@@ -14,7 +14,7 @@ const TIMESTAMP_EPOCH = 1577836800000; // Date.UTC(2020, 0)
 /** Maximum value of 28-bit counter field. */
 const MAX_COUNTER = 0xfff_ffff;
 
-/** Returns a random uint generator based on available cryptographic RNG. */
+/** Returns a random bit generator based on available cryptographic RNG. */
 const detectRng = (): ((k: number) => number) => {
   if (typeof window !== "undefined" && window.crypto) {
     // Web Crypto API on browsers
@@ -57,7 +57,7 @@ class Generator {
   private perSecRandom = 0;
 
   /** Returns a `k`-bit (cryptographically strong) random unsigned integer. */
-  private getRandomUint = detectRng();
+  private getRandomBits = detectRng();
 
   /** Generates a new SCRU128 ID object. */
   generate(): Identifier {
@@ -66,7 +66,7 @@ class Generator {
     // update timestamp and counter
     if (tsNow > this.tsLastGen) {
       this.tsLastGen = tsNow;
-      this.counter = this.getRandomUint(28);
+      this.counter = this.getRandomBits(28);
     } else if (++this.counter > MAX_COUNTER) {
       // wait a moment until clock goes forward when counter overflows
       let i = 0;
@@ -80,20 +80,20 @@ class Generator {
       }
 
       this.tsLastGen = tsNow;
-      this.counter = this.getRandomUint(28);
+      this.counter = this.getRandomBits(28);
     }
 
     // update perSecRandom
     if (this.tsLastGen - this.tsLastSec > 1000) {
       this.tsLastSec = this.tsLastGen;
-      this.perSecRandom = this.getRandomUint(16);
+      this.perSecRandom = this.getRandomBits(24);
     }
 
     return new Identifier(
       this.tsLastGen - TIMESTAMP_EPOCH,
       this.counter,
       this.perSecRandom,
-      this.getRandomUint(40)
+      this.getRandomBits(32)
     );
   }
 }
@@ -103,8 +103,8 @@ class Identifier {
   /**
    * @param timestamp - 44-bit timestamp.
    * @param counter - 28-bit counter.
-   * @param perSecRandom - 16-bit per-second randomness.
-   * @param perGenRandom - 40-bit per-generation randomness.
+   * @param perSecRandom - 24-bit per-second randomness.
+   * @param perGenRandom - 32-bit per-generation randomness.
    */
   constructor(
     readonly timestamp: number,
@@ -123,8 +123,8 @@ class Identifier {
       this.perGenRandom < 0 ||
       this.timestamp > 0xfff_ffff_ffff ||
       this.counter > MAX_COUNTER ||
-      this.perSecRandom > 0xffff ||
-      this.perGenRandom > 0xff_ffff_ffff
+      this.perSecRandom > 0xff_ffff ||
+      this.perGenRandom > 0xffff_ffff
     ) {
       throw new RangeError("invalid field value");
     }
@@ -133,11 +133,13 @@ class Identifier {
   /** Returns the canonical textual representation. */
   toString(): string {
     const h48 = this.timestamp * 0x10 + (this.counter >> 24);
-    const m40 = (this.counter & 0xff_ffff) * 0x1_0000 + this.perSecRandom;
+    const m40 =
+      (this.counter & 0xff_ffff) * 0x1_0000 + (this.perSecRandom >> 8);
+    const l40 = (this.perSecRandom & 0xff) * 0x1_0000_0000 + this.perGenRandom;
     return (
       ("000000000" + h48.toString(32)).slice(-10) +
       ("0000000" + m40.toString(32)).slice(-8) +
-      ("0000000" + this.perGenRandom.toString(32)).slice(-8)
+      ("0000000" + l40.toString(32)).slice(-8)
     ).toUpperCase();
   }
 
@@ -150,11 +152,12 @@ class Identifier {
 
     const h48 = parseInt(m[1], 32);
     const m40 = parseInt(m[2], 32);
+    const l40 = parseInt(m[3], 32);
     return new Identifier(
       Math.trunc(h48 / 0x10),
       (h48 % 0x10 << 24) | Math.trunc(m40 / 0x1_0000),
-      m40 % 0x1_0000,
-      parseInt(m[3], 32)
+      (m40 % 0x1_0000 << 8) | Math.trunc(l40 / 0x1_0000_0000),
+      l40 % 0x1_0000_0000
     );
   }
 }

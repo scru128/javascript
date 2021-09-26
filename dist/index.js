@@ -13,7 +13,7 @@ const crypto_1 = require("crypto");
 const TIMESTAMP_EPOCH = 1577836800000; // Date.UTC(2020, 0)
 /** Maximum value of 28-bit counter field. */
 const MAX_COUNTER = 268435455;
-/** Returns a random uint generator based on available cryptographic RNG. */
+/** Returns a random bit generator based on available cryptographic RNG. */
 const detectRng = () => {
     if (typeof window !== "undefined" && window.crypto) {
         // Web Crypto API on browsers
@@ -47,7 +47,7 @@ class Generator {
         /** Per-second random value at last generation. */
         this.perSecRandom = 0;
         /** Returns a `k`-bit (cryptographically strong) random unsigned integer. */
-        this.getRandomUint = detectRng();
+        this.getRandomBits = detectRng();
     }
     /** Generates a new SCRU128 ID object. */
     generate() {
@@ -55,7 +55,7 @@ class Generator {
         // update timestamp and counter
         if (tsNow > this.tsLastGen) {
             this.tsLastGen = tsNow;
-            this.counter = this.getRandomUint(28);
+            this.counter = this.getRandomBits(28);
         }
         else if (++this.counter > MAX_COUNTER) {
             // wait a moment until clock goes forward when counter overflows
@@ -69,14 +69,14 @@ class Generator {
                 }
             }
             this.tsLastGen = tsNow;
-            this.counter = this.getRandomUint(28);
+            this.counter = this.getRandomBits(28);
         }
         // update perSecRandom
         if (this.tsLastGen - this.tsLastSec > 1000) {
             this.tsLastSec = this.tsLastGen;
-            this.perSecRandom = this.getRandomUint(16);
+            this.perSecRandom = this.getRandomBits(24);
         }
-        return new Identifier(this.tsLastGen - TIMESTAMP_EPOCH, this.counter, this.perSecRandom, this.getRandomUint(40));
+        return new Identifier(this.tsLastGen - TIMESTAMP_EPOCH, this.counter, this.perSecRandom, this.getRandomBits(32));
     }
 }
 /** Represents a SCRU128 ID. */
@@ -84,8 +84,8 @@ class Identifier {
     /**
      * @param timestamp - 44-bit timestamp.
      * @param counter - 28-bit counter.
-     * @param perSecRandom - 16-bit per-second randomness.
-     * @param perGenRandom - 40-bit per-generation randomness.
+     * @param perSecRandom - 24-bit per-second randomness.
+     * @param perGenRandom - 32-bit per-generation randomness.
      */
     constructor(timestamp, counter, perSecRandom, perGenRandom) {
         this.timestamp = timestamp;
@@ -102,18 +102,19 @@ class Identifier {
             this.perGenRandom < 0 ||
             this.timestamp > 17592186044415 ||
             this.counter > MAX_COUNTER ||
-            this.perSecRandom > 0xffff ||
-            this.perGenRandom > 1099511627775) {
+            this.perSecRandom > 16777215 ||
+            this.perGenRandom > 4294967295) {
             throw new RangeError("invalid field value");
         }
     }
     /** Returns the canonical textual representation. */
     toString() {
         const h48 = this.timestamp * 0x10 + (this.counter >> 24);
-        const m40 = (this.counter & 16777215) * 65536 + this.perSecRandom;
+        const m40 = (this.counter & 16777215) * 65536 + (this.perSecRandom >> 8);
+        const l40 = (this.perSecRandom & 0xff) * 4294967296 + this.perGenRandom;
         return (("000000000" + h48.toString(32)).slice(-10) +
             ("0000000" + m40.toString(32)).slice(-8) +
-            ("0000000" + this.perGenRandom.toString(32)).slice(-8)).toUpperCase();
+            ("0000000" + l40.toString(32)).slice(-8)).toUpperCase();
     }
     /** Parses textual representation to create an object. */
     static fromString(s) {
@@ -123,7 +124,8 @@ class Identifier {
         }
         const h48 = parseInt(m[1], 32);
         const m40 = parseInt(m[2], 32);
-        return new Identifier(Math.trunc(h48 / 0x10), (h48 % 0x10 << 24) | Math.trunc(m40 / 65536), m40 % 65536, parseInt(m[3], 32));
+        const l40 = parseInt(m[3], 32);
+        return new Identifier(Math.trunc(h48 / 0x10), (h48 % 0x10 << 24) | Math.trunc(m40 / 65536), (m40 % 65536 << 8) | Math.trunc(l40 / 4294967296), l40 % 4294967296);
     }
 }
 const defaultGenerator = new Generator();

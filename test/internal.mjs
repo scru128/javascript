@@ -12,10 +12,10 @@ describe("Internal", function () {
         [[0, 0, 0, 0], "00000000000000000000000000"],
         [[2 ** 44 - 1, 0, 0, 0], "7VVVVVVVVG0000000000000000"],
         [[0, 2 ** 28 - 1, 0, 0], "000000000FVVVVU00000000000"],
-        [[0, 0, 2 ** 16 - 1, 0], "000000000000001VVV00000000"],
-        [[0, 0, 0, 2 ** 40 - 1], "000000000000000000VVVVVVVV"],
+        [[0, 0, 2 ** 24 - 1, 0], "000000000000001VVVVS000000"],
+        [[0, 0, 0, 2 ** 32 - 1], "00000000000000000003VVVVVV"],
         [
-          [2 ** 44 - 1, 2 ** 28 - 1, 2 ** 16 - 1, 2 ** 40 - 1],
+          [2 ** 44 - 1, 2 ** 28 - 1, 2 ** 24 - 1, 2 ** 32 - 1],
           "7VVVVVVVVVVVVVVVVVVVVVVVVV",
         ],
       ];
@@ -40,10 +40,10 @@ describe("Internal", function () {
     });
   });
 
-  describe("getRandomUint()", function () {
+  describe("getRandomBits()", function () {
     const rng = _internal.detectRng();
 
-    it("generates uniformly distributed random number", function () {
+    it("generates uniformly distributed random bits", function () {
       // test if random bits are set to 1 at ~50% probability
       // set margin based on binom dist 99.999% confidence interval
       const N_SAMPLES = 2_000;
