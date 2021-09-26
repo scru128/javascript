@@ -107,7 +107,7 @@ class Identifier {
             throw new RangeError("invalid field value");
         }
     }
-    /** Returns the canonical textual representation. */
+    /** Returns the 26-digit canonical string representation. */
     toString() {
         const h48 = this.timestamp * 0x10 + (this.counter >> 24);
         const m40 = (this.counter & 16777215) * 65536 + (this.perSecRandom >> 8);
@@ -116,11 +116,11 @@ class Identifier {
             ("0000000" + m40.toString(32)).slice(-8) +
             ("0000000" + l40.toString(32)).slice(-8)).toUpperCase();
     }
-    /** Parses textual representation to create an object. */
-    static fromString(s) {
-        const m = s.match(/^([0-7][0-9A-V]{9})([0-9A-V]{8})([0-9A-V]{8})$/i);
+    /** Creates an object from a 26-digit string representation. */
+    static fromString(value) {
+        const m = value.match(/^([0-7][0-9A-V]{9})([0-9A-V]{8})([0-9A-V]{8})$/i);
         if (m === null) {
-            throw new SyntaxError("invalid string representation: " + s);
+            throw new SyntaxError("invalid string representation: " + value);
         }
         const h48 = parseInt(m[1], 32);
         const m40 = parseInt(m[2], 32);
@@ -130,9 +130,9 @@ class Identifier {
 }
 const defaultGenerator = new Generator();
 /**
- * Generates a new SCRU128 ID.
+ * Generates a new SCRU128 ID encoded in a string.
  *
- * @returns Canonical representation consisting of 26 characters.
+ * @returns 26-digit canonical string representation.
  */
 const scru128 = () => defaultGenerator.generate().toString();
 exports.scru128 = scru128;

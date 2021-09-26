@@ -6,8 +6,8 @@
  * @packageDocumentation
  */
 /**
- * Generates a new SCRU128 ID.
+ * Generates a new SCRU128 ID encoded in a string.
  *
- * @returns Canonical representation consisting of 26 characters.
+ * @returns 26-digit canonical string representation.
  */
 export declare const scru128: () => string;

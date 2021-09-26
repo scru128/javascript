@@ -11,7 +11,7 @@ describe("scru128()", function () {
     samples[i] = scru128();
   }
 
-  it("generates 26-character canonical string", function () {
+  it("generates 26-digit canonical string", function () {
     const re = /^[0-7][0-9A-V]{25}$/;
     assert(samples.every((e) => typeof e === "string" && re.test(e)));
   });
