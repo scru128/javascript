@@ -35,15 +35,15 @@ Where:
 - `timestamp` is a 44-bit unix time in milliseconds biased by 50 years (i.e.
   milliseconds elapsed since 2020-01-01 00:00:00+00:00, ignoring leap seconds).
 - `counter` is a 28-bit counter incremented by one for each ID generated within
-  the same `timestamp` and reset to a random number every millisecond.
+  the same `timestamp` (reset to a random number every millisecond).
 - `per_sec_random` is a 24-bit random number refreshed only once per second.
 - `per_gen_random` is a 32-bit random number renewed per generation of a new ID.
 
 This is essentially equivalent to allocating four unsigned integer fields to a
-128-bit space as follows in a big-endian system, and thus it is easier to be
-implemented with bitwise operators than arithmetic operators in many languages.
+128-bit space as follows in a big-endian system, and thus it is easily
+implemented with binary operations.
 
-| Bit numbers  | Field name     | Length  | Data type        |
+| Bit numbers  | Field name     | Size    | Data type        |
 | ------------ | -------------- | ------- | ---------------- |
 | Msb 0 - 43   | timestamp      | 44 bits | Unsigned integer |
 | Msb 44 - 71  | counter        | 28 bits | Unsigned integer |
@@ -65,10 +65,10 @@ million IDs at the same millisecond, no collision will occur as long as the
 random numbers generated only once per second (`per_sec_random`) differ.
 
 That being said, the `per_sec_random` field is refreshed every second to prevent
-potential attackers from using this field as a fingerprint to identify a
-generator. Also, the 32-bit `per_gen_random` field is reset to a new random
-number whenever an ID is generated to make sure the adjacent IDs generated
-within the same `timestamp` are not predictable.
+potential attackers from using this field as a generator's fingerprint. Also,
+the 32-bit `per_gen_random` field is reset to a new random number whenever an ID
+is generated to make sure the adjacent IDs generated within the same `timestamp`
+are not predictable.
 
 ## Textual representation
 
@@ -81,9 +81,9 @@ with bitwise operations by translating each 5-bit group into one digit of
 significant bits are mapped to one of `[0-7]`, any numeral greater than
 `7VVVVVVVVVVVVVVVVVVVVVVVVV` is not a valid SCRU128 ID.
 
-Note that this is different from the encodings commonly referred to as _base32_
-or _base32hex_ (e.g. [RFC 4648]), which read and translate 5-bit groups from the
-most significant one to the least.
+Note that this is different from some binary-to-text encodings referred to as
+_base32_ or _base32hex_ (e.g. [RFC 4648]), which read and translate 5-bit groups
+from the most significant one to the least.
 
 [rfc 4648]: https://www.ietf.org/rfc/rfc4648.txt
 
@@ -104,6 +104,6 @@ specific language governing permissions and limitations under the License.
 
 ## See also
 
-- [npm package](https://www.npmjs.com/package/scru128)
+- [scru128 - npm](https://www.npmjs.com/package/scru128)
 - [API Documentation](https://scru128.github.io/javascript/docs/)
 - [Run tests on your browser](https://scru128.github.io/javascript/test/)

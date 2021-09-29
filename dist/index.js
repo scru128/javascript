@@ -59,10 +59,10 @@ class Generator {
         }
         else if (++this.counter > MAX_COUNTER) {
             // wait a moment until clock goes forward when counter overflows
-            let i = 0;
+            let nTrials = 0;
             while (tsNow <= this.tsLastGen) {
                 tsNow = Date.now();
-                if (++i > 1000000) {
+                if (++nTrials > 1000000) {
                     console.warn("scru128: reset state as clock did not go forward");
                     this.tsLastSec = 0;
                     break;
@@ -82,10 +82,10 @@ class Generator {
 /** Represents a SCRU128 ID. */
 class Identifier {
     /**
-     * @param timestamp - 44-bit timestamp.
-     * @param counter - 28-bit counter.
-     * @param perSecRandom - 24-bit per-second randomness.
-     * @param perGenRandom - 32-bit per-generation randomness.
+     * @param timestamp - 44-bit millisecond timestamp field.
+     * @param counter - 28-bit per-millisecond counter field.
+     * @param perSecRandom - 24-bit per-second randomness field.
+     * @param perGenRandom - 32-bit per-generation randomness field.
      */
     constructor(timestamp, counter, perSecRandom, perGenRandom) {
         this.timestamp = timestamp;

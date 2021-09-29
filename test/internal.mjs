@@ -7,7 +7,7 @@ const assert = (expression, message = "") => {
 
 describe("Internal", function () {
   describe("Identifier", function () {
-    it("encodes and decodes special cases correctly", function () {
+    it("encodes and decodes prepared cases correctly", function () {
       const cases = [
         [[0, 0, 0, 0], "00000000000000000000000000"],
         [[2 ** 44 - 1, 0, 0, 0], "7VVVVVVVVG0000000000000000"],
@@ -22,12 +22,12 @@ describe("Internal", function () {
 
       const fs = ["timestamp", "counter", "perSecRandom", "perGenRandom"];
       for (const e of cases) {
-        const fromNums = new _internal.Identifier(...e[0]);
+        const fromFields = new _internal.Identifier(...e[0]);
         const fromStr = _internal.Identifier.fromString(e[1]);
 
-        assert(fromNums.toString() === e[1] && fromStr.toString() === e[1]);
+        assert(fromFields.toString() === e[1] && fromStr.toString() === e[1]);
         for (let i = 0; i < fs.length; i++) {
-          assert(fromNums[fs[i]] === e[0][i] && fromStr[fs[i]] === e[0][i]);
+          assert(fromFields[fs[i]] === e[0][i] && fromStr[fs[i]] === e[0][i]);
         }
       }
     });
