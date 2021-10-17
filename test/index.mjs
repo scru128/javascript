@@ -27,19 +27,19 @@ describe("scru128()", function () {
     }
   });
 
-  it("encodes up-to-date unix timestamp", function () {
+  it("encodes up-to-date timestamp", function () {
     const epoch = Date.UTC(2020, 0);
     for (let i = 0; i < 10_000; i++) {
       const tsNow = Date.now() - epoch;
-      const timestamp = _internal.Identifier.fromString(scru128()).timestamp;
+      const timestamp = _internal.Scru128Id.fromString(scru128()).timestamp;
       assert(Math.abs(tsNow - timestamp) < 16);
     }
   });
 
   it("encodes unique sortable pair of timestamp and counter", function () {
-    let prev = _internal.Identifier.fromString(samples[0]);
+    let prev = _internal.Scru128Id.fromString(samples[0]);
     for (let i = 1; i < samples.length; i++) {
-      const curr = _internal.Identifier.fromString(samples[i]);
+      const curr = _internal.Scru128Id.fromString(samples[i]);
       assert(
         prev.timestamp < curr.timestamp ||
           (prev.timestamp === curr.timestamp && prev.counter < curr.counter)

@@ -42,7 +42,10 @@ const detectRng = (): ((k: number) => number) => {
   }
 };
 
-/** Represents a SCRU128 ID generator. */
+/**
+ * Represents a SCRU128 ID generator and provides an interface to do more than
+ * just generate a string representation.
+ */
 class Generator {
   /** Timestamp at last generation. */
   private tsLastGen = 0;
@@ -60,7 +63,7 @@ class Generator {
   private getRandomBits = detectRng();
 
   /** Generates a new SCRU128 ID object. */
-  generate(): Identifier {
+  generate(): Scru128Id {
     let tsNow = Date.now();
 
     // update timestamp and counter
@@ -89,7 +92,7 @@ class Generator {
       this.perSecRandom = this.getRandomBits(24);
     }
 
-    return new Identifier(
+    return Scru128Id.fromFields(
       this.tsLastGen - TIMESTAMP_EPOCH,
       this.counter,
       this.perSecRandom,
@@ -98,15 +101,12 @@ class Generator {
   }
 }
 
-/** Represents a SCRU128 ID. */
-class Identifier {
-  /**
-   * @param timestamp - 44-bit millisecond timestamp field.
-   * @param counter - 28-bit per-millisecond counter field.
-   * @param perSecRandom - 24-bit per-second randomness field.
-   * @param perGenRandom - 32-bit per-generation randomness field.
-   */
-  constructor(
+/**
+ * Represents a SCRU128 ID and provides converters to/from string and numbers.
+ */
+class Scru128Id {
+  /** Creates an object from field values. */
+  private constructor(
     readonly timestamp: number,
     readonly counter: number,
     readonly perSecRandom: number,
@@ -130,6 +130,23 @@ class Identifier {
     }
   }
 
+  /**
+   * Creates an object from field values.
+   *
+   * @param timestamp - 44-bit millisecond timestamp field.
+   * @param counter - 28-bit per-millisecond counter field.
+   * @param perSecRandom - 24-bit per-second randomness field.
+   * @param perGenRandom - 32-bit per-generation randomness field.
+   */
+  static fromFields(
+    timestamp: number,
+    counter: number,
+    perSecRandom: number,
+    perGenRandom: number
+  ): Scru128Id {
+    return new Scru128Id(timestamp, counter, perSecRandom, perGenRandom);
+  }
+
   /** Returns the 26-digit canonical string representation. */
   toString(): string {
     const h48 = this.timestamp * 0x10 + (this.counter >> 24);
@@ -144,7 +161,7 @@ class Identifier {
   }
 
   /** Creates an object from a 26-digit string representation. */
-  static fromString(value: string): Identifier {
+  static fromString(value: string): Scru128Id {
     const m = value.match(/^([0-7][0-9A-V]{9})([0-9A-V]{8})([0-9A-V]{8})$/i);
     if (m === null) {
       throw new SyntaxError("invalid string representation: " + value);
@@ -153,7 +170,7 @@ class Identifier {
     const h48 = parseInt(m[1], 32);
     const m40 = parseInt(m[2], 32);
     const l40 = parseInt(m[3], 32);
-    return new Identifier(
+    return new Scru128Id(
       Math.trunc(h48 / 0x10),
       (h48 % 0x10 << 24) | Math.trunc(m40 / 0x1_0000),
       (m40 % 0x1_0000 << 8) | Math.trunc(l40 / 0x1_0000_0000),
@@ -176,4 +193,4 @@ export const scru128 = (): string => defaultGenerator.generate().toString();
  *
  * @internal
  */
-export const _internal = { Identifier, detectRng };
+export const _internal = { Scru128Id, detectRng };

@@ -6,7 +6,7 @@ const assert = (expression, message = "") => {
 };
 
 describe("Internal", function () {
-  describe("Identifier", function () {
+  describe("Scru128Id", function () {
     it("encodes and decodes prepared cases correctly", function () {
       const cases = [
         [[0, 0, 0, 0], "00000000000000000000000000"],
@@ -22,8 +22,8 @@ describe("Internal", function () {
 
       const fs = ["timestamp", "counter", "perSecRandom", "perGenRandom"];
       for (const e of cases) {
-        const fromFields = new _internal.Identifier(...e[0]);
-        const fromStr = _internal.Identifier.fromString(e[1]);
+        const fromFields = _internal.Scru128Id.fromFields(...e[0]);
+        const fromStr = _internal.Scru128Id.fromString(e[1]);
 
         assert(fromFields.toString() === e[1] && fromStr.toString() === e[1]);
         for (let i = 0; i < fs.length; i++) {
@@ -35,7 +35,7 @@ describe("Internal", function () {
     it("has symmetric fromString() and toString()", function () {
       for (let i = 0; i < 1_000; i++) {
         const src = scru128();
-        assert(_internal.Identifier.fromString(src).toString() === src);
+        assert(_internal.Scru128Id.fromString(src).toString() === src);
       }
     });
   });

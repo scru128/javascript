@@ -35,7 +35,10 @@ const detectRng = () => {
             : Math.trunc(Math.random() * Math.pow(2, k));
     }
 };
-/** Represents a SCRU128 ID generator. */
+/**
+ * Represents a SCRU128 ID generator and provides an interface to do more than
+ * just generate a string representation.
+ */
 class Generator {
     constructor() {
         /** Timestamp at last generation. */
@@ -76,17 +79,14 @@ class Generator {
             this.tsLastSec = this.tsLastGen;
             this.perSecRandom = this.getRandomBits(24);
         }
-        return new Identifier(this.tsLastGen - TIMESTAMP_EPOCH, this.counter, this.perSecRandom, this.getRandomBits(32));
+        return Scru128Id.fromFields(this.tsLastGen - TIMESTAMP_EPOCH, this.counter, this.perSecRandom, this.getRandomBits(32));
     }
 }
-/** Represents a SCRU128 ID. */
-class Identifier {
-    /**
-     * @param timestamp - 44-bit millisecond timestamp field.
-     * @param counter - 28-bit per-millisecond counter field.
-     * @param perSecRandom - 24-bit per-second randomness field.
-     * @param perGenRandom - 32-bit per-generation randomness field.
-     */
+/**
+ * Represents a SCRU128 ID and provides converters to/from string and numbers.
+ */
+class Scru128Id {
+    /** Creates an object from field values. */
     constructor(timestamp, counter, perSecRandom, perGenRandom) {
         this.timestamp = timestamp;
         this.counter = counter;
@@ -107,6 +107,17 @@ class Identifier {
             throw new RangeError("invalid field value");
         }
     }
+    /**
+     * Creates an object from field values.
+     *
+     * @param timestamp - 44-bit millisecond timestamp field.
+     * @param counter - 28-bit per-millisecond counter field.
+     * @param perSecRandom - 24-bit per-second randomness field.
+     * @param perGenRandom - 32-bit per-generation randomness field.
+     */
+    static fromFields(timestamp, counter, perSecRandom, perGenRandom) {
+        return new Scru128Id(timestamp, counter, perSecRandom, perGenRandom);
+    }
     /** Returns the 26-digit canonical string representation. */
     toString() {
         const h48 = this.timestamp * 0x10 + (this.counter >> 24);
@@ -125,7 +136,7 @@ class Identifier {
         const h48 = parseInt(m[1], 32);
         const m40 = parseInt(m[2], 32);
         const l40 = parseInt(m[3], 32);
-        return new Identifier(Math.trunc(h48 / 0x10), (h48 % 0x10 << 24) | Math.trunc(m40 / 65536), (m40 % 65536 << 8) | Math.trunc(l40 / 4294967296), l40 % 4294967296);
+        return new Scru128Id(Math.trunc(h48 / 0x10), (h48 % 0x10 << 24) | Math.trunc(m40 / 65536), (m40 % 65536 << 8) | Math.trunc(l40 / 4294967296), l40 % 4294967296);
     }
 }
 const defaultGenerator = new Generator();
@@ -141,4 +152,4 @@ exports.scru128 = scru128;
  *
  * @internal
  */
-exports._internal = { Identifier, detectRng };
+exports._internal = { Scru128Id, detectRng };
