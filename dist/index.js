@@ -2,6 +2,14 @@
 /**
  * SCRU128: Sortable, Clock and Random number-based Unique identifier
  *
+ * @example
+ * ```javascript
+ * import { scru128 } from "scru128";
+ *
+ * console.log(scru128()); // e.g. "00PGHAJ3Q9VAJ7IU6PQBHBUAK4"
+ * console.log(scru128()); // e.g. "00PGHAJ3Q9VAJ7KU6PQ92NVBTV"
+ * ```
+ *
  * @license Apache-2.0
  * @copyright 2021 LiosK
  * @packageDocumentation
@@ -48,6 +56,7 @@ const detectRng = () => {
  * const g = new Generator();
  * const x = g.generate();
  * console.log(x.toString());
+ * console.log(BigInt(x.toHex()));
  * ```
  */
 class Generator {
@@ -60,6 +69,8 @@ class Generator {
         this.tsLastSec = 0;
         /** Per-second random value at last generation. */
         this.perSecRandom = 0;
+        /** Maximum number of checking `Date.now()` until clock goes forward. */
+        this.nClockCheckMax = 1000000;
         /** Returns a `k`-bit (cryptographically strong) random unsigned integer. */
         this.getRandomBits = detectRng();
     }
@@ -73,10 +84,10 @@ class Generator {
         }
         else if (++this.counter > MAX_COUNTER) {
             // wait a moment until clock goes forward when counter overflows
-            let nTrials = 0;
+            let nClockCheck = 0;
             while (tsNow <= this.tsLastGen) {
                 tsNow = Date.now();
-                if (++nTrials > 1000000) {
+                if (++nClockCheck > this.nClockCheckMax) {
                     console.warn("scru128: reset state as clock did not go forward");
                     this.tsLastSec = 0;
                     break;
@@ -104,8 +115,8 @@ exports.Generator = Generator;
  * const x = Scru128Id.fromString("00Q1D9AB6DTJNLJ80SJ42SNJ4F");
  * console.log(x.toString());
  *
- * const y = Scru128Id.fromHex("0x00d05a952ccdecef5aa01c9904e5a115");
- * console.log(y.toHex());
+ * const y = Scru128Id.fromHex(0xd05a952ccdecef5aa01c9904e5a115n.toString(16));
+ * console.log(BigInt(y.toHex()));
  * ```
  */
 class Scru128Id {

@@ -1,4 +1,4 @@
-<!DOCTYPE html><html class="default no-js"><head><meta charSet="utf-8"/><meta http-equiv="x-ua-compatible" content="IE=edge"/><title>scru128</title><meta name="description" content="Documentation for scru128"/><meta name="viewport" content="width=device-width, initial-scale=1"/><link rel="stylesheet" href="assets/style.css"/><link rel="stylesheet" href="assets/highlight.css"/><script async src="assets/search.js" id="search-script"></script></head><body><script>document.body.classList.add(localStorage.getItem(&quot;tsd-theme&quot;) || &quot;os&quot;)</script><header><div class="tsd-page-toolbar"><div class="container"><div class="table-wrap"><div class="table-cell" id="tsd-search" data-base="."><div class="field"><label for="tsd-search-field" class="tsd-widget search no-caption">Search</label><input type="text" id="tsd-search-field"/></div><ul class="results"><li class="state loading">Preparing search index...</li><li class="state failure">The search index is not available</li></ul><a href="index.html" class="title">scru128</a></div><div class="table-cell" id="tsd-widgets"><div id="tsd-filter"><a href="#" class="tsd-widget options no-caption" data-toggle="options">Options</a><div class="tsd-filter-group"><div class="tsd-select" id="tsd-filter-visibility"><span class="tsd-select-label">All</span><ul class="tsd-select-list"><li data-value="public">Public</li><li data-value="protected">Public/Protected</li><li data-value="private" class="selected">All</li></ul></div> <input type="checkbox" id="tsd-filter-inherited" checked/><label class="tsd-widget" for="tsd-filter-inherited">Inherited</label><input type="checkbox" id="tsd-filter-externals" checked/><label class="tsd-widget" for="tsd-filter-externals">Externals</label></div></div><a href="#" class="tsd-widget menu no-caption" data-toggle="menu">Menu</a></div></div></div></div><div class="tsd-page-title"><div class="container"><h1>scru128</h1></div></div></header><div class="container container-main"><div class="row"><div class="col-8 col-content"><div class="tsd-panel tsd-typography">
+<!DOCTYPE html><html class="default no-js"><head><meta charSet="utf-8"/><meta http-equiv="x-ua-compatible" content="IE=edge"/><title>scru128</title><meta name="description" content="Documentation for scru128"/><meta name="viewport" content="width=device-width, initial-scale=1"/><link rel="stylesheet" href="assets/style.css"/><link rel="stylesheet" href="assets/highlight.css"/><script async src="assets/search.js" id="search-script"></script></head><body><script>document.body.classList.add(localStorage.getItem("tsd-theme") || "os")</script><header><div class="tsd-page-toolbar"><div class="container"><div class="table-wrap"><div class="table-cell" id="tsd-search" data-base="."><div class="field"><label for="tsd-search-field" class="tsd-widget search no-caption">Search</label><input type="text" id="tsd-search-field"/></div><ul class="results"><li class="state loading">Preparing search index...</li><li class="state failure">The search index is not available</li></ul><a href="index.html" class="title">scru128</a></div><div class="table-cell" id="tsd-widgets"><div id="tsd-filter"><a href="#" class="tsd-widget options no-caption" data-toggle="options">Options</a><div class="tsd-filter-group"><div class="tsd-select" id="tsd-filter-visibility"><span class="tsd-select-label">All</span><ul class="tsd-select-list"><li data-value="public">Public</li><li data-value="protected">Public/Protected</li><li data-value="private" class="selected">All</li></ul></div> <input type="checkbox" id="tsd-filter-inherited" checked/><label class="tsd-widget" for="tsd-filter-inherited">Inherited</label><input type="checkbox" id="tsd-filter-externals" checked/><label class="tsd-widget" for="tsd-filter-externals">Externals</label></div></div><a href="#" class="tsd-widget menu no-caption" data-toggle="menu">Menu</a></div></div></div></div><div class="tsd-page-title"><div class="container"><h1>scru128</h1></div></div></header><div class="container container-main"><div class="row"><div class="col-8 col-content"><div class="tsd-panel tsd-typography">
 <a href="#scru128-sortable-clock-and-random-number-based-unique-identifier" id="scru128-sortable-clock-and-random-number-based-unique-identifier" style="color: inherit; text-decoration: none;">
   <h1>SCRU128: Sortable, Clock and Random number-based Unique identifier</h1>
 </a>
@@ -8,100 +8,14 @@ decentralized, globally unique time-ordered identifiers. SCRU128 is inspired by
 <ul>
 <li>128-bit unsigned integer type</li>
 <li>Sortable by generation time (as integer and as text)</li>
-<li>26-character case-insensitive portable textual representation</li>
+<li>26-digit case-insensitive portable textual representation</li>
 <li>44-bit biased millisecond timestamp that ensures remaining life of 550 years</li>
 <li>Up to 268 million time-ordered but unpredictable unique IDs per millisecond</li>
 <li>84-bit <em>layered</em> randomness for collision resistance</li>
 </ul>
-<pre><code class="language-javascript"><span class="hl-0">import</span><span class="hl-1"> { </span><span class="hl-2">scru128</span><span class="hl-1"> } </span><span class="hl-0">from</span><span class="hl-1"> </span><span class="hl-3">&quot;scru128&quot;</span><span class="hl-1">;</span><br/><br/><span class="hl-2">console</span><span class="hl-1">.</span><span class="hl-6">log</span><span class="hl-1">(</span><span class="hl-6">scru128</span><span class="hl-1">()); </span><span class="hl-7">// e.g. &quot;00PGHAJ3Q9VAJ7IU6PQBHBUAK4&quot;</span><br/><span class="hl-2">console</span><span class="hl-1">.</span><span class="hl-6">log</span><span class="hl-1">(</span><span class="hl-6">scru128</span><span class="hl-1">()); </span><span class="hl-7">// e.g. &quot;00PGHAJ3Q9VAJ7KU6PQ92NVBTV&quot;</span>
+<pre><code class="language-javascript"><span class="hl-0">import</span><span class="hl-1"> { </span><span class="hl-2">scru128</span><span class="hl-1"> } </span><span class="hl-0">from</span><span class="hl-1"> </span><span class="hl-3">&quot;scru128&quot;</span><span class="hl-1">;</span><br/><br/><span class="hl-2">console</span><span class="hl-1">.</span><span class="hl-4">log</span><span class="hl-1">(</span><span class="hl-4">scru128</span><span class="hl-1">()); </span><span class="hl-5">// e.g. &quot;00PGHAJ3Q9VAJ7IU6PQBHBUAK4&quot;</span><br/><span class="hl-2">console</span><span class="hl-1">.</span><span class="hl-4">log</span><span class="hl-1">(</span><span class="hl-4">scru128</span><span class="hl-1">()); </span><span class="hl-5">// e.g. &quot;00PGHAJ3Q9VAJ7KU6PQ92NVBTV&quot;</span>
 </code></pre>
-
-<a href="#design" id="design" style="color: inherit; text-decoration: none;">
-  <h2>Design</h2>
-</a>
-<p>A SCRU128 ID is a 128-bit unsigned integer consisting of four terms:</p>
-<pre><code><span class="hl-2">timestamp</span><span class="hl-1"> * </span><span class="hl-8">2</span><span class="hl-1">^</span><span class="hl-8">84</span><span class="hl-1"> + </span><span class="hl-2">counter</span><span class="hl-1"> * </span><span class="hl-8">2</span><span class="hl-1">^</span><span class="hl-8">56</span><span class="hl-1"> + </span><span class="hl-2">per_sec_random</span><span class="hl-1"> * </span><span class="hl-8">2</span><span class="hl-1">^</span><span class="hl-8">32</span><span class="hl-1"> + </span><span class="hl-2">per_gen_random</span>
-</code></pre>
-<p>Where:</p>
-<ul>
-<li><code>timestamp</code> is a 44-bit unix time in milliseconds biased by 50 years (i.e.
-milliseconds elapsed since 2020-01-01 00:00:00+00:00, ignoring leap seconds).</li>
-<li><code>counter</code> is a 28-bit counter incremented by one for each ID generated within
-the same <code>timestamp</code> (reset to a random number every millisecond).</li>
-<li><code>per_sec_random</code> is a 24-bit random number refreshed only once per second.</li>
-<li><code>per_gen_random</code> is a 32-bit random number renewed per generation of a new ID.</li>
-</ul>
-<p>This is essentially equivalent to allocating four unsigned integer fields to a
-128-bit space as follows in a big-endian system, and thus it is easily
-implemented with binary operations.</p>
-<table>
-<thead>
-<tr>
-<th>Bit numbers</th>
-<th>Field name</th>
-<th>Size</th>
-<th>Data type</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>Msb 0 - 43</td>
-<td>timestamp</td>
-<td>44 bits</td>
-<td>Unsigned integer</td>
-</tr>
-<tr>
-<td>Msb 44 - 71</td>
-<td>counter</td>
-<td>28 bits</td>
-<td>Unsigned integer</td>
-</tr>
-<tr>
-<td>Msb 72 - 95</td>
-<td>per_sec_random</td>
-<td>24 bits</td>
-<td>Unsigned integer</td>
-</tr>
-<tr>
-<td>Msb 96 - 127</td>
-<td>per_gen_random</td>
-<td>32 bits</td>
-<td>Unsigned integer</td>
-</tr>
-</tbody></table>
-
-<a href="#layered-randomness" id="layered-randomness" style="color: inherit; text-decoration: none;">
-  <h3>Layered randomness</h3>
-</a>
-<p>SCRU128 utilizes monotonic <code>counter</code> to guarantee the uniqueness of IDs with the
-same <code>timestamp</code>; however, this mechanism does not ensure the uniqueness of IDs
-generated by multiple generators that do not share a <code>counter</code> state. SCRU128
-relies on random numbers to avoid such collisions.</p>
-<p>For a given length of random bits, the greater the number of random numbers
-generated, the higher the probability of collision. Therefore, SCRU128 gives
-some random bits a longer life to reduce the number of random number generation
-per a unit of time. As a result, even if each of multiple generators generates a
-million IDs at the same millisecond, no collision will occur as long as the
-random numbers generated only once per second (<code>per_sec_random</code>) differ.</p>
-<p>That being said, the <code>per_sec_random</code> field is refreshed every second to prevent
-potential attackers from using this field as a generator&#39;s fingerprint. Also,
-the 32-bit <code>per_gen_random</code> field is reset to a new random number whenever an ID
-is generated to make sure the adjacent IDs generated within the same <code>timestamp</code>
-are not predictable.</p>
-
-<a href="#textual-representation" id="textual-representation" style="color: inherit; text-decoration: none;">
-  <h2>Textual representation</h2>
-</a>
-<p>A SCRU128 ID is encoded in a string as a 128-bit unsigned integer denoted in the
-radix of 32 using the digits of <code>[0-9A-V]</code>, with leading zeros added to form a
-26-digit canonical representation. Converters for this simple base 32 notation
-are widely available in many languages; even if not, it is easily implemented
-with bitwise operations by translating each 5-bit group into one digit of
-<code>[0-9A-V]</code>, from the least significant digit to the most. Since the three most
-significant bits are mapped to one of <code>[0-7]</code>, any numeral greater than
-<code>7VVVVVVVVVVVVVVVVVVVVVVVVV</code> is not a valid SCRU128 ID.</p>
-<p>Note that this is different from some binary-to-text encodings referred to as
-<em>base32</em> or <em>base32hex</em> (e.g. <a href="https://www.ietf.org/rfc/rfc4648.txt">RFC 4648</a>), which read and translate 5-bit groups
-from the most significant one to the least.</p>
+<p>See <a href="https://github.com/scru128/spec">SCRU128 Specification</a> for details.</p>
 
 <a href="#license" id="license" style="color: inherit; text-decoration: none;">
   <h2>License</h2>
