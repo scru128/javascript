@@ -6,40 +6,6 @@ const assert = (expression, message = "") => {
 };
 
 describe("Internal", function () {
-  describe("Scru128Id", function () {
-    it("encodes and decodes prepared cases correctly", function () {
-      const cases = [
-        [[0, 0, 0, 0], "00000000000000000000000000"],
-        [[2 ** 44 - 1, 0, 0, 0], "7VVVVVVVVG0000000000000000"],
-        [[0, 2 ** 28 - 1, 0, 0], "000000000FVVVVU00000000000"],
-        [[0, 0, 2 ** 24 - 1, 0], "000000000000001VVVVS000000"],
-        [[0, 0, 0, 2 ** 32 - 1], "00000000000000000003VVVVVV"],
-        [
-          [2 ** 44 - 1, 2 ** 28 - 1, 2 ** 24 - 1, 2 ** 32 - 1],
-          "7VVVVVVVVVVVVVVVVVVVVVVVVV",
-        ],
-      ];
-
-      const fs = ["timestamp", "counter", "perSecRandom", "perGenRandom"];
-      for (const e of cases) {
-        const fromFields = _internal.Scru128Id.fromFields(...e[0]);
-        const fromStr = _internal.Scru128Id.fromString(e[1]);
-
-        assert(fromFields.toString() === e[1] && fromStr.toString() === e[1]);
-        for (let i = 0; i < fs.length; i++) {
-          assert(fromFields[fs[i]] === e[0][i] && fromStr[fs[i]] === e[0][i]);
-        }
-      }
-    });
-
-    it("has symmetric fromString() and toString()", function () {
-      for (let i = 0; i < 1_000; i++) {
-        const src = scru128();
-        assert(_internal.Scru128Id.fromString(src).toString() === src);
-      }
-    });
-  });
-
   describe("getRandomBits()", function () {
     const rng = _internal.detectRng();
 

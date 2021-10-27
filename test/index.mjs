@@ -1,4 +1,4 @@
-import { scru128, _internal } from "scru128";
+import { scru128, Scru128Id } from "scru128";
 const assert = (expression, message = "") => {
   if (!expression) {
     throw new Error("Assertion failed" + (message ? ": " + message : ""));
@@ -31,15 +31,15 @@ describe("scru128()", function () {
     const epoch = Date.UTC(2020, 0);
     for (let i = 0; i < 10_000; i++) {
       const tsNow = Date.now() - epoch;
-      const timestamp = _internal.Scru128Id.fromString(scru128()).timestamp;
+      const timestamp = Scru128Id.fromString(scru128()).timestamp;
       assert(Math.abs(tsNow - timestamp) < 16);
     }
   });
 
   it("encodes unique sortable pair of timestamp and counter", function () {
-    let prev = _internal.Scru128Id.fromString(samples[0]);
+    let prev = Scru128Id.fromString(samples[0]);
     for (let i = 1; i < samples.length; i++) {
-      const curr = _internal.Scru128Id.fromString(samples[i]);
+      const curr = Scru128Id.fromString(samples[i]);
       assert(
         prev.timestamp < curr.timestamp ||
           (prev.timestamp === curr.timestamp && prev.counter < curr.counter)
