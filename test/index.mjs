@@ -1,4 +1,4 @@
-import { scru128, Scru128Id } from "scru128";
+import { scru128, Scru128Generator, Scru128Id } from "scru128";
 const assert = (expression, message = "") => {
   if (!expression) {
     throw new Error("Assertion failed" + (message ? ": " + message : ""));
@@ -21,17 +21,17 @@ describe("scru128()", function () {
   });
 
   it("generates sortable string representation by creation time", function () {
-    const sorted = samples.slice().sort();
-    for (let i = 0; i < samples.length; i++) {
-      assert(samples[i] === sorted[i]);
+    for (let i = 1; i < samples.length; i++) {
+      assert(samples[i - 1] < samples[i]);
     }
   });
 
   it("encodes up-to-date timestamp", function () {
     const epoch = Date.UTC(2020, 0);
+    const g = new Scru128Generator();
     for (let i = 0; i < 10_000; i++) {
       const tsNow = Date.now() - epoch;
-      const timestamp = Scru128Id.fromString(scru128()).timestamp;
+      const timestamp = g.generate().timestamp;
       assert(Math.abs(tsNow - timestamp) < 16);
     }
   });
@@ -46,5 +46,23 @@ describe("scru128()", function () {
       );
       prev = curr;
     }
+  });
+
+  it("generates no IDs sharing same timestamp and counter by multiple async functions", async function () {
+    const q = [];
+    const producers = [];
+    for (let i = 0; i < 4 * 10_000; i++) {
+      producers.push((async () => q.push(scru128()))());
+    }
+
+    await Promise.all(producers);
+
+    const s = new Set(
+      q.map((e) => {
+        const obj = Scru128Id.fromString(e);
+        return `${obj.timestamp}-${obj.counter}`;
+      })
+    );
+    assert(s.size === 4 * 10_000);
   });
 });

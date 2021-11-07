@@ -15,7 +15,7 @@
  * @packageDocumentation
  */
 Object.defineProperty(exports, "__esModule", { value: true });
-exports._internal = exports.scru128 = exports.Scru128Id = exports.Generator = exports.TIMESTAMP_BIAS = void 0;
+exports._internal = exports.scru128 = exports.Scru128Id = exports.Scru128Generator = exports.TIMESTAMP_BIAS = void 0;
 const crypto_1 = require("crypto");
 /** Unix time in milliseconds at 2020-01-01 00:00:00+00:00. */
 exports.TIMESTAMP_BIAS = 1577836800000; // Date.UTC(2020, 0)
@@ -51,15 +51,15 @@ const detectRng = () => {
  *
  * @example
  * ```javascript
- * import { Generator } from "scru128";
+ * import { Scru128Generator } from "scru128";
  *
- * const g = new Generator();
+ * const g = new Scru128Generator();
  * const x = g.generate();
  * console.log(x.toString());
  * console.log(BigInt(x.toHex()));
  * ```
  */
-class Generator {
+class Scru128Generator {
     constructor() {
         /** Timestamp at last generation. */
         this.tsLastGen = 0;
@@ -83,7 +83,7 @@ class Generator {
             this.counter = this.getRandomBits(28);
         }
         else if (++this.counter > MAX_COUNTER) {
-            // wait a moment until clock goes forward when counter overflows
+            console.info("scru128: counter limit reached; will wait until clock goes forward");
             let nClockCheck = 0;
             while (tsNow <= this.tsLastGen) {
                 tsNow = Date.now();
@@ -104,7 +104,7 @@ class Generator {
         return Scru128Id.fromFields(this.tsLastGen - exports.TIMESTAMP_BIAS, this.counter, this.perSecRandom, this.getRandomBits(32));
     }
 }
-exports.Generator = Generator;
+exports.Scru128Generator = Scru128Generator;
 /**
  * Represents a SCRU128 ID and provides converters to/from string and numbers.
  *
@@ -144,10 +144,10 @@ class Scru128Id {
     /**
      * Creates an object from field values.
      *
-     * @param timestamp - 44-bit millisecond timestamp field.
-     * @param counter - 28-bit per-millisecond counter field.
-     * @param perSecRandom - 24-bit per-second randomness field.
-     * @param perGenRandom - 32-bit per-generation randomness field.
+     * @param timestamp - 44-bit millisecond timestamp field value.
+     * @param counter - 28-bit per-timestamp monotonic counter field value.
+     * @param perSecRandom - 24-bit per-second randomness field value.
+     * @param perGenRandom - 32-bit per-generation randomness field value.
      * @throws RangeError if any argument is out of the range of each field.
      * @category Conversion
      */
@@ -235,12 +235,12 @@ class Scru128Id {
     }
 }
 exports.Scru128Id = Scru128Id;
-const defaultGenerator = new Generator();
+const defaultGenerator = new Scru128Generator();
 /**
  * Generates a new SCRU128 ID encoded in a string.
  *
  * Use this function to quickly get a new SCRU128 ID as a string. Use
- * [[Generator]] to do more.
+ * [[Scru128Generator]] to do more.
  *
  * @returns 26-digit canonical string representation.
  * @example

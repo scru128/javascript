@@ -1,4 +1,4 @@
-import { scru128, Scru128Id } from "scru128";
+import { scru128, Scru128Generator, Scru128Id } from "scru128";
 const assert = (expression, message = "") => {
   if (!expression) {
     throw new Error("Assertion failed" + (message ? ": " + message : ""));
@@ -25,19 +25,30 @@ describe("Scru128Id", function () {
       const fromStr = Scru128Id.fromString(e[1]);
 
       assert(fromFields.equals(fromStr));
-      assert(fromFields.toString() === e[1] && fromStr.toString() === e[1]);
+      assert(fromFields.toHex() === fromStr.toHex());
+      assert(fromFields.toString() === e[1]);
+      assert(fromStr.toString() === e[1]);
       for (let i = 0; i < fs.length; i++) {
-        assert(fromFields[fs[i]] === e[0][i] && fromStr[fs[i]] === e[0][i]);
+        assert(fromFields[fs[i]] === e[0][i]);
+        assert(fromStr[fs[i]] === e[0][i]);
       }
     }
   });
 
-  it("has symmetric converters from/to string and hex", function () {
+  it("has symmetric converters from/to string, hex, and fields", function () {
+    const g = new Scru128Generator();
     for (let i = 0; i < 1_000; i++) {
-      const strValue = scru128();
-      const obj = Scru128Id.fromString(strValue);
-      assert(obj.toString() === strValue);
+      const obj = g.generate();
+      assert(Scru128Id.fromString(obj.toString()).equals(obj));
       assert(Scru128Id.fromHex(obj.toHex()).equals(obj));
+      assert(
+        Scru128Id.fromFields(
+          obj.timestamp,
+          obj.counter,
+          obj.perSecRandom,
+          obj.perGenRandom
+        ).equals(obj)
+      );
     }
   });
 
@@ -50,8 +61,9 @@ describe("Scru128Id", function () {
       Scru128Id.fromFields(1, 0, 0, 0),
     ];
 
+    const g = new Scru128Generator();
     for (let i = 0; i < 1_000; i++) {
-      ordered.push(Scru128Id.fromString(scru128()));
+      ordered.push(g.generate());
     }
 
     let prev = ordered.shift();

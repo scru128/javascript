@@ -21,15 +21,15 @@ export declare const TIMESTAMP_BIAS = 1577836800000;
  *
  * @example
  * ```javascript
- * import { Generator } from "scru128";
+ * import { Scru128Generator } from "scru128";
  *
- * const g = new Generator();
+ * const g = new Scru128Generator();
  * const x = g.generate();
  * console.log(x.toString());
  * console.log(BigInt(x.toHex()));
  * ```
  */
-export declare class Generator {
+export declare class Scru128Generator {
     /** Timestamp at last generation. */
     private tsLastGen;
     /** Counter at last generation. */
@@ -69,10 +69,10 @@ export declare class Scru128Id {
     /**
      * Creates an object from field values.
      *
-     * @param timestamp - 44-bit millisecond timestamp field.
-     * @param counter - 28-bit per-millisecond counter field.
-     * @param perSecRandom - 24-bit per-second randomness field.
-     * @param perGenRandom - 32-bit per-generation randomness field.
+     * @param timestamp - 44-bit millisecond timestamp field value.
+     * @param counter - 28-bit per-timestamp monotonic counter field value.
+     * @param perSecRandom - 24-bit per-second randomness field value.
+     * @param perGenRandom - 32-bit per-generation randomness field value.
      * @throws RangeError if any argument is out of the range of each field.
      * @category Conversion
      */
@@ -122,7 +122,7 @@ export declare class Scru128Id {
  * Generates a new SCRU128 ID encoded in a string.
  *
  * Use this function to quickly get a new SCRU128 ID as a string. Use
- * [[Generator]] to do more.
+ * [[Scru128Generator]] to do more.
  *
  * @returns 26-digit canonical string representation.
  * @example

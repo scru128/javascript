@@ -59,15 +59,15 @@ const detectRng = (): ((k: number) => number) => {
  *
  * @example
  * ```javascript
- * import { Generator } from "scru128";
+ * import { Scru128Generator } from "scru128";
  *
- * const g = new Generator();
+ * const g = new Scru128Generator();
  * const x = g.generate();
  * console.log(x.toString());
  * console.log(BigInt(x.toHex()));
  * ```
  */
-export class Generator {
+export class Scru128Generator {
   /** Timestamp at last generation. */
   private tsLastGen = 0;
 
@@ -95,7 +95,9 @@ export class Generator {
       this.tsLastGen = tsNow;
       this.counter = this.getRandomBits(28);
     } else if (++this.counter > MAX_COUNTER) {
-      // wait a moment until clock goes forward when counter overflows
+      console.info(
+        "scru128: counter limit reached; will wait until clock goes forward"
+      );
       let nClockCheck = 0;
       while (tsNow <= this.tsLastGen) {
         tsNow = Date.now();
@@ -168,10 +170,10 @@ export class Scru128Id {
   /**
    * Creates an object from field values.
    *
-   * @param timestamp - 44-bit millisecond timestamp field.
-   * @param counter - 28-bit per-millisecond counter field.
-   * @param perSecRandom - 24-bit per-second randomness field.
-   * @param perGenRandom - 32-bit per-generation randomness field.
+   * @param timestamp - 44-bit millisecond timestamp field value.
+   * @param counter - 28-bit per-timestamp monotonic counter field value.
+   * @param perSecRandom - 24-bit per-second randomness field value.
+   * @param perGenRandom - 32-bit per-generation randomness field value.
    * @throws RangeError if any argument is out of the range of each field.
    * @category Conversion
    */
@@ -296,13 +298,13 @@ export class Scru128Id {
   }
 }
 
-const defaultGenerator = new Generator();
+const defaultGenerator = new Scru128Generator();
 
 /**
  * Generates a new SCRU128 ID encoded in a string.
  *
  * Use this function to quickly get a new SCRU128 ID as a string. Use
- * [[Generator]] to do more.
+ * [[Scru128Generator]] to do more.
  *
  * @returns 26-digit canonical string representation.
  * @example
