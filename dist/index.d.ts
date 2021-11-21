@@ -40,8 +40,8 @@ export declare class Scru128Generator {
     private perSecRandom;
     /** Maximum number of checking `Date.now()` until clock goes forward. */
     private nClockCheckMax;
-    /** Returns a `k`-bit (cryptographically strong) random unsigned integer. */
-    private getRandomBits;
+    /** Returns a 32-bit (cryptographically strong) random unsigned integer. */
+    private getRandomUint32;
     /** Generates a new SCRU128 ID object. */
     generate(): Scru128Id;
 }

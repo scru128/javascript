@@ -25,31 +25,21 @@ const MAX_COUNTER = 0xfff_ffff;
 /** Leading zeros to polyfill padStart(n, "0") with slice(-n). */
 const PAD_ZEROS = "0000000000000000";
 
-/** Returns a random bit generator based on available cryptographic RNG. */
-const detectRng = (): ((k: number) => number) => {
+/** Returns a random number generator based on available cryptographic RNG. */
+const detectRng = (): (() => number) => {
   if (typeof window !== "undefined" && window.crypto) {
     // Web Crypto API on browsers
-    return (k: number) =>
-      window.crypto
-        .getRandomValues(new Uint16Array(Math.ceil(k / 16)))
-        .reduce((acc, e) => acc * 0x1_0000 + e) %
-      2 ** k; // Caution: the result overflows if k > 48
+    return () => window.crypto.getRandomValues(new Uint32Array(1))[0];
   } else if (randomFillSync) {
     // Node.js Crypto
-    return (k: number) =>
-      randomFillSync(new Uint16Array(Math.ceil(k / 16))).reduce(
-        (acc, e) => acc * 0x1_0000 + e
-      ) %
-      2 ** k; // Caution: the result overflows if k > 48
+    return () => randomFillSync(new Uint32Array(1))[0];
   } else {
     console.warn(
       "scru128: fell back on Math.random() as no cryptographic RNG was detected"
     );
-    return (k: number) =>
-      k > 30
-        ? Math.trunc(Math.random() * 2 ** (k - 30)) * 0x4000_0000 +
-          Math.trunc(Math.random() * 0x4000_0000)
-        : Math.trunc(Math.random() * 2 ** k);
+    return () =>
+      Math.trunc(Math.random() * 0x1_0000) * 0x1_0000 +
+      Math.trunc(Math.random() * 0x1_0000);
   }
 };
 
@@ -83,8 +73,8 @@ export class Scru128Generator {
   /** Maximum number of checking `Date.now()` until clock goes forward. */
   private nClockCheckMax = 1_000_000;
 
-  /** Returns a `k`-bit (cryptographically strong) random unsigned integer. */
-  private getRandomBits = detectRng();
+  /** Returns a 32-bit (cryptographically strong) random unsigned integer. */
+  private getRandomUint32 = detectRng();
 
   /** Generates a new SCRU128 ID object. */
   generate(): Scru128Id {
@@ -93,7 +83,7 @@ export class Scru128Generator {
     // update timestamp and counter
     if (tsNow > this.tsLastGen) {
       this.tsLastGen = tsNow;
-      this.counter = this.getRandomBits(28);
+      this.counter = this.getRandomUint32() >>> 4;
     } else if (++this.counter > MAX_COUNTER) {
       console.info(
         "scru128: counter limit reached; will wait until clock goes forward"
@@ -109,20 +99,20 @@ export class Scru128Generator {
       }
 
       this.tsLastGen = tsNow;
-      this.counter = this.getRandomBits(28);
+      this.counter = this.getRandomUint32() >>> 4;
     }
 
     // update perSecRandom
     if (this.tsLastGen - this.tsLastSec > 1000) {
       this.tsLastSec = this.tsLastGen;
-      this.perSecRandom = this.getRandomBits(24);
+      this.perSecRandom = this.getRandomUint32() >>> 8;
     }
 
     return Scru128Id.fromFields(
       this.tsLastGen - TIMESTAMP_BIAS,
       this.counter,
       this.perSecRandom,
-      this.getRandomBits(32)
+      this.getRandomUint32()
     );
   }
 }
@@ -215,9 +205,9 @@ export class Scru128Id {
    * @category Conversion
    */
   toString(): string {
-    const h48 = this.timestamp * 0x10 + (this.counter >> 24);
+    const h48 = this.timestamp * 0x10 + (this.counter >>> 24);
     const m40 =
-      (this.counter & 0xff_ffff) * 0x1_0000 + (this.perSecRandom >> 8);
+      (this.counter & 0xff_ffff) * 0x1_0000 + (this.perSecRandom >>> 8);
     const l40 = (this.perSecRandom & 0xff) * 0x1_0000_0000 + this.perGenRandom;
     return (
       (PAD_ZEROS + h48.toString(32)).slice(-10) +
@@ -316,10 +306,3 @@ const defaultGenerator = new Scru128Generator();
  * ```
  */
 export const scru128 = (): string => defaultGenerator.generate().toString();
-
-/**
- * Exported for unit testing purposes only.
- *
- * @internal
- */
-export const _internal = { detectRng };
