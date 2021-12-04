@@ -12,10 +12,15 @@ decentralized, globally unique time-ordered identifiers. SCRU128 is inspired by
 - 84-bit _layered_ randomness for collision resistance
 
 ```javascript
-import { scru128 } from "scru128";
+import { scru128, scru128String } from "scru128";
 
-console.log(scru128()); // e.g. "00PGHAJ3Q9VAJ7IU6PQBHBUAK4"
-console.log(scru128()); // e.g. "00PGHAJ3Q9VAJ7KU6PQ92NVBTV"
+// generate a new identifier object
+const x = scru128();
+console.log(String(x)); // e.g. "00S6GVKR1MH58KE72EJD87SDOO"
+console.log(BigInt(x.toHex())); // as a 128-bit unsigned integer
+
+// generate a textual representation directly
+console.log(scru128String()); // e.g. "00S6GVKR3F7R79I72EJF0J4RGC"
 ```
 
 See [SCRU128 Specification] for details.

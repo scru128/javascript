@@ -3,10 +3,15 @@
  *
  * @example
  * ```javascript
- * import { scru128 } from "scru128";
+ * import { scru128, scru128String } from "scru128";
  *
- * console.log(scru128()); // e.g. "00PGHAJ3Q9VAJ7IU6PQBHBUAK4"
- * console.log(scru128()); // e.g. "00PGHAJ3Q9VAJ7KU6PQ92NVBTV"
+ * // generate a new identifier object
+ * const x = scru128();
+ * console.log(String(x)); // e.g. "00S6GVKR1MH58KE72EJD87SDOO"
+ * console.log(BigInt(x.toHex())); // as a 128-bit unsigned integer
+ *
+ * // generate a textual representation directly
+ * console.log(scru128String()); // e.g. "00S6GVKR3F7R79I72EJF0J4RGC"
  * ```
  *
  * @license Apache-2.0
@@ -16,8 +21,8 @@
 /** Unix time in milliseconds at 2020-01-01 00:00:00+00:00. */
 export declare const TIMESTAMP_BIAS = 1577836800000;
 /**
- * Represents a SCRU128 ID generator and provides an interface to do more than
- * just generate a string representation.
+ * Represents a SCRU128 ID generator that encapsulates the monotonic counter and
+ * other internal states.
  *
  * @example
  * ```javascript
@@ -25,7 +30,7 @@ export declare const TIMESTAMP_BIAS = 1577836800000;
  *
  * const g = new Scru128Generator();
  * const x = g.generate();
- * console.log(x.toString());
+ * console.log(String(x));
  * console.log(BigInt(x.toHex()));
  * ```
  */
@@ -38,7 +43,7 @@ export declare class Scru128Generator {
     private tsLastSec;
     /** Per-second random value at last generation. */
     private perSecRandom;
-    /** Maximum number of checking `Date.now()` until clock goes forward. */
+    /** Maximum number of checking the system clock until it goes forward. */
     private nClockCheckMax;
     /** Returns a 32-bit (cryptographically strong) random unsigned integer. */
     private getRandomUint32;
@@ -53,7 +58,7 @@ export declare class Scru128Generator {
  * import { Scru128Id } from "scru128";
  *
  * const x = Scru128Id.fromString("00Q1D9AB6DTJNLJ80SJ42SNJ4F");
- * console.log(x.toString());
+ * console.log(String(x));
  *
  * const y = Scru128Id.fromHex(0xd05a952ccdecef5aa01c9904e5a115n.toString(16));
  * console.log(BigInt(y.toHex()));
@@ -73,7 +78,7 @@ export declare class Scru128Id {
      * @param counter - 28-bit per-timestamp monotonic counter field value.
      * @param perSecRandom - 24-bit per-second randomness field value.
      * @param perGenRandom - 32-bit per-generation randomness field value.
-     * @throws RangeError if any argument is out of the range of each field.
+     * @throws RangeError if any argument is out of the value range of the field.
      * @category Conversion
      */
     static fromFields(timestamp: number, counter: number, perSecRandom: number, perGenRandom: number): Scru128Id;
@@ -118,19 +123,20 @@ export declare class Scru128Id {
      */
     compareTo(other: Scru128Id): number;
 }
+/** Generates a new SCRU128 ID object. */
+export declare const scru128: () => Scru128Id;
 /**
  * Generates a new SCRU128 ID encoded in a string.
  *
- * Use this function to quickly get a new SCRU128 ID as a string. Use
- * [[Scru128Generator]] to do more.
+ * Use this function to quickly get a new SCRU128 ID as a string.
  *
  * @returns 26-digit canonical string representation.
  * @example
  * ```javascript
- * import { scru128 } from "scru128";
+ * import { scru128String } from "scru128";
  *
- * const x = scru128();
+ * const x = scru128String();
  * console.log(x);
  * ```
  */
-export declare const scru128: () => string;
+export declare const scru128String: () => string;

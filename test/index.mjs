@@ -1,4 +1,4 @@
-import { scru128, Scru128Generator, Scru128Id } from "scru128";
+import { scru128, scru128String, Scru128Generator, Scru128Id } from "scru128";
 const assert = (expression, message = "") => {
   if (!expression) {
     throw new Error("Assertion failed" + (message ? ": " + message : ""));
@@ -6,9 +6,16 @@ const assert = (expression, message = "") => {
 };
 
 describe("scru128()", function () {
+  it("returns a Scru128Id object", function () {
+    const obj = scru128();
+    assert(obj instanceof Scru128Id);
+  });
+});
+
+describe("scru128String()", function () {
   const samples = [];
   for (let i = 0; i < 100_000; i++) {
-    samples[i] = scru128();
+    samples[i] = scru128String();
   }
 
   it("generates 26-digit canonical string", function () {
@@ -57,12 +64,7 @@ describe("scru128()", function () {
 
     await Promise.all(producers);
 
-    const s = new Set(
-      q.map((e) => {
-        const obj = Scru128Id.fromString(e);
-        return `${obj.timestamp}-${obj.counter}`;
-      })
-    );
+    const s = new Set(q.map((e) => `${e.timestamp}-${e.counter}`));
     assert(s.size === 4 * 10_000);
   });
 });

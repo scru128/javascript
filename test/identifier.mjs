@@ -1,4 +1,4 @@
-import { scru128, Scru128Generator, Scru128Id } from "scru128";
+import { Scru128Generator, Scru128Id } from "scru128";
 const assert = (expression, message = "") => {
   if (!expression) {
     throw new Error("Assertion failed" + (message ? ": " + message : ""));
@@ -56,9 +56,13 @@ describe("Scru128Id", function () {
     const ordered = [
       Scru128Id.fromFields(0, 0, 0, 0),
       Scru128Id.fromFields(0, 0, 0, 1),
+      Scru128Id.fromFields(0, 0, 0, 0xffff_ffff),
       Scru128Id.fromFields(0, 0, 1, 0),
+      Scru128Id.fromFields(0, 0, 0xff_ffff, 0),
       Scru128Id.fromFields(0, 1, 0, 0),
+      Scru128Id.fromFields(0, 0xfff_ffff, 0, 0),
       Scru128Id.fromFields(1, 0, 0, 0),
+      Scru128Id.fromFields(2, 0, 0, 0),
     ];
 
     const g = new Scru128Generator();
@@ -82,6 +86,14 @@ describe("Scru128Id", function () {
       assert(clone.compareTo(curr) === 0);
 
       prev = curr;
+    }
+  });
+
+  it("serializes an object using the canonical string representation", function () {
+    const g = new Scru128Generator();
+    for (let i = 0; i < 1_000; i++) {
+      const obj = g.generate();
+      assert(JSON.stringify(obj) === `"${obj}"`);
     }
   });
 });
