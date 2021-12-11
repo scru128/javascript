@@ -21,37 +21,8 @@
 /** Unix time in milliseconds at 2020-01-01 00:00:00+00:00. */
 export declare const TIMESTAMP_BIAS = 1577836800000;
 /**
- * Represents a SCRU128 ID generator that encapsulates the monotonic counter and
- * other internal states.
- *
- * @example
- * ```javascript
- * import { Scru128Generator } from "scru128";
- *
- * const g = new Scru128Generator();
- * const x = g.generate();
- * console.log(String(x));
- * console.log(BigInt(x.toHex()));
- * ```
- */
-export declare class Scru128Generator {
-    /** Timestamp at last generation. */
-    private tsLastGen;
-    /** Counter at last generation. */
-    private counter;
-    /** Timestamp at last renewal of perSecRandom. */
-    private tsLastSec;
-    /** Per-second random value at last generation. */
-    private perSecRandom;
-    /** Maximum number of checking the system clock until it goes forward. */
-    private nClockCheckMax;
-    /** Returns a 32-bit (cryptographically strong) random unsigned integer. */
-    private getRandomUint32;
-    /** Generates a new SCRU128 ID object. */
-    generate(): Scru128Id;
-}
-/**
- * Represents a SCRU128 ID and provides converters to/from string and numbers.
+ * Represents a SCRU128 ID and provides various converters and comparison
+ * operators.
  *
  * @example
  * ```javascript
@@ -122,6 +93,47 @@ export declare class Scru128Id {
      * than, equal to, and greater than `other`, respectively.
      */
     compareTo(other: Scru128Id): number;
+}
+/**
+ * Specifies the logger object used in the package.
+ *
+ * Logging is disabled by default. Set a logger object to enable logging. The
+ * interface is compatible with the console object.
+ */
+export declare const setLogger: (newLogger: {
+    error: (message: string) => void;
+    warn: (message: string) => void;
+    info: (message: string) => void;
+}) => void;
+/**
+ * Represents a SCRU128 ID generator that encapsulates the monotonic counter and
+ * other internal states.
+ *
+ * @example
+ * ```javascript
+ * import { Scru128Generator } from "scru128";
+ *
+ * const g = new Scru128Generator();
+ * const x = g.generate();
+ * console.log(String(x));
+ * console.log(BigInt(x.toHex()));
+ * ```
+ */
+export declare class Scru128Generator {
+    /** Timestamp at last generation. */
+    private tsLastGen;
+    /** Counter at last generation. */
+    private counter;
+    /** Timestamp at last renewal of perSecRandom. */
+    private tsLastSec;
+    /** Per-second random value at last generation. */
+    private perSecRandom;
+    /** Maximum number of checking the system clock until it goes forward. */
+    private nClockCheckMax;
+    /** Returns a 32-bit (cryptographically strong) random unsigned integer. */
+    private getRandomUint32;
+    /** Generates a new SCRU128 ID object. */
+    generate(): Scru128Id;
 }
 /** Generates a new SCRU128 ID object. */
 export declare const scru128: () => Scru128Id;

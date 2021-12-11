@@ -27,101 +27,12 @@ export const TIMESTAMP_BIAS = 1577836800000; // Date.UTC(2020, 0)
 /** Maximum value of 28-bit counter field. */
 const MAX_COUNTER = 0xfff_ffff;
 
+/** Digit characters used in the base 32 notation. */
 const DIGITS = "0123456789ABCDEFGHIJKLMNOPQRSTUV";
 
-/** Returns a random number generator based on available cryptographic RNG. */
-const detectRng = (): (() => number) => {
-  if (typeof window !== "undefined" && window.crypto) {
-    // Web Crypto API on browsers
-    return () => window.crypto.getRandomValues(new Uint32Array(1))[0];
-  } else if (randomFillSync) {
-    // Node.js Crypto
-    return () => randomFillSync(new Uint32Array(1))[0];
-  } else {
-    console.warn(
-      "scru128: fell back on Math.random() as no cryptographic RNG was detected"
-    );
-    return () =>
-      Math.trunc(Math.random() * 0x1_0000) * 0x1_0000 +
-      Math.trunc(Math.random() * 0x1_0000);
-  }
-};
-
 /**
- * Represents a SCRU128 ID generator that encapsulates the monotonic counter and
- * other internal states.
- *
- * @example
- * ```javascript
- * import { Scru128Generator } from "scru128";
- *
- * const g = new Scru128Generator();
- * const x = g.generate();
- * console.log(String(x));
- * console.log(BigInt(x.toHex()));
- * ```
- */
-export class Scru128Generator {
-  /** Timestamp at last generation. */
-  private tsLastGen = 0;
-
-  /** Counter at last generation. */
-  private counter = 0;
-
-  /** Timestamp at last renewal of perSecRandom. */
-  private tsLastSec = 0;
-
-  /** Per-second random value at last generation. */
-  private perSecRandom = 0;
-
-  /** Maximum number of checking the system clock until it goes forward. */
-  private nClockCheckMax = 1_000_000;
-
-  /** Returns a 32-bit (cryptographically strong) random unsigned integer. */
-  private getRandomUint32 = detectRng();
-
-  /** Generates a new SCRU128 ID object. */
-  generate(): Scru128Id {
-    // update timestamp and counter
-    let tsNow = Date.now();
-    if (tsNow > this.tsLastGen) {
-      this.tsLastGen = tsNow;
-      this.counter = this.getRandomUint32() >>> 4;
-    } else if (++this.counter > MAX_COUNTER) {
-      console.info(
-        "scru128: counter limit reached; will wait until clock goes forward"
-      );
-      let nClockCheck = 0;
-      while (tsNow <= this.tsLastGen) {
-        tsNow = Date.now();
-        if (++nClockCheck > this.nClockCheckMax) {
-          console.warn("scru128: reset state as clock did not go forward");
-          this.tsLastSec = 0;
-          break;
-        }
-      }
-
-      this.tsLastGen = tsNow;
-      this.counter = this.getRandomUint32() >>> 4;
-    }
-
-    // update perSecRandom
-    if (this.tsLastGen - this.tsLastSec > 1000) {
-      this.tsLastSec = this.tsLastGen;
-      this.perSecRandom = this.getRandomUint32() >>> 8;
-    }
-
-    return Scru128Id.fromFields(
-      this.tsLastGen - TIMESTAMP_BIAS,
-      this.counter,
-      this.perSecRandom,
-      this.getRandomUint32()
-    );
-  }
-}
-
-/**
- * Represents a SCRU128 ID and provides converters to/from string and numbers.
+ * Represents a SCRU128 ID and provides various converters and comparison
+ * operators.
  *
  * @example
  * ```javascript
@@ -301,10 +212,125 @@ export class Scru128Id {
   }
 }
 
-const defaultGenerator = new Scru128Generator();
+/** Logger object used in the package. */
+let logger:
+  | {
+      error: (message: string) => void;
+      warn: (message: string) => void;
+      info: (message: string) => void;
+    }
+  | undefined = undefined;
+
+/**
+ * Specifies the logger object used in the package.
+ *
+ * Logging is disabled by default. Set a logger object to enable logging. The
+ * interface is compatible with the console object.
+ */
+export const setLogger = (newLogger: {
+  error: (message: string) => void;
+  warn: (message: string) => void;
+  info: (message: string) => void;
+}): void => {
+  logger = newLogger;
+};
+
+/** Returns a random number generator based on available cryptographic RNG. */
+const detectRng = (): (() => number) => {
+  if (typeof window !== "undefined" && window.crypto) {
+    // Web Crypto API on browsers
+    return () => window.crypto.getRandomValues(new Uint32Array(1))[0];
+  } else if (randomFillSync) {
+    // Node.js Crypto
+    return () => randomFillSync(new Uint32Array(1))[0];
+  } else {
+    logger?.warn(
+      "scru128: fell back on Math.random() as no cryptographic RNG was detected"
+    );
+    return () =>
+      Math.trunc(Math.random() * 0x1_0000) * 0x1_0000 +
+      Math.trunc(Math.random() * 0x1_0000);
+  }
+};
+
+/**
+ * Represents a SCRU128 ID generator that encapsulates the monotonic counter and
+ * other internal states.
+ *
+ * @example
+ * ```javascript
+ * import { Scru128Generator } from "scru128";
+ *
+ * const g = new Scru128Generator();
+ * const x = g.generate();
+ * console.log(String(x));
+ * console.log(BigInt(x.toHex()));
+ * ```
+ */
+export class Scru128Generator {
+  /** Timestamp at last generation. */
+  private tsLastGen = 0;
+
+  /** Counter at last generation. */
+  private counter = 0;
+
+  /** Timestamp at last renewal of perSecRandom. */
+  private tsLastSec = 0;
+
+  /** Per-second random value at last generation. */
+  private perSecRandom = 0;
+
+  /** Maximum number of checking the system clock until it goes forward. */
+  private nClockCheckMax = 1_000_000;
+
+  /** Returns a 32-bit (cryptographically strong) random unsigned integer. */
+  private getRandomUint32 = detectRng();
+
+  /** Generates a new SCRU128 ID object. */
+  generate(): Scru128Id {
+    // update timestamp and counter
+    let tsNow = Date.now();
+    if (tsNow > this.tsLastGen) {
+      this.tsLastGen = tsNow;
+      this.counter = this.getRandomUint32() >>> 4;
+    } else if (++this.counter > MAX_COUNTER) {
+      logger?.info(
+        "scru128: counter limit reached; will wait until clock goes forward"
+      );
+      let nClockCheck = 0;
+      while (tsNow <= this.tsLastGen) {
+        tsNow = Date.now();
+        if (++nClockCheck > this.nClockCheckMax) {
+          logger?.warn("scru128: reset state as clock did not go forward");
+          this.tsLastSec = 0;
+          break;
+        }
+      }
+
+      this.tsLastGen = tsNow;
+      this.counter = this.getRandomUint32() >>> 4;
+    }
+
+    // update perSecRandom
+    if (this.tsLastGen - this.tsLastSec > 1000) {
+      this.tsLastSec = this.tsLastGen;
+      this.perSecRandom = this.getRandomUint32() >>> 8;
+    }
+
+    return Scru128Id.fromFields(
+      this.tsLastGen - TIMESTAMP_BIAS,
+      this.counter,
+      this.perSecRandom,
+      this.getRandomUint32()
+    );
+  }
+}
+
+let defaultGenerator: Scru128Generator | undefined;
 
 /** Generates a new SCRU128 ID object. */
-export const scru128 = (): Scru128Id => defaultGenerator.generate();
+export const scru128 = (): Scru128Id =>
+  (defaultGenerator || (defaultGenerator = new Scru128Generator())).generate();
 
 /**
  * Generates a new SCRU128 ID encoded in a string.
