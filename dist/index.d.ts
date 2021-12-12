@@ -15,7 +15,6 @@
  * ```
  *
  * @license Apache-2.0
- * @copyright 2021 LiosK
  * @packageDocumentation
  */
 /** Unix time in milliseconds at 2020-01-01 00:00:00+00:00. */
@@ -66,6 +65,23 @@ export declare class Scru128Id {
      * @category Conversion
      */
     toString(): string;
+    /**
+     * Creates an object from a byte array that represents a 128-bit unsigned
+     * integer.
+     *
+     * @param value - 16-byte buffer that represents a 128-bit unsigned integer in
+     * the big-endian (network) byte order.
+     * @throws RangeError if the byte length of the argument is not 16.
+     * @category Conversion
+     */
+    static fromArrayBuffer(value: ArrayBuffer): Scru128Id;
+    /**
+     * Returns a 16-byte byte array containing the 128-bit unsigned integer
+     * representation in the big-endian (network) byte order.
+     *
+     * @category Conversion
+     */
+    toArrayBuffer(): ArrayBuffer;
     /**
      * Creates an object from a 128-bit unsigned integer encoded in a hexadecimal
      * string.

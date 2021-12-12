@@ -6,23 +6,28 @@ const assert = (expression, message = "") => {
 };
 
 describe("Scru128Id", function () {
+  const MAX_UINT44 = 2 ** 44 - 1;
+  const MAX_UINT28 = 2 ** 28 - 1;
+  const MAX_UINT24 = 2 ** 24 - 1;
+  const MAX_UINT32 = 2 ** 32 - 1;
+
   it("encodes and decodes prepared cases correctly", function () {
     const cases = [
       [[0, 0, 0, 0], "00000000000000000000000000"],
-      [[2 ** 44 - 1, 0, 0, 0], "7VVVVVVVVG0000000000000000"],
-      [[2 ** 44 - 1, 0, 0, 0], "7vvvvvvvvg0000000000000000"],
-      [[0, 2 ** 28 - 1, 0, 0], "000000000FVVVVU00000000000"],
-      [[0, 2 ** 28 - 1, 0, 0], "000000000fvvvvu00000000000"],
-      [[0, 0, 2 ** 24 - 1, 0], "000000000000001VVVVS000000"],
-      [[0, 0, 2 ** 24 - 1, 0], "000000000000001vvvvs000000"],
-      [[0, 0, 0, 2 ** 32 - 1], "00000000000000000003VVVVVV"],
-      [[0, 0, 0, 2 ** 32 - 1], "00000000000000000003vvvvvv"],
+      [[MAX_UINT44, 0, 0, 0], "7VVVVVVVVG0000000000000000"],
+      [[MAX_UINT44, 0, 0, 0], "7vvvvvvvvg0000000000000000"],
+      [[0, MAX_UINT28, 0, 0], "000000000FVVVVU00000000000"],
+      [[0, MAX_UINT28, 0, 0], "000000000fvvvvu00000000000"],
+      [[0, 0, MAX_UINT24, 0], "000000000000001VVVVS000000"],
+      [[0, 0, MAX_UINT24, 0], "000000000000001vvvvs000000"],
+      [[0, 0, 0, MAX_UINT32], "00000000000000000003VVVVVV"],
+      [[0, 0, 0, MAX_UINT32], "00000000000000000003vvvvvv"],
       [
-        [2 ** 44 - 1, 2 ** 28 - 1, 2 ** 24 - 1, 2 ** 32 - 1],
+        [MAX_UINT44, MAX_UINT28, MAX_UINT24, MAX_UINT32],
         "7VVVVVVVVVVVVVVVVVVVVVVVVV",
       ],
       [
-        [2 ** 44 - 1, 2 ** 28 - 1, 2 ** 24 - 1, 2 ** 32 - 1],
+        [MAX_UINT44, MAX_UINT28, MAX_UINT24, MAX_UINT32],
         "7vvvvvvvvvvvvvvvvvvvvvvvvv",
       ],
     ];
@@ -33,7 +38,6 @@ describe("Scru128Id", function () {
       const fromString = Scru128Id.fromString(e[1]);
 
       assert(fromFields.equals(fromString));
-      assert(fromFields.toHex() === fromString.toHex());
       assert(fromFields.toString() === e[1].toUpperCase());
       assert(fromString.toString() === e[1].toUpperCase());
       for (let i = 0; i < fs.length; i++) {
@@ -72,19 +76,32 @@ describe("Scru128Id", function () {
     }
   });
 
-  it("has symmetric converters from/to string, hex, and fields", function () {
+  it("has symmetric converters from/to various values", function () {
+    const cases = [
+      Scru128Id.fromFields(0, 0, 0, 0),
+      Scru128Id.fromFields(MAX_UINT44, 0, 0, 0),
+      Scru128Id.fromFields(0, MAX_UINT28, 0, 0),
+      Scru128Id.fromFields(0, 0, MAX_UINT24, 0),
+      Scru128Id.fromFields(0, 0, 0, MAX_UINT32),
+      Scru128Id.fromFields(MAX_UINT44, MAX_UINT28, MAX_UINT24, MAX_UINT32),
+    ];
+
     const g = new Scru128Generator();
     for (let i = 0; i < 1_000; i++) {
-      const obj = g.generate();
-      assert(Scru128Id.fromString(obj.toString()).equals(obj));
-      assert(Scru128Id.fromHex(obj.toHex()).equals(obj));
+      cases.push(g.generate());
+    }
+
+    for (const e of cases) {
+      assert(Scru128Id.fromString(e.toString()).equals(e));
+      assert(Scru128Id.fromArrayBuffer(e.toArrayBuffer()).equals(e));
+      assert(Scru128Id.fromHex(e.toHex()).equals(e));
       assert(
         Scru128Id.fromFields(
-          obj.timestamp,
-          obj.counter,
-          obj.perSecRandom,
-          obj.perGenRandom
-        ).equals(obj)
+          e.timestamp,
+          e.counter,
+          e.perSecRandom,
+          e.perGenRandom
+        ).equals(e)
       );
     }
   });
@@ -93,11 +110,11 @@ describe("Scru128Id", function () {
     const ordered = [
       Scru128Id.fromFields(0, 0, 0, 0),
       Scru128Id.fromFields(0, 0, 0, 1),
-      Scru128Id.fromFields(0, 0, 0, 0xffff_ffff),
+      Scru128Id.fromFields(0, 0, 0, MAX_UINT32),
       Scru128Id.fromFields(0, 0, 1, 0),
-      Scru128Id.fromFields(0, 0, 0xff_ffff, 0),
+      Scru128Id.fromFields(0, 0, MAX_UINT24, 0),
       Scru128Id.fromFields(0, 1, 0, 0),
-      Scru128Id.fromFields(0, 0xfff_ffff, 0, 0),
+      Scru128Id.fromFields(0, MAX_UINT28, 0, 0),
       Scru128Id.fromFields(1, 0, 0, 0),
       Scru128Id.fromFields(2, 0, 0, 0),
     ];

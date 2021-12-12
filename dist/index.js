@@ -16,7 +16,6 @@
  * ```
  *
  * @license Apache-2.0
- * @copyright 2021 LiosK
  * @packageDocumentation
  */
 Object.defineProperty(exports, "__esModule", { value: true });
@@ -26,6 +25,8 @@ const crypto_1 = require("crypto");
 exports.TIMESTAMP_BIAS = 1577836800000; // Date.UTC(2020, 0)
 /** Maximum value of 28-bit counter field. */
 const MAX_COUNTER = 268435455;
+/** Maximum value of 24-bit per_sec_random field. */
+const MAX_PER_SEC_RANDOM = 16777215;
 /** Digit characters used in the base 32 notation. */
 const DIGITS = "0123456789ABCDEFGHIJKLMNOPQRSTUV";
 /**
@@ -60,7 +61,7 @@ class Scru128Id {
             this.perGenRandom < 0 ||
             this.timestamp > 17592186044415 ||
             this.counter > MAX_COUNTER ||
-            this.perSecRandom > 16777215 ||
+            this.perSecRandom > MAX_PER_SEC_RANDOM ||
             this.perGenRandom > 4294967295) {
             throw new RangeError("invalid field value");
         }
@@ -118,6 +119,37 @@ class Scru128Id {
             }
         }
         return DIGITS.charAt(hi8 >>> 5) + DIGITS.charAt(hi8 & 31) + buffer;
+    }
+    /**
+     * Creates an object from a byte array that represents a 128-bit unsigned
+     * integer.
+     *
+     * @param value - 16-byte buffer that represents a 128-bit unsigned integer in
+     * the big-endian (network) byte order.
+     * @throws RangeError if the byte length of the argument is not 16.
+     * @category Conversion
+     */
+    static fromArrayBuffer(value) {
+        if (value.byteLength !== 16) {
+            throw new RangeError("not a 128-bit byte array");
+        }
+        const view = new DataView(value);
+        return new Scru128Id(view.getUint32(0) * 0x1000 + (view.getUint16(4) >>> 4), view.getUint32(5) & MAX_COUNTER, view.getUint32(8) & MAX_PER_SEC_RANDOM, view.getUint32(12));
+    }
+    /**
+     * Returns a 16-byte byte array containing the 128-bit unsigned integer
+     * representation in the big-endian (network) byte order.
+     *
+     * @category Conversion
+     */
+    toArrayBuffer() {
+        const view = new DataView(new ArrayBuffer(16));
+        view.setUint32(12, this.perGenRandom);
+        view.setUint32(8, this.perSecRandom);
+        view.setUint32(5, this.counter);
+        view.setUint16(4, (this.timestamp % 0x1000 << 4) | (this.counter >>> 24));
+        view.setUint32(0, this.timestamp / 0x1000);
+        return view.buffer;
     }
     /**
      * Creates an object from a 128-bit unsigned integer encoded in a hexadecimal
