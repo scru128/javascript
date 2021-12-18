@@ -217,13 +217,32 @@ const setLogger = (newLogger) => {
 exports.setLogger = setLogger;
 /** Returns a random number generator based on available cryptographic RNG. */
 const detectRng = () => {
+    // use small buffer to improve throughput while avoiding waste of time and
+    // space for unused buffer contents
+    const BUFFER_SIZE = 8;
     if (typeof window !== "undefined" && window.crypto) {
         // Web Crypto API on browsers
-        return () => window.crypto.getRandomValues(new Uint32Array(1))[0];
+        const buffer = new Uint32Array(BUFFER_SIZE);
+        let cursor = BUFFER_SIZE;
+        return () => {
+            if (cursor >= BUFFER_SIZE) {
+                window.crypto.getRandomValues(buffer);
+                cursor = 0;
+            }
+            return buffer[cursor++];
+        };
     }
     else if (crypto_1.randomFillSync) {
         // Node.js Crypto
-        return () => (0, crypto_1.randomFillSync)(new Uint32Array(1))[0];
+        const buffer = new Uint32Array(BUFFER_SIZE);
+        let cursor = BUFFER_SIZE;
+        return () => {
+            if (cursor >= BUFFER_SIZE) {
+                (0, crypto_1.randomFillSync)(buffer);
+                cursor = 0;
+            }
+            return buffer[cursor++];
+        };
     }
     else {
         logger === null || logger === void 0 ? void 0 : logger.warn("scru128: fell back on Math.random() as no cryptographic RNG was detected");
@@ -246,7 +265,12 @@ const detectRng = () => {
  * ```
  */
 class Scru128Generator {
-    constructor() {
+    /**
+     * Creates a generator object with the default random number generator, or
+     * with the specified one if passed as an argument. The specified random
+     * number generator should be cryptographically strong and securely seeded.
+     */
+    constructor(randomNumberGenerator) {
         /** Timestamp at last generation. */
         this.tsLastGen = 0;
         /** Counter at last generation. */
@@ -257,8 +281,7 @@ class Scru128Generator {
         this.perSecRandom = 0;
         /** Maximum number of checking the system clock until it goes forward. */
         this.nClockCheckMax = 1000000;
-        /** Returns a 32-bit (cryptographically strong) random unsigned integer. */
-        this.getRandomUint32 = detectRng();
+        this.rng = randomNumberGenerator || { nextUint32: detectRng() };
     }
     /** Generates a new SCRU128 ID object. */
     generate() {
@@ -266,7 +289,7 @@ class Scru128Generator {
         let tsNow = Date.now();
         if (tsNow > this.tsLastGen) {
             this.tsLastGen = tsNow;
-            this.counter = this.getRandomUint32() >>> 4;
+            this.counter = this.rng.nextUint32() >>> 4;
         }
         else if (++this.counter > MAX_COUNTER) {
             logger === null || logger === void 0 ? void 0 : logger.info("scru128: counter limit reached; will wait until clock goes forward");
@@ -280,14 +303,14 @@ class Scru128Generator {
                 }
             }
             this.tsLastGen = tsNow;
-            this.counter = this.getRandomUint32() >>> 4;
+            this.counter = this.rng.nextUint32() >>> 4;
         }
         // update perSecRandom
         if (this.tsLastGen - this.tsLastSec > 1000) {
             this.tsLastSec = this.tsLastGen;
-            this.perSecRandom = this.getRandomUint32() >>> 8;
+            this.perSecRandom = this.rng.nextUint32() >>> 8;
         }
-        return Scru128Id.fromFields(this.tsLastGen - exports.TIMESTAMP_BIAS, this.counter, this.perSecRandom, this.getRandomUint32());
+        return Scru128Id.fromFields(this.tsLastGen - exports.TIMESTAMP_BIAS, this.counter, this.perSecRandom, this.rng.nextUint32());
     }
 }
 exports.Scru128Generator = Scru128Generator;

@@ -146,8 +146,16 @@ export declare class Scru128Generator {
     private perSecRandom;
     /** Maximum number of checking the system clock until it goes forward. */
     private nClockCheckMax;
-    /** Returns a 32-bit (cryptographically strong) random unsigned integer. */
-    private getRandomUint32;
+    private rng;
+    /**
+     * Creates a generator object with the default random number generator, or
+     * with the specified one if passed as an argument. The specified random
+     * number generator should be cryptographically strong and securely seeded.
+     */
+    constructor(randomNumberGenerator?: {
+        /** Returns a 32-bit random unsigned integer. */
+        nextUint32: () => number;
+    });
     /** Generates a new SCRU128 ID object. */
     generate(): Scru128Id;
 }
