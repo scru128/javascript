@@ -1,6 +1,6 @@
 {
   "name": "scru128",
-  "version": "0.5.2",
+  "version": "0.5.3",
   "description": "SCRU128: Sortable, Clock and Random number-based Unique identifier",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",

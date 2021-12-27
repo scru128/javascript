@@ -29,6 +29,19 @@ const MAX_COUNTER = 268435455;
 const MAX_PER_SEC_RANDOM = 16777215;
 /** Digit characters used in the base 32 notation. */
 const DIGITS = "0123456789ABCDEFGHIJKLMNOPQRSTUV";
+/** O(1) map from ASCII code points to base 32 digit values. */
+const DECODE_MAP = [
+    0x7f, 0x7f, 0x7f, 0x7f, 0x7f, 0x7f, 0x7f, 0x7f, 0x7f, 0x7f, 0x7f, 0x7f, 0x7f,
+    0x7f, 0x7f, 0x7f, 0x7f, 0x7f, 0x7f, 0x7f, 0x7f, 0x7f, 0x7f, 0x7f, 0x7f, 0x7f,
+    0x7f, 0x7f, 0x7f, 0x7f, 0x7f, 0x7f, 0x7f, 0x7f, 0x7f, 0x7f, 0x7f, 0x7f, 0x7f,
+    0x7f, 0x7f, 0x7f, 0x7f, 0x7f, 0x7f, 0x7f, 0x7f, 0x7f, 0x00, 0x01, 0x02, 0x03,
+    0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x7f, 0x7f, 0x7f, 0x7f, 0x7f, 0x7f, 0x7f,
+    0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f, 0x10, 0x11, 0x12, 0x13, 0x14, 0x15, 0x16,
+    0x17, 0x18, 0x19, 0x1a, 0x1b, 0x1c, 0x1d, 0x1e, 0x1f, 0x7f, 0x7f, 0x7f, 0x7f,
+    0x7f, 0x7f, 0x7f, 0x7f, 0x7f, 0x7f, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f, 0x10,
+    0x11, 0x12, 0x13, 0x14, 0x15, 0x16, 0x17, 0x18, 0x19, 0x1a, 0x1b, 0x1c, 0x1d,
+    0x1e, 0x1f, 0x7f, 0x7f, 0x7f, 0x7f, 0x7f, 0x7f, 0x7f, 0x7f, 0x7f,
+];
 /**
  * Represents a SCRU128 ID and provides various converters and comparison
  * operators.
@@ -86,14 +99,27 @@ class Scru128Id {
      * @category Conversion
      */
     static fromString(value) {
-        const m = value.match(/^([0-7][0-9A-V]{9})([0-9A-V]{8})([0-9A-V]{8})$/i);
-        if (m === null) {
-            throw new SyntaxError("invalid string representation: " + value);
+        var _a, _b, _c;
+        if (value.length !== 26) {
+            throw new SyntaxError("invalid string representation");
         }
-        const h48 = parseInt(m[1], 32);
-        const m40 = parseInt(m[2], 32);
-        const l40 = parseInt(m[3], 32);
-        return new Scru128Id(Math.trunc(h48 / 0x10), (h48 % 0x10 << 24) | Math.trunc(m40 / 65536), (m40 % 65536 << 8) | Math.trunc(l40 / 4294967296), l40 % 4294967296);
+        const n0 = (_a = DECODE_MAP[value.charCodeAt(0)]) !== null && _a !== void 0 ? _a : 0x7f;
+        const n1 = (_b = DECODE_MAP[value.charCodeAt(1)]) !== null && _b !== void 0 ? _b : 0x7f;
+        if (n0 > 7 || n1 === 0x7f) {
+            throw new SyntaxError("invalid string representation");
+        }
+        const hi8 = (n0 << 5) | n1;
+        const lo30s = [0, 0, 0, 0];
+        for (let i = 0; i < 4; i++) {
+            for (let j = 0; j < 6; j++) {
+                const n = (_c = DECODE_MAP[value.charCodeAt(2 + i * 6 + j)]) !== null && _c !== void 0 ? _c : 0x7f;
+                if (n === 0x7f) {
+                    throw new SyntaxError("invalid string representation");
+                }
+                lo30s[i] = (lo30s[i] << 5) | n;
+            }
+        }
+        return new Scru128Id(hi8 * 68719476736 + lo30s[0] * 0x40 + (lo30s[1] >>> 24), ((lo30s[1] & 16777215) << 4) | (lo30s[2] >>> 26), (lo30s[2] >>> 2) & MAX_PER_SEC_RANDOM, (lo30s[2] & 0b11) * 1073741824 + lo30s[3]);
     }
     /**
      * Returns the 26-digit canonical string representation.
