@@ -15,7 +15,6 @@
  * console.log(scru128String()); // e.g. "00S6GVKR3F7R79I72EJF0J4RGC"
  * ```
  *
- * @license Apache-2.0
  * @packageDocumentation
  */
 Object.defineProperty(exports, "__esModule", { value: true });
@@ -218,8 +217,8 @@ class Scru128Id {
         return this.compareTo(other) === 0;
     }
     /**
-     * Returns a negative integer, zero, and positive integer if `this` is less
-     * than, equal to, and greater than `other`, respectively.
+     * Returns a negative integer, zero, or positive integer if `this` is less
+     * than, equal to, or greater than `other`, respectively.
      */
     compareTo(other) {
         return Math.sign(this.timestamp - other.timestamp ||
