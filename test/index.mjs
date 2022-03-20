@@ -18,8 +18,8 @@ describe("scru128String()", function () {
     samples[i] = scru128String();
   }
 
-  it("generates 26-digit canonical string", function () {
-    const re = /^[0-7][0-9A-V]{25}$/;
+  it("generates 25-digit canonical string", function () {
+    const re = /^[0-9A-Z]{25}$/;
     assert(samples.every((e) => typeof e === "string" && re.test(e)));
   });
 
@@ -34,28 +34,31 @@ describe("scru128String()", function () {
   });
 
   it("encodes up-to-date timestamp", function () {
-    const epoch = Date.UTC(2020, 0);
     const g = new Scru128Generator();
     for (let i = 0; i < 10_000; i++) {
-      const tsNow = Date.now() - epoch;
+      const tsNow = Date.now();
       const timestamp = g.generate().timestamp;
       assert(Math.abs(tsNow - timestamp) < 16);
     }
   });
 
-  it("encodes unique sortable pair of timestamp and counter", function () {
+  it("encodes unique sortable tuple of timestamp and counters", function () {
     let prev = Scru128Id.fromString(samples[0]);
     for (let i = 1; i < samples.length; i++) {
       const curr = Scru128Id.fromString(samples[i]);
       assert(
         prev.timestamp < curr.timestamp ||
-          (prev.timestamp === curr.timestamp && prev.counter < curr.counter)
+          (prev.timestamp === curr.timestamp &&
+            prev.counterHi < curr.counterHi) ||
+          (prev.timestamp === curr.timestamp &&
+            prev.counterHi === curr.counterHi &&
+            prev.counterLo < curr.counterLo)
       );
       prev = curr;
     }
   });
 
-  it("generates no IDs sharing same timestamp and counter by multiple async functions", async function () {
+  it("generates no IDs sharing same timestamp and counters by multiple async functions", async function () {
     const q = [];
     const producers = [];
     for (let i = 0; i < 4 * 10_000; i++) {
@@ -64,7 +67,9 @@ describe("scru128String()", function () {
 
     await Promise.all(producers);
 
-    const s = new Set(q.map((e) => `${e.timestamp}-${e.counter}`));
+    const s = new Set(
+      q.map((e) => `${e.timestamp}-${e.counterHi}-${e.counterLo}`)
+    );
     assert(s.size === 4 * 10_000);
   });
 });

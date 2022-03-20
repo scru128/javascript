@@ -7,11 +7,11 @@
  *
  * // generate a new identifier object
  * const x = scru128();
- * console.log(String(x)); // e.g. "00S6GVKR1MH58KE72EJD87SDOO"
+ * console.log(String(x)); // e.g. "036Z951MHJIKZIK2GSL81GR7L"
  * console.log(BigInt(x.toHex())); // as a 128-bit unsigned integer
  *
  * // generate a textual representation directly
- * console.log(scru128String()); // e.g. "00S6GVKR3F7R79I72EJF0J4RGC"
+ * console.log(scru128String()); // e.g. "036Z951MHZX67T63MQ9XE6Q0J"
  * ```
  *
  * @packageDocumentation
@@ -19,19 +19,16 @@
 
 import { randomFillSync } from "crypto";
 
-/** Unix time in milliseconds at 2020-01-01 00:00:00+00:00. */
-export const TIMESTAMP_BIAS = 1577836800000; // Date.UTC(2020, 0)
+/** Maximum value of 24-bit `counter_hi` field. */
+const MAX_COUNTER_HI = 0xff_ffff;
 
-/** Maximum value of 28-bit counter field. */
-const MAX_COUNTER = 0xfff_ffff;
+/** Maximum value of 24-bit `counter_lo` field. */
+const MAX_COUNTER_LO = 0xff_ffff;
 
-/** Maximum value of 24-bit per_sec_random field. */
-const MAX_PER_SEC_RANDOM = 0xff_ffff;
+/** Digit characters used in the Base36 notation. */
+const DIGITS = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
-/** Digit characters used in the base 32 notation. */
-const DIGITS = "0123456789ABCDEFGHIJKLMNOPQRSTUV";
-
-/** O(1) map from ASCII code points to base 32 digit values. */
+/** O(1) map from ASCII code points to Base36 digit values. */
 const DECODE_MAP = [
   0x7f, 0x7f, 0x7f, 0x7f, 0x7f, 0x7f, 0x7f, 0x7f, 0x7f, 0x7f, 0x7f, 0x7f, 0x7f,
   0x7f, 0x7f, 0x7f, 0x7f, 0x7f, 0x7f, 0x7f, 0x7f, 0x7f, 0x7f, 0x7f, 0x7f, 0x7f,
@@ -39,134 +36,162 @@ const DECODE_MAP = [
   0x7f, 0x7f, 0x7f, 0x7f, 0x7f, 0x7f, 0x7f, 0x7f, 0x7f, 0x00, 0x01, 0x02, 0x03,
   0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x7f, 0x7f, 0x7f, 0x7f, 0x7f, 0x7f, 0x7f,
   0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f, 0x10, 0x11, 0x12, 0x13, 0x14, 0x15, 0x16,
-  0x17, 0x18, 0x19, 0x1a, 0x1b, 0x1c, 0x1d, 0x1e, 0x1f, 0x7f, 0x7f, 0x7f, 0x7f,
+  0x17, 0x18, 0x19, 0x1a, 0x1b, 0x1c, 0x1d, 0x1e, 0x1f, 0x20, 0x21, 0x22, 0x23,
   0x7f, 0x7f, 0x7f, 0x7f, 0x7f, 0x7f, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f, 0x10,
   0x11, 0x12, 0x13, 0x14, 0x15, 0x16, 0x17, 0x18, 0x19, 0x1a, 0x1b, 0x1c, 0x1d,
-  0x1e, 0x1f, 0x7f, 0x7f, 0x7f, 0x7f, 0x7f, 0x7f, 0x7f, 0x7f, 0x7f,
+  0x1e, 0x1f, 0x20, 0x21, 0x22, 0x23, 0x7f, 0x7f, 0x7f, 0x7f, 0x7f,
 ];
 
 /**
- * Represents a SCRU128 ID and provides various converters and comparison
- * operators.
+ * Represents a SCRU128 ID and provides converters and comparison operators.
  *
  * @example
  * ```javascript
  * import { Scru128Id } from "scru128";
  *
- * const x = Scru128Id.fromString("00Q1D9AB6DTJNLJ80SJ42SNJ4F");
+ * const x = Scru128Id.fromString("036Z968FU2TUGY7SVKFZNEWKK");
  * console.log(String(x));
  *
- * const y = Scru128Id.fromHex(0xd05a952ccdecef5aa01c9904e5a115n.toString(16));
+ * const y = Scru128Id.fromHex(0x017fa1de51a80fd992f9e8cc2d5eb88en.toString(16));
  * console.log(BigInt(y.toHex()));
  * ```
  */
 export class Scru128Id {
-  /** Creates an object from field values. */
-  private constructor(
-    readonly timestamp: number,
-    readonly counter: number,
-    readonly perSecRandom: number,
-    readonly perGenRandom: number
-  ) {
-    if (
-      !Number.isInteger(this.timestamp) ||
-      !Number.isInteger(this.counter) ||
-      !Number.isInteger(this.perSecRandom) ||
-      !Number.isInteger(this.perGenRandom) ||
-      this.timestamp < 0 ||
-      this.counter < 0 ||
-      this.perSecRandom < 0 ||
-      this.perGenRandom < 0 ||
-      this.timestamp > 0xfff_ffff_ffff ||
-      this.counter > MAX_COUNTER ||
-      this.perSecRandom > MAX_PER_SEC_RANDOM ||
-      this.perGenRandom > 0xffff_ffff
-    ) {
-      throw new RangeError("invalid field value");
+  /** Creates an object from four 32-bit words. */
+  private constructor(private readonly words: Uint32Array) {
+    if (words.length !== 4) {
+      throw new TypeError("invalid number of words: " + words.length);
     }
   }
 
   /**
    * Creates an object from field values.
    *
-   * @param timestamp - 44-bit millisecond timestamp field value.
-   * @param counter - 28-bit per-timestamp monotonic counter field value.
-   * @param perSecRandom - 24-bit per-second randomness field value.
-   * @param perGenRandom - 32-bit per-generation randomness field value.
+   * @param timestamp - 48-bit `timestamp` field value.
+   * @param counterHi - 24-bit `counter_hi` field value.
+   * @param counterLo - 24-bit `counter_lo` field value.
+   * @param entropy - 32-bit `entropy` field value.
    * @throws RangeError if any argument is out of the value range of the field.
    * @category Conversion
    */
   static fromFields(
     timestamp: number,
-    counter: number,
-    perSecRandom: number,
-    perGenRandom: number
+    counterHi: number,
+    counterLo: number,
+    entropy: number
   ): Scru128Id {
-    return new Scru128Id(timestamp, counter, perSecRandom, perGenRandom);
+    if (
+      !Number.isInteger(timestamp) ||
+      !Number.isInteger(counterHi) ||
+      !Number.isInteger(counterLo) ||
+      !Number.isInteger(entropy) ||
+      timestamp < 0 ||
+      counterHi < 0 ||
+      counterLo < 0 ||
+      entropy < 0 ||
+      timestamp > 0xffff_ffff_ffff ||
+      counterHi > MAX_COUNTER_HI ||
+      counterLo > MAX_COUNTER_LO ||
+      entropy > 0xffff_ffff
+    ) {
+      throw new RangeError("invalid field value");
+    }
+
+    const words = new Uint32Array(4);
+    words[0] = Math.trunc(timestamp / 0x1_0000);
+    words[1] = (timestamp & 0xffff) * 0x1_0000 + (counterHi >>> 8);
+    words[2] = (counterHi & 0xff) * 0x100_0000 + counterLo;
+    words[3] = entropy;
+    return new Scru128Id(words);
+  }
+
+  /** Returns the 48-bit `timestamp` field value. */
+  get timestamp(): number {
+    return this.words[0] * 0x1_0000 + (this.words[1] >>> 16);
+  }
+
+  /** Returns the 24-bit `counter_hi` field value. */
+  get counterHi(): number {
+    return (this.words[1] * 0x100 + (this.words[2] >>> 24)) & MAX_COUNTER_HI;
+  }
+
+  /** Returns the 24-bit `counter_lo` field value. */
+  get counterLo(): number {
+    return this.words[2] & MAX_COUNTER_LO;
+  }
+
+  /** Returns the 32-bit `entropy` field value. */
+  get entropy(): number {
+    return this.words[3];
   }
 
   /**
-   * Creates an object from a 26-digit string representation.
+   * Creates an object from a 25-digit string representation.
    *
    * @throws SyntaxError if the argument is not a valid string representation.
    * @category Conversion
    */
   static fromString(value: string): Scru128Id {
-    if (value.length !== 26) {
-      throw new SyntaxError("invalid string representation");
+    if (value.length !== 25) {
+      throw new SyntaxError("invalid length: " + value.length);
     }
 
-    const n0 = DECODE_MAP[value.charCodeAt(0)] ?? 0x7f;
-    const n1 = DECODE_MAP[value.charCodeAt(1)] ?? 0x7f;
-    if (n0 > 7 || n1 === 0x7f) {
-      throw new SyntaxError("invalid string representation");
-    }
-
-    const hi8 = (n0 << 5) | n1;
-    const lo30s = [0, 0, 0, 0];
-    for (let i = 0; i < 4; i++) {
-      for (let j = 0; j < 6; j++) {
-        const n = DECODE_MAP[value.charCodeAt(2 + i * 6 + j)] ?? 0x7f;
-        if (n === 0x7f) {
-          throw new SyntaxError("invalid string representation");
-        }
-        lo30s[i] = (lo30s[i] << 5) | n;
+    const src = new Uint8Array(25);
+    for (let i = 0; i < 25; i++) {
+      src[i] = DECODE_MAP[value.charCodeAt(i)] ?? 0x7f;
+      if (src[i] === 0x7f) {
+        throw new SyntaxError("invalid digit: " + value.charAt(i));
       }
     }
 
-    return new Scru128Id(
-      hi8 * 0x10_0000_0000 + lo30s[0] * 0x40 + (lo30s[1] >>> 24),
-      ((lo30s[1] & 0xff_ffff) << 4) | (lo30s[2] >>> 26),
-      (lo30s[2] >>> 2) & MAX_PER_SEC_RANDOM,
-      (lo30s[2] & 0b11) * 0x4000_0000 + lo30s[3]
-    );
+    const dst = new Uint32Array(4);
+    let minIndex = 99; // any number greater than size of output array
+    for (let carry of src) {
+      // iterate over output array from right to left while carry != 0 but at
+      // least up to place already filled
+      let i = dst.length - 1;
+      for (; carry > 0 || i > minIndex; i--) {
+        if (i < 0) {
+          throw new SyntaxError("out of 128-bit value range");
+        }
+        carry += dst[i] * 36;
+        const quo = Math.trunc(carry / 0x1_0000_0000);
+        dst[i] = carry - quo * 0x1_0000_0000; // remainder
+        carry = quo;
+      }
+      minIndex = i;
+    }
+
+    return new Scru128Id(dst);
   }
 
   /**
-   * Returns the 26-digit canonical string representation.
+   * Returns the 25-digit canonical string representation.
    *
    * @category Conversion
    */
   toString(): string {
-    const hi8 = Math.trunc(this.timestamp / 0x10_0000_0000);
-    const lo30s = [
-      (this.timestamp / 0x40) & 0x3fff_ffff,
-      (this.timestamp % 0x40 << 24) | (this.counter >>> 4),
-      ((this.counter & 0xf) << 26) |
-        (this.perSecRandom << 2) |
-        (this.perGenRandom >>> 30),
-      this.perGenRandom & 0x3fff_ffff,
-    ];
-
-    let buffer = "";
-    for (let i = 0; i < 4; i++) {
-      let n = lo30s[3 - i];
-      for (let j = 0; j < 6; j++) {
-        buffer = DIGITS.charAt(n & 31) + buffer;
-        n >>>= 5;
+    const dst = new Uint8Array(25);
+    let minIndex = 99; // any number greater than size of output array
+    for (let carry of this.words) {
+      // iterate over output array from right to left while carry != 0 but at
+      // least up to place already filled
+      let i = dst.length - 1;
+      for (; carry > 0 || i > minIndex; i--) {
+        // console.assert(i >= 0);
+        carry += dst[i] * 0x1_0000_0000;
+        const quo = Math.trunc(carry / 36);
+        dst[i] = carry - quo * 36; // remainder
+        carry = quo;
       }
+      minIndex = i;
     }
-    return DIGITS.charAt(hi8 >>> 5) + DIGITS.charAt(hi8 & 31) + buffer;
+
+    let text = "";
+    for (let d of dst) {
+      text += DIGITS[d];
+    }
+    return text;
   }
 
   /**
@@ -183,13 +208,12 @@ export class Scru128Id {
       throw new RangeError("not a 128-bit byte array");
     }
 
-    const view = new DataView(value);
-    return new Scru128Id(
-      view.getUint32(0) * 0x1000 + (view.getUint16(4) >>> 4),
-      view.getUint32(5) & MAX_COUNTER,
-      view.getUint32(8) & MAX_PER_SEC_RANDOM,
-      view.getUint32(12)
-    );
+    const src = new DataView(value);
+    const dst = new Uint32Array(4);
+    for (let i = 0; i < 4; i++) {
+      dst[i] = src.getUint32(i * 4);
+    }
+    return new Scru128Id(dst);
   }
 
   /**
@@ -199,13 +223,11 @@ export class Scru128Id {
    * @category Conversion
    */
   toArrayBuffer(): ArrayBuffer {
-    const view = new DataView(new ArrayBuffer(16));
-    view.setUint32(12, this.perGenRandom);
-    view.setUint32(8, this.perSecRandom);
-    view.setUint32(5, this.counter);
-    view.setUint16(4, (this.timestamp % 0x1000 << 4) | (this.counter >>> 24));
-    view.setUint32(0, this.timestamp / 0x1000);
-    return view.buffer;
+    const dst = new DataView(new ArrayBuffer(16));
+    for (let i = 0; i < 4; i++) {
+      dst.setUint32(i * 4, this.words[i]);
+    }
+    return dst.buffer;
   }
 
   /**
@@ -219,15 +241,15 @@ export class Scru128Id {
   static fromHex(value: string): Scru128Id {
     const m = value.match(/^(?:0x)?0*(0|[1-9a-f][0-9a-f]*)$/i);
     if (m === null || m[1].length > 32) {
-      throw new SyntaxError("invalid hexadecimal integer: " + value);
+      throw new SyntaxError("invalid hexadecimal integer");
     }
 
-    return new Scru128Id(
-      parseInt(m[1].slice(-32, -21) || "0", 16),
-      parseInt(m[1].slice(-21, -14) || "0", 16),
-      parseInt(m[1].slice(-14, -8) || "0", 16),
-      parseInt(m[1].slice(-8) || "0", 16)
-    );
+    const words = new Uint32Array(4);
+    words[0] = parseInt(m[1].slice(-32, -24) || "0", 16);
+    words[1] = parseInt(m[1].slice(-24, -16) || "0", 16);
+    words[2] = parseInt(m[1].slice(-16, -8) || "0", 16);
+    words[3] = parseInt(m[1].slice(-8) || "0", 16);
+    return new Scru128Id(words);
   }
 
   /**
@@ -237,28 +259,21 @@ export class Scru128Id {
    * @category Conversion
    */
   toHex(): string {
-    return (
-      "0x" +
-      ("000000000000" + this.timestamp.toString(16)).slice(-11) +
-      ("000000000000" + this.counter.toString(16)).slice(-7) +
-      ("000000000000" + this.perSecRandom.toString(16)).slice(-6) +
-      ("000000000000" + this.perGenRandom.toString(16)).slice(-8)
-    );
+    let text = "0x";
+    for (let e of this.words) {
+      text += ("0000000" + e.toString(16)).slice(-8);
+    }
+    return text;
   }
 
-  /** Represents `this` in JSON as a 26-digit canonical string. */
+  /** Represents `this` in JSON as a 25-digit canonical string. */
   toJSON(): string {
     return this.toString();
   }
 
   /** Creates an object from `this`. */
   clone(): Scru128Id {
-    return new Scru128Id(
-      this.timestamp,
-      this.counter,
-      this.perSecRandom,
-      this.perGenRandom
-    );
+    return new Scru128Id(this.words.slice(0));
   }
 
   /** Returns true if `this` is equivalent to `other`. */
@@ -271,37 +286,15 @@ export class Scru128Id {
    * than, equal to, or greater than `other`, respectively.
    */
   compareTo(other: Scru128Id): number {
-    return Math.sign(
-      this.timestamp - other.timestamp ||
-        this.counter - other.counter ||
-        this.perSecRandom - other.perSecRandom ||
-        this.perGenRandom - other.perGenRandom
-    );
+    for (let i = 0; i < 4; i++) {
+      const diff = this.words[i] - other.words[i];
+      if (diff !== 0) {
+        return Math.sign(diff);
+      }
+    }
+    return 0;
   }
 }
-
-/** Logger object used in the package. */
-let logger:
-  | {
-      error: (message: string) => void;
-      warn: (message: string) => void;
-      info: (message: string) => void;
-    }
-  | undefined = undefined;
-
-/**
- * Specifies the logger object used in the package.
- *
- * Logging is disabled by default. Set a logger object to enable logging. The
- * interface is compatible with the console object.
- */
-export const setLogger = (newLogger: {
-  error: (message: string) => void;
-  warn: (message: string) => void;
-  info: (message: string) => void;
-}): void => {
-  logger = newLogger;
-};
 
 /** Returns a random number generator based on available cryptographic RNG. */
 const detectRng = (): (() => number) => {
@@ -332,9 +325,6 @@ const detectRng = (): (() => number) => {
       return buffer[cursor++];
     };
   } else {
-    logger?.warn(
-      "scru128: fell back on Math.random() as no cryptographic RNG was detected"
-    );
     return () =>
       Math.trunc(Math.random() * 0x1_0000) * 0x1_0000 +
       Math.trunc(Math.random() * 0x1_0000);
@@ -342,8 +332,8 @@ const detectRng = (): (() => number) => {
 };
 
 /**
- * Represents a SCRU128 ID generator that encapsulates the monotonic counter and
- * other internal states.
+ * Represents a SCRU128 ID generator that encapsulates the monotonic counters
+ * and other internal states.
  *
  * @example
  * ```javascript
@@ -356,22 +346,18 @@ const detectRng = (): (() => number) => {
  * ```
  */
 export class Scru128Generator {
-  /** Timestamp at last generation. */
-  private tsLastGen = 0;
+  private timestamp = 0;
+  private counterHi = 0;
+  private counterLo = 0;
 
-  /** Counter at last generation. */
-  private counter = 0;
+  /** Timestamp at the last renewal of `counter_hi` field. */
+  private tsCounterHi = 0;
 
-  /** Timestamp at last renewal of perSecRandom. */
-  private tsLastSec = 0;
-
-  /** Per-second random value at last generation. */
-  private perSecRandom = 0;
-
-  /** Maximum number of checking the system clock until it goes forward. */
-  private nClockCheckMax = 1_000_000;
-
+  /** Random number generator used by the generator. */
   private rng: { nextUint32: () => number };
+
+  /** Logger object used by the generator. */
+  private logger = { warn: (message: string): void => {} };
 
   /**
    * Creates a generator object with the default random number generator, or
@@ -387,41 +373,62 @@ export class Scru128Generator {
 
   /** Generates a new SCRU128 ID object. */
   generate(): Scru128Id {
-    // update timestamp and counter
-    let tsNow = Date.now();
-    if (tsNow > this.tsLastGen) {
-      this.tsLastGen = tsNow;
-      this.counter = this.rng.nextUint32() >>> 4;
-    } else if (++this.counter > MAX_COUNTER) {
-      logger?.info(
-        "scru128: counter limit reached; will wait until clock goes forward"
-      );
-      let nClockCheck = 0;
-      while (tsNow <= this.tsLastGen) {
-        tsNow = Date.now();
-        if (++nClockCheck > this.nClockCheckMax) {
-          logger?.warn("scru128: reset state as clock did not go forward");
-          this.tsLastSec = 0;
-          break;
+    const ts = Date.now();
+    if (ts > this.timestamp) {
+      this.timestamp = ts;
+      this.counterLo = this.rng.nextUint32() & MAX_COUNTER_LO;
+      if (ts - this.tsCounterHi >= 1000) {
+        this.tsCounterHi = ts;
+        this.counterHi = this.rng.nextUint32() & MAX_COUNTER_HI;
+      }
+    } else {
+      this.counterLo++;
+      if (this.counterLo > MAX_COUNTER_LO) {
+        this.counterLo = 0;
+        this.counterHi++;
+        if (this.counterHi > MAX_COUNTER_HI) {
+          this.counterHi = 0;
+          this.handleCounterOverflow();
+          return this.generate();
         }
       }
-
-      this.tsLastGen = tsNow;
-      this.counter = this.rng.nextUint32() >>> 4;
-    }
-
-    // update perSecRandom
-    if (this.tsLastGen - this.tsLastSec > 1000) {
-      this.tsLastSec = this.tsLastGen;
-      this.perSecRandom = this.rng.nextUint32() >>> 8;
     }
 
     return Scru128Id.fromFields(
-      this.tsLastGen - TIMESTAMP_BIAS,
-      this.counter,
-      this.perSecRandom,
+      this.timestamp,
+      this.counterHi,
+      this.counterLo,
       this.rng.nextUint32()
     );
+  }
+
+  /**
+   * Defines the behavior on counter overflow.
+   *
+   * Currently, this method busy-waits for the next clock tick and, if the clock
+   * does not move forward for a while, reinitializes the generator state.
+   */
+  private handleCounterOverflow(): void {
+    this.logger.warn("counter overflowing; will wait for next clock tick");
+    this.tsCounterHi = 0;
+    for (let i = 0; i < 1_000_000; i++) {
+      if (Date.now() > this.timestamp) {
+        return;
+      }
+    }
+    this.logger.warn("reset state as clock did not move for a while");
+    this.timestamp = 0;
+  }
+
+  /**
+   * Specifies the logger object used by the generator.
+   *
+   * Logging is disabled by default. Set a logger object to enable logging. The
+   * interface is compatible with the console object.
+   */
+  setLogger(logger: { warn: (message: string) => void }): this {
+    this.logger = logger;
+    return this;
   }
 }
 
@@ -436,7 +443,7 @@ export const scru128 = (): Scru128Id =>
  *
  * Use this function to quickly get a new SCRU128 ID as a string.
  *
- * @returns 26-digit canonical string representation.
+ * @returns 25-digit canonical string representation.
  * @example
  * ```javascript
  * import { scru128String } from "scru128";
