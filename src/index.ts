@@ -373,6 +373,27 @@ export class Scru128Generator {
 
   /** Generates a new SCRU128 ID object. */
   generate(): Scru128Id {
+    while (true) {
+      try {
+        return this.generateCore();
+      } catch (e) {
+        if (e instanceof CounterOverflowError) {
+          this.handleCounterOverflow();
+        } else {
+          throw e;
+        }
+      }
+    }
+  }
+
+  /**
+   * Generates a new SCRU128 ID object, while delegating the caller to take care
+   * of counter overflows.
+   *
+   * @throws CounterOverflowError when the `counter_hi` and `counter_lo` fields
+   * can no more be incremented.
+   */
+  private generateCore(): Scru128Id {
     const ts = Date.now();
     if (ts > this.timestamp) {
       this.timestamp = ts;
@@ -388,8 +409,7 @@ export class Scru128Generator {
         this.counterHi++;
         if (this.counterHi > MAX_COUNTER_HI) {
           this.counterHi = 0;
-          this.handleCounterOverflow();
-          return this.generate();
+          throw new CounterOverflowError();
         }
       }
     }
@@ -431,6 +451,9 @@ export class Scru128Generator {
     return this;
   }
 }
+
+/** Error thrown when the monotonic counters can no more be incremented. */
+class CounterOverflowError {}
 
 let defaultGenerator: Scru128Generator | undefined;
 
