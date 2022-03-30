@@ -5,6 +5,8 @@ const assert = (expression, message = "") => {
   }
 };
 
+globalThis.SCRU128_DENY_WEAK_RNG = true;
+
 describe("scru128()", function () {
   it("returns a Scru128Id object", function () {
     const obj = scru128();

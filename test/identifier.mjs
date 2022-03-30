@@ -5,6 +5,8 @@ const assert = (expression, message = "") => {
   }
 };
 
+globalThis.SCRU128_DENY_WEAK_RNG = true;
+
 describe("Scru128Id", function () {
   const MAX_UINT48 = 2 ** 48 - 1;
   const MAX_UINT24 = 2 ** 24 - 1;

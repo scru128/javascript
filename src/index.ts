@@ -296,41 +296,6 @@ export class Scru128Id {
   }
 }
 
-/** Returns a random number generator based on available cryptographic RNG. */
-const detectRng = (): (() => number) => {
-  // use small buffer to improve throughput while avoiding waste of time and
-  // space for unused buffer contents
-  const BUFFER_SIZE = 8;
-
-  if (typeof window !== "undefined" && window.crypto) {
-    // Web Crypto API on browsers
-    const buffer = new Uint32Array(BUFFER_SIZE);
-    let cursor = BUFFER_SIZE;
-    return () => {
-      if (cursor >= BUFFER_SIZE) {
-        window.crypto.getRandomValues(buffer);
-        cursor = 0;
-      }
-      return buffer[cursor++];
-    };
-  } else if (randomFillSync) {
-    // Node.js Crypto
-    const buffer = new Uint32Array(BUFFER_SIZE);
-    let cursor = BUFFER_SIZE;
-    return () => {
-      if (cursor >= BUFFER_SIZE) {
-        randomFillSync(buffer);
-        cursor = 0;
-      }
-      return buffer[cursor++];
-    };
-  } else {
-    return () =>
-      Math.trunc(Math.random() * 0x1_0000) * 0x1_0000 +
-      Math.trunc(Math.random() * 0x1_0000);
-  }
-};
-
 /**
  * Represents a SCRU128 ID generator that encapsulates the monotonic counters
  * and other internal states.
@@ -368,7 +333,7 @@ export class Scru128Generator {
     /** Returns a 32-bit random unsigned integer. */
     nextUint32: () => number;
   }) {
-    this.rng = randomNumberGenerator || { nextUint32: detectRng() };
+    this.rng = randomNumberGenerator || new DefaultRandom();
   }
 
   /** Generates a new SCRU128 ID object. */
@@ -449,6 +414,49 @@ export class Scru128Generator {
   setLogger(logger: { warn: (message: string) => void }): this {
     this.logger = logger;
     return this;
+  }
+}
+
+/** A global flag to force use of cryptographically strong RNG. */
+declare const SCRU128_DENY_WEAK_RNG: boolean;
+
+/** Stores `crypto.getRandomValues()` available in the environment. */
+let getRandomValues: (buffer: Uint32Array) => Uint32Array = (buffer) => {
+  // fall back on Math.random() unless the flag is set to true
+  if (typeof SCRU128_DENY_WEAK_RNG !== "undefined" && SCRU128_DENY_WEAK_RNG) {
+    throw new Error("no cryptographically strong RNG available");
+  }
+
+  for (let i = 0; i < buffer.length; i++) {
+    buffer[i] =
+      Math.trunc(Math.random() * 0x1_0000) * 0x1_0000 +
+      Math.trunc(Math.random() * 0x1_0000);
+  }
+  return buffer;
+};
+
+if (typeof crypto !== "undefined" && crypto.getRandomValues) {
+  // Web Crypto API
+  getRandomValues = (buffer) => crypto.getRandomValues(buffer);
+} else if (randomFillSync) {
+  // Node.js Crypto
+  getRandomValues = randomFillSync;
+}
+
+/**
+ * Wraps `crypto.getRandomValues()` and compatibles to enable buffering; this
+ * uses a small buffer by default to avoid unbearable throughput decline in some
+ * environments as well as the waste of time and space for unused values.
+ */
+class DefaultRandom {
+  private readonly buffer = new Uint32Array(8);
+  private cursor = Infinity;
+  nextUint32(): number {
+    if (this.cursor >= this.buffer.length) {
+      getRandomValues(this.buffer);
+      this.cursor = 0;
+    }
+    return this.buffer[this.cursor++];
   }
 }
 
