@@ -10,6 +10,7 @@
   24 bits, `counter_lo`: 24 bits, `entropy`: 32 bits }
 - Timestamp epoch: 2020-01-01 00:00:00.000 UTC -> 1970-01-01 00:00:00.000 UTC
 - Custom logger: package-wide configuration -> per-generator configuration
+- Dual packaging method: CommonJS + ESM wrapper -> native ESM + isolate CommonJS
 
 ### Added
 
@@ -21,6 +22,10 @@
 - `TIMESTAMP_BIAS`
 - `Scru128Id#counter`, `Scru128Id#perSecRandom`, `Scru128Id#perGenRandom`
 - `setLogger()`
+
+### Deprecated
+
+- CommonJS entry points
 
 ## v1.0.1 - 2022-03-15
 

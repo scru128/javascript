@@ -16,6 +16,8 @@ decentralized, globally unique time-ordered identifiers. SCRU128 is inspired by
 
 ```javascript
 import { scru128, scru128String } from "scru128";
+// or on browsers:
+// import { scru128, scru128String } from "https://unpkg.com/scru128@^2";
 
 // generate a new identifier object
 const x = scru128();

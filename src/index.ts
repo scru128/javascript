@@ -4,6 +4,8 @@
  * @example
  * ```javascript
  * import { scru128, scru128String } from "scru128";
+ * // or on browsers:
+ * // import { scru128, scru128String } from "https://unpkg.com/scru128@^2";
  *
  * // generate a new identifier object
  * const x = scru128();
@@ -16,8 +18,6 @@
  *
  * @packageDocumentation
  */
-
-import { randomFillSync } from "crypto";
 
 /** Maximum value of 24-bit `counter_hi` field. */
 const MAX_COUNTER_HI = 0xff_ffff;
@@ -435,13 +435,17 @@ let getRandomValues: (buffer: Uint32Array) => Uint32Array = (buffer) => {
   return buffer;
 };
 
+// detect Web Crypto API
 if (typeof crypto !== "undefined" && crypto.getRandomValues) {
-  // Web Crypto API
   getRandomValues = (buffer) => crypto.getRandomValues(buffer);
-} else if (randomFillSync) {
-  // Node.js Crypto
-  getRandomValues = randomFillSync;
 }
+
+/** @internal */
+export const _setRandom = (
+  rand: <T extends Uint8Array | Uint16Array | Uint32Array>(buffer: T) => T
+) => {
+  getRandomValues = rand;
+};
 
 /**
  * Wraps `crypto.getRandomValues()` and compatibles to enable buffering; this
