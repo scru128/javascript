@@ -93,7 +93,6 @@ describe("Scru128Id", function () {
 
     for (const e of cases) {
       assert(Scru128Id.fromString(e.toString()).equals(e));
-      assert(Scru128Id.fromArrayBuffer(e.toArrayBuffer()).equals(e));
       assert(Scru128Id.fromHex(e.toHex()).equals(e));
       assert(
         Scru128Id.fromFields(
@@ -103,6 +102,12 @@ describe("Scru128Id", function () {
           e.entropy
         ).equals(e)
       );
+
+      const arrayBuffer = e.toArrayBuffer();
+      const fromArrayBuffer = Scru128Id.fromArrayBuffer(arrayBuffer);
+      assert(fromArrayBuffer.equals(e));
+      assert(arrayBuffer != e.bytes.buffer);
+      assert(arrayBuffer != fromArrayBuffer.bytes.buffer);
     }
   });
 
@@ -138,6 +143,8 @@ describe("Scru128Id", function () {
       assert(clone.equals(curr));
       assert(curr.compareTo(clone) === 0);
       assert(clone.compareTo(curr) === 0);
+      assert(curr.bytes.buffer != clone.bytes.buffer);
+      assert(clone.bytes.buffer != curr.bytes.buffer);
 
       prev = curr;
     }

@@ -57,10 +57,10 @@ const DECODE_MAP = [
  * ```
  */
 export class Scru128Id {
-  /** Creates an object from four 32-bit words. */
-  private constructor(private readonly words: Uint32Array) {
-    if (words.length !== 4) {
-      throw new TypeError("invalid number of words: " + words.length);
+  /** Creates an object from a 16-byte byte array. */
+  private constructor(private readonly bytes: Uint8Array) {
+    if (bytes.length !== 16) {
+      throw new TypeError("invalid length of byte array: " + bytes.length);
     }
   }
 
@@ -97,32 +97,44 @@ export class Scru128Id {
       throw new RangeError("invalid field value");
     }
 
-    const words = new Uint32Array(4);
-    words[0] = Math.trunc(timestamp / 0x1_0000);
-    words[1] = (timestamp & 0xffff) * 0x1_0000 + (counterHi >>> 8);
-    words[2] = (counterHi & 0xff) * 0x100_0000 + counterLo;
-    words[3] = entropy;
-    return new Scru128Id(words);
+    const bytes = new Uint8Array(16);
+    bytes[0] = timestamp / 0x100_0000_0000;
+    bytes[1] = timestamp / 0x1_0000_0000;
+    bytes[2] = timestamp >>> 24;
+    bytes[3] = timestamp >>> 16;
+    bytes[4] = timestamp >>> 8;
+    bytes[5] = timestamp;
+    bytes[6] = counterHi >>> 16;
+    bytes[7] = counterHi >>> 8;
+    bytes[8] = counterHi;
+    bytes[9] = counterLo >>> 16;
+    bytes[10] = counterLo >>> 8;
+    bytes[11] = counterLo;
+    bytes[12] = entropy >>> 24;
+    bytes[13] = entropy >>> 16;
+    bytes[14] = entropy >>> 8;
+    bytes[15] = entropy;
+    return new Scru128Id(bytes);
   }
 
   /** Returns the 48-bit `timestamp` field value. */
   get timestamp(): number {
-    return this.words[0] * 0x1_0000 + (this.words[1] >>> 16);
+    return this.subUint(0, 6);
   }
 
   /** Returns the 24-bit `counter_hi` field value. */
   get counterHi(): number {
-    return (this.words[1] * 0x100 + (this.words[2] >>> 24)) & MAX_COUNTER_HI;
+    return this.subUint(6, 9);
   }
 
   /** Returns the 24-bit `counter_lo` field value. */
   get counterLo(): number {
-    return this.words[2] & MAX_COUNTER_LO;
+    return this.subUint(9, 12);
   }
 
   /** Returns the 32-bit `entropy` field value. */
   get entropy(): number {
-    return this.words[3];
+    return this.subUint(12, 16);
   }
 
   /**
@@ -144,22 +156,28 @@ export class Scru128Id {
       }
     }
 
-    const dst = new Uint32Array(4);
+    const dst = new Uint8Array(16);
     let minIndex = 99; // any number greater than size of output array
-    for (let carry of src) {
+    for (let i = -7; i < 25; i += 8) {
+      // implement Base36 using 8-digit words
+      let carry = 0;
+      for (let j = i < 0 ? 0 : i; j < i + 8; j++) {
+        carry = carry * 36 + src[j];
+      }
+
       // iterate over output array from right to left while carry != 0 but at
       // least up to place already filled
-      let i = dst.length - 1;
-      for (; carry > 0 || i > minIndex; i--) {
-        if (i < 0) {
+      let j = dst.length - 1;
+      for (; carry > 0 || j > minIndex; j--) {
+        if (j < 0) {
           throw new SyntaxError("out of 128-bit value range");
         }
-        carry += dst[i] * 36;
-        const quo = Math.trunc(carry / 0x1_0000_0000);
-        dst[i] = carry - quo * 0x1_0000_0000; // remainder
+        carry += dst[j] * 2821109907456; // 36 ** 8
+        const quo = Math.trunc(carry / 0x100);
+        dst[j] = carry & 0xff; // remainder
         carry = quo;
       }
-      minIndex = i;
+      minIndex = j;
     }
 
     return new Scru128Id(dst);
@@ -173,23 +191,26 @@ export class Scru128Id {
   toString(): string {
     const dst = new Uint8Array(25);
     let minIndex = 99; // any number greater than size of output array
-    for (let carry of this.words) {
+    for (let i = -4; i < 16; i += 5) {
+      // implement Base36 using 40-bit words
+      let carry = this.subUint(i < 0 ? 0 : i, i + 5);
+
       // iterate over output array from right to left while carry != 0 but at
       // least up to place already filled
-      let i = dst.length - 1;
-      for (; carry > 0 || i > minIndex; i--) {
-        // console.assert(i >= 0);
-        carry += dst[i] * 0x1_0000_0000;
+      let j = dst.length - 1;
+      for (; carry > 0 || j > minIndex; j--) {
+        // console.assert(j >= 0);
+        carry += dst[j] * 0x100_0000_0000;
         const quo = Math.trunc(carry / 36);
-        dst[i] = carry - quo * 36; // remainder
+        dst[j] = carry - quo * 36; // remainder
         carry = quo;
       }
-      minIndex = i;
+      minIndex = j;
     }
 
     let text = "";
     for (let d of dst) {
-      text += DIGITS[d];
+      text += DIGITS.charAt(d);
     }
     return text;
   }
@@ -200,20 +221,15 @@ export class Scru128Id {
    *
    * @param value - 16-byte buffer that represents a 128-bit unsigned integer in
    * the big-endian (network) byte order.
-   * @throws RangeError if the byte length of the argument is not 16.
+   * @throws TypeError if the byte length of the argument is not 16.
    * @category Conversion
    */
   static fromArrayBuffer(value: ArrayBuffer): Scru128Id {
     if (value.byteLength !== 16) {
-      throw new RangeError("not a 128-bit byte array");
+      throw new TypeError("invalid length of byte array: " + value.byteLength);
     }
 
-    const src = new DataView(value);
-    const dst = new Uint32Array(4);
-    for (let i = 0; i < 4; i++) {
-      dst[i] = src.getUint32(i * 4);
-    }
-    return new Scru128Id(dst);
+    return new Scru128Id(new Uint8Array(value.slice(0)));
   }
 
   /**
@@ -223,11 +239,7 @@ export class Scru128Id {
    * @category Conversion
    */
   toArrayBuffer(): ArrayBuffer {
-    const dst = new DataView(new ArrayBuffer(16));
-    for (let i = 0; i < 4; i++) {
-      dst.setUint32(i * 4, this.words[i]);
-    }
-    return dst.buffer;
+    return this.bytes.buffer.slice(0);
   }
 
   /**
@@ -244,12 +256,15 @@ export class Scru128Id {
       throw new SyntaxError("invalid hexadecimal integer");
     }
 
-    const words = new Uint32Array(4);
-    words[0] = parseInt(m[1].slice(-32, -24) || "0", 16);
-    words[1] = parseInt(m[1].slice(-24, -16) || "0", 16);
-    words[2] = parseInt(m[1].slice(-16, -8) || "0", 16);
-    words[3] = parseInt(m[1].slice(-8) || "0", 16);
-    return new Scru128Id(words);
+    const gap = 32 - m[1].length;
+    const bytes = new Uint8Array(16);
+    for (let i = 0; i < 16; i++) {
+      const pos = i * 2 - gap;
+      bytes[i] =
+        (pos < 0 ? 0 : DECODE_MAP[m[1].charCodeAt(pos)] << 4) |
+        (pos + 1 < 0 ? 0 : DECODE_MAP[m[1].charCodeAt(pos + 1)]);
+    }
+    return new Scru128Id(bytes);
   }
 
   /**
@@ -259,9 +274,11 @@ export class Scru128Id {
    * @category Conversion
    */
   toHex(): string {
+    const digits = "0123456789abcdef";
     let text = "0x";
-    for (let e of this.words) {
-      text += ("0000000" + e.toString(16)).slice(-8);
+    for (let e of this.bytes) {
+      text += digits.charAt(e >>> 4);
+      text += digits.charAt(e & 0xf);
     }
     return text;
   }
@@ -271,9 +288,14 @@ export class Scru128Id {
     return this.toString();
   }
 
-  /** Creates an object from `this`. */
+  /**
+   * Creates an object from `this`.
+   *
+   * Note that this class is designed to be immutable, and thus `clone()` is not
+   * necessary unless properties marked as private are modified directly.
+   */
   clone(): Scru128Id {
-    return new Scru128Id(this.words.slice(0));
+    return new Scru128Id(this.bytes.slice(0));
   }
 
   /** Returns true if `this` is equivalent to `other`. */
@@ -286,13 +308,22 @@ export class Scru128Id {
    * than, equal to, or greater than `other`, respectively.
    */
   compareTo(other: Scru128Id): number {
-    for (let i = 0; i < 4; i++) {
-      const diff = this.words[i] - other.words[i];
+    for (let i = 0; i < 16; i++) {
+      const diff = this.bytes[i] - other.bytes[i];
       if (diff !== 0) {
         return Math.sign(diff);
       }
     }
     return 0;
+  }
+
+  /** Returns a part of `bytes` as an unsigned integer. */
+  private subUint(beginIndex: number, endIndex: number): number {
+    let buffer = 0;
+    while (beginIndex < endIndex) {
+      buffer = buffer * 0x100 + this.bytes[beginIndex++];
+    }
+    return buffer;
   }
 }
 
