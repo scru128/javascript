@@ -352,9 +352,6 @@ export class Scru128Generator {
   /** Random number generator used by the generator. */
   private rng: { nextUint32: () => number };
 
-  /** Logger object used by the generator. */
-  private logger = { warn: (message: string): void => {} };
-
   /**
    * Creates a generator object with the default random number generator, or
    * with the specified one if passed as an argument. The specified random
@@ -369,45 +366,32 @@ export class Scru128Generator {
 
   /** Generates a new SCRU128 ID object. */
   generate(): Scru128Id {
-    while (true) {
-      try {
-        return this.generateCore();
-      } catch (e) {
-        if (e instanceof CounterOverflowError) {
-          this.handleCounterOverflow();
-        } else {
-          throw e;
-        }
-      }
-    }
-  }
-
-  /**
-   * Generates a new SCRU128 ID object, while delegating the caller to take care
-   * of counter overflows.
-   *
-   * @throws CounterOverflowError when the `counter_hi` and `counter_lo` fields
-   * can no more be incremented.
-   */
-  private generateCore(): Scru128Id {
     const ts = Date.now();
     if (ts > this.timestamp) {
       this.timestamp = ts;
       this.counterLo = this.rng.nextUint32() & MAX_COUNTER_LO;
-      if (ts - this.tsCounterHi >= 1000) {
-        this.tsCounterHi = ts;
-        this.counterHi = this.rng.nextUint32() & MAX_COUNTER_HI;
-      }
-    } else {
+    } else if (ts + 10_000 > this.timestamp) {
       this.counterLo++;
       if (this.counterLo > MAX_COUNTER_LO) {
         this.counterLo = 0;
         this.counterHi++;
         if (this.counterHi > MAX_COUNTER_HI) {
           this.counterHi = 0;
-          throw new CounterOverflowError();
+          // increment timestamp at counter overflow
+          this.timestamp++;
+          this.counterLo = this.rng.nextUint32() & MAX_COUNTER_LO;
         }
       }
+    } else {
+      // reset state if clock moves back more than ten seconds
+      this.tsCounterHi = 0;
+      this.timestamp = ts;
+      this.counterLo = this.rng.nextUint32() & MAX_COUNTER_LO;
+    }
+
+    if (this.timestamp - this.tsCounterHi >= 1_000) {
+      this.tsCounterHi = this.timestamp;
+      this.counterHi = this.rng.nextUint32() & MAX_COUNTER_HI;
     }
 
     return Scru128Id.fromFields(
@@ -416,35 +400,6 @@ export class Scru128Generator {
       this.counterLo,
       this.rng.nextUint32()
     );
-  }
-
-  /**
-   * Defines the behavior on counter overflow.
-   *
-   * Currently, this method busy-waits for the next clock tick and, if the clock
-   * does not move forward for a while, reinitializes the generator state.
-   */
-  private handleCounterOverflow(): void {
-    this.logger.warn("counter overflowing; will wait for next clock tick");
-    this.tsCounterHi = 0;
-    for (let i = 0; i < 1_000_000; i++) {
-      if (Date.now() > this.timestamp) {
-        return;
-      }
-    }
-    this.logger.warn("reset state as clock did not move for a while");
-    this.timestamp = 0;
-  }
-
-  /**
-   * Specifies the logger object used by the generator.
-   *
-   * Logging is disabled by default. Set a logger object to enable logging. The
-   * interface is compatible with the console object.
-   */
-  setLogger(logger: { warn: (message: string) => void }): this {
-    this.logger = logger;
-    return this;
   }
 }
 
@@ -494,9 +449,6 @@ class DefaultRandom {
     return this.buffer[this.cursor++];
   }
 }
-
-/** Error thrown when the monotonic counters can no more be incremented. */
-class CounterOverflowError {}
 
 let defaultGenerator: Scru128Generator | undefined;
 
