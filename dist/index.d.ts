@@ -4,62 +4,66 @@
  * @example
  * ```javascript
  * import { scru128, scru128String } from "scru128";
+ * // or on browsers:
+ * // import { scru128, scru128String } from "https://unpkg.com/scru128@^2";
  *
  * // generate a new identifier object
  * const x = scru128();
- * console.log(String(x)); // e.g. "00S6GVKR1MH58KE72EJD87SDOO"
+ * console.log(String(x)); // e.g. "036Z951MHJIKZIK2GSL81GR7L"
  * console.log(BigInt(x.toHex())); // as a 128-bit unsigned integer
  *
  * // generate a textual representation directly
- * console.log(scru128String()); // e.g. "00S6GVKR3F7R79I72EJF0J4RGC"
+ * console.log(scru128String()); // e.g. "036Z951MHZX67T63MQ9XE6Q0J"
  * ```
  *
  * @packageDocumentation
  */
-/** Unix time in milliseconds at 2020-01-01 00:00:00+00:00. */
-export declare const TIMESTAMP_BIAS = 1577836800000;
 /**
- * Represents a SCRU128 ID and provides various converters and comparison
- * operators.
+ * Represents a SCRU128 ID and provides converters and comparison operators.
  *
  * @example
  * ```javascript
  * import { Scru128Id } from "scru128";
  *
- * const x = Scru128Id.fromString("00Q1D9AB6DTJNLJ80SJ42SNJ4F");
+ * const x = Scru128Id.fromString("036Z968FU2TUGY7SVKFZNEWKK");
  * console.log(String(x));
  *
- * const y = Scru128Id.fromHex(0xd05a952ccdecef5aa01c9904e5a115n.toString(16));
+ * const y = Scru128Id.fromHex(0x017fa1de51a80fd992f9e8cc2d5eb88en.toString(16));
  * console.log(BigInt(y.toHex()));
  * ```
  */
 export declare class Scru128Id {
-    readonly timestamp: number;
-    readonly counter: number;
-    readonly perSecRandom: number;
-    readonly perGenRandom: number;
-    /** Creates an object from field values. */
+    private readonly bytes;
+    /** Creates an object from a 16-byte byte array. */
     private constructor();
     /**
      * Creates an object from field values.
      *
-     * @param timestamp - 44-bit millisecond timestamp field value.
-     * @param counter - 28-bit per-timestamp monotonic counter field value.
-     * @param perSecRandom - 24-bit per-second randomness field value.
-     * @param perGenRandom - 32-bit per-generation randomness field value.
+     * @param timestamp - 48-bit `timestamp` field value.
+     * @param counterHi - 24-bit `counter_hi` field value.
+     * @param counterLo - 24-bit `counter_lo` field value.
+     * @param entropy - 32-bit `entropy` field value.
      * @throws RangeError if any argument is out of the value range of the field.
      * @category Conversion
      */
-    static fromFields(timestamp: number, counter: number, perSecRandom: number, perGenRandom: number): Scru128Id;
+    static fromFields(timestamp: number, counterHi: number, counterLo: number, entropy: number): Scru128Id;
+    /** Returns the 48-bit `timestamp` field value. */
+    get timestamp(): number;
+    /** Returns the 24-bit `counter_hi` field value. */
+    get counterHi(): number;
+    /** Returns the 24-bit `counter_lo` field value. */
+    get counterLo(): number;
+    /** Returns the 32-bit `entropy` field value. */
+    get entropy(): number;
     /**
-     * Creates an object from a 26-digit string representation.
+     * Creates an object from a 25-digit string representation.
      *
      * @throws SyntaxError if the argument is not a valid string representation.
      * @category Conversion
      */
     static fromString(value: string): Scru128Id;
     /**
-     * Returns the 26-digit canonical string representation.
+     * Returns the 25-digit canonical string representation.
      *
      * @category Conversion
      */
@@ -70,7 +74,7 @@ export declare class Scru128Id {
      *
      * @param value - 16-byte buffer that represents a 128-bit unsigned integer in
      * the big-endian (network) byte order.
-     * @throws RangeError if the byte length of the argument is not 16.
+     * @throws TypeError if the byte length of the argument is not 16.
      * @category Conversion
      */
     static fromArrayBuffer(value: ArrayBuffer): Scru128Id;
@@ -97,9 +101,14 @@ export declare class Scru128Id {
      * @category Conversion
      */
     toHex(): string;
-    /** Represents `this` in JSON as a 26-digit canonical string. */
+    /** Represents `this` in JSON as a 25-digit canonical string. */
     toJSON(): string;
-    /** Creates an object from `this`. */
+    /**
+     * Creates an object from `this`.
+     *
+     * Note that this class is designed to be immutable, and thus `clone()` is not
+     * necessary unless properties marked as private are modified directly.
+     */
     clone(): Scru128Id;
     /** Returns true if `this` is equivalent to `other`. */
     equals(other: Scru128Id): boolean;
@@ -108,21 +117,12 @@ export declare class Scru128Id {
      * than, equal to, or greater than `other`, respectively.
      */
     compareTo(other: Scru128Id): number;
+    /** Returns a part of `bytes` as an unsigned integer. */
+    private subUint;
 }
 /**
- * Specifies the logger object used in the package.
- *
- * Logging is disabled by default. Set a logger object to enable logging. The
- * interface is compatible with the console object.
- */
-export declare const setLogger: (newLogger: {
-    error: (message: string) => void;
-    warn: (message: string) => void;
-    info: (message: string) => void;
-}) => void;
-/**
- * Represents a SCRU128 ID generator that encapsulates the monotonic counter and
- * other internal states.
+ * Represents a SCRU128 ID generator that encapsulates the monotonic counters
+ * and other internal states.
  *
  * @example
  * ```javascript
@@ -135,16 +135,12 @@ export declare const setLogger: (newLogger: {
  * ```
  */
 export declare class Scru128Generator {
-    /** Timestamp at last generation. */
-    private tsLastGen;
-    /** Counter at last generation. */
-    private counter;
-    /** Timestamp at last renewal of perSecRandom. */
-    private tsLastSec;
-    /** Per-second random value at last generation. */
-    private perSecRandom;
-    /** Maximum number of checking the system clock until it goes forward. */
-    private nClockCheckMax;
+    private timestamp;
+    private counterHi;
+    private counterLo;
+    /** Timestamp at the last renewal of `counter_hi` field. */
+    private tsCounterHi;
+    /** Random number generator used by the generator. */
     private rng;
     /**
      * Creates a generator object with the default random number generator, or
@@ -165,7 +161,7 @@ export declare const scru128: () => Scru128Id;
  *
  * Use this function to quickly get a new SCRU128 ID as a string.
  *
- * @returns 26-digit canonical string representation.
+ * @returns 25-digit canonical string representation.
  * @example
  * ```javascript
  * import { scru128String } from "scru128";
