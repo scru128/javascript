@@ -1,12 +1,12 @@
 {
-  "exclude": ["./src/cjs"],
+  "include": ["./src/cjs"],
   "compilerOptions": {
     "target": "es2015",
-    "module": "es2015",
+    "module": "commonjs",
     "moduleResolution": "node",
     "typeRoots": [],
-    "declaration": true,
-    "outDir": "./dist",
+    // "declaration": true,
+    "outDir": "./dist/cjs",
     "stripInternal": true,
     "isolatedModules": true,
     "esModuleInterop": true,

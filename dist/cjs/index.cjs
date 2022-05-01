@@ -1,3 +1,4 @@
+"use strict";
 /**
  * SCRU128: Sortable, Clock and Random number-based Unique identifier
  *
@@ -18,6 +19,8 @@
  *
  * @packageDocumentation
  */
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.scru128String = exports.scru128 = exports._setRandom = exports.Scru128Generator = exports.Scru128Id = void 0;
 /** Maximum value of 24-bit `counter_hi` field. */
 const MAX_COUNTER_HI = 16777215;
 /** Maximum value of 24-bit `counter_lo` field. */
@@ -51,7 +54,7 @@ const DECODE_MAP = [
  * console.log(BigInt(y.toHex()));
  * ```
  */
-export class Scru128Id {
+class Scru128Id {
     /** Creates an object from a 16-byte byte array. */
     constructor(bytes) {
         this.bytes = bytes;
@@ -291,6 +294,7 @@ export class Scru128Id {
         return buffer;
     }
 }
+exports.Scru128Id = Scru128Id;
 /**
  * Represents a SCRU128 ID generator that encapsulates the monotonic counters
  * and other internal states.
@@ -305,7 +309,7 @@ export class Scru128Id {
  * console.log(BigInt(x.toHex()));
  * ```
  */
-export class Scru128Generator {
+class Scru128Generator {
     /**
      * Creates a generator object with the default random number generator, or
      * with the specified one if passed as an argument. The specified random
@@ -352,6 +356,7 @@ export class Scru128Generator {
         return Scru128Id.fromFields(this.timestamp, this.counterHi, this.counterLo, this.rng.nextUint32());
     }
 }
+exports.Scru128Generator = Scru128Generator;
 /** Stores `crypto.getRandomValues()` available in the environment. */
 let getRandomValues = (buffer) => {
     // fall back on Math.random() unless the flag is set to true
@@ -370,9 +375,10 @@ if (typeof crypto !== "undefined" && crypto.getRandomValues) {
     getRandomValues = (buffer) => crypto.getRandomValues(buffer);
 }
 /** @internal */
-export const _setRandom = (rand) => {
+const _setRandom = (rand) => {
     getRandomValues = rand;
 };
+exports._setRandom = _setRandom;
 /**
  * Wraps `crypto.getRandomValues()` and compatibles to enable buffering; this
  * uses a small buffer by default to avoid unbearable throughput decline in some
@@ -393,7 +399,8 @@ class DefaultRandom {
 }
 let defaultGenerator;
 /** Generates a new SCRU128 ID object. */
-export const scru128 = () => (defaultGenerator || (defaultGenerator = new Scru128Generator())).generate();
+const scru128 = () => (defaultGenerator || (defaultGenerator = new Scru128Generator())).generate();
+exports.scru128 = scru128;
 /**
  * Generates a new SCRU128 ID encoded in a string.
  *
@@ -408,4 +415,5 @@ export const scru128 = () => (defaultGenerator || (defaultGenerator = new Scru12
  * console.log(x);
  * ```
  */
-export const scru128String = () => scru128().toString();
+const scru128String = () => (0, exports.scru128)().toString();
+exports.scru128String = scru128String;

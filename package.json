@@ -1,23 +1,30 @@
 {
   "name": "scru128",
-  "version": "1.0.1",
+  "version": "2.0.0",
   "description": "SCRU128: Sortable, Clock and Random number-based Unique identifier",
+  "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "exports": {
-    "import": "./esm.mjs",
-    "require": "./dist/index.js"
+    "node": {
+      "require": "./dist/cjs/node.cjs",
+      "default": "./dist/node.js"
+    },
+    "require": "./dist/cjs/index.cjs",
+    "default": "./dist/index.js"
   },
   "files": [
-    "dist",
-    "esm.mjs"
+    "dist"
   ],
-  "sideEffects": false,
+  "sideEffects": [
+    "./dist/node.js",
+    "./dist/cjs/node.cjs"
+  ],
   "browser": {
-    "crypto": "./dist/crypto_dummy.js"
+    "crypto": false
   },
   "scripts": {
-    "build": "tsc && webpack ./test/*.mjs -o ./test/bundle --mode production",
+    "build": "tsc && tsc -p ./tsconfig.cjs.json && webpack ./test/*.mjs -o ./test/bundle --mode production",
     "doc": "typedoc ./src/index.ts --gitRevision \"v$npm_package_version\"",
     "prebuild": "rm -rf ./dist ./test/bundle",
     "predoc": "rm -rf ./docs",
@@ -43,9 +50,9 @@
   "homepage": "https://github.com/scru128/javascript#readme",
   "devDependencies": {
     "mocha": "^9.2.2",
-    "typedoc": "^0.22.13",
-    "typescript": "^4.6.2",
-    "webpack": "^5.70.0",
+    "typedoc": "^0.22.15",
+    "typescript": "^4.6.4",
+    "webpack": "^5.72.0",
     "webpack-cli": "^4.9.2"
   }
 }
