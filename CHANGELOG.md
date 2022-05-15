@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Added
+
+- `Scru128Generator#generateCore()`
+
 ## v2.0.0 - 2022-05-01
 
 ### Changed

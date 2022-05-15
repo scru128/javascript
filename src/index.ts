@@ -19,6 +19,9 @@
  * @packageDocumentation
  */
 
+/** Maximum value of 48-bit `timestamp` field. */
+const MAX_TIMESTAMP = 0xffff_ffff_ffff;
+
 /** Maximum value of 24-bit `counter_hi` field. */
 const MAX_COUNTER_HI = 0xff_ffff;
 
@@ -89,7 +92,7 @@ export class Scru128Id {
       counterHi < 0 ||
       counterLo < 0 ||
       entropy < 0 ||
-      timestamp > 0xffff_ffff_ffff ||
+      timestamp > MAX_TIMESTAMP ||
       counterHi > MAX_COUNTER_HI ||
       counterLo > MAX_COUNTER_LO ||
       entropy > 0xffff_ffff
@@ -366,27 +369,67 @@ export class Scru128Generator {
 
   /** Generates a new SCRU128 ID object. */
   generate(): Scru128Id {
-    const ts = Date.now();
-    if (ts > this.timestamp) {
-      this.timestamp = ts;
+    return this.generateCore(Date.now())[0];
+  }
+
+  /**
+   * Generates a new SCRU128 ID object with the `timestamp` passed.
+   *
+   * This method returns a generated ID and a [[Scru128GeneratorStatus]] code
+   * that indicates the internal state involved in the generation. Callers can
+   * usually ignore the status unless the monotonic order of generated IDs is
+   * critically important.
+   *
+   * @example
+   * ```javascript
+   * import { Scru128Generator } from "scru128";
+   *
+   * const g = new Scru128Generator();
+   * const [x] = g.generateCore(Date.now());
+   * const [y, status] = g.generateCore(Date.now());
+   * if (status === "CLOCK_ROLLBACK") {
+   *   throw new Error("clock moved backward");
+   * } else {
+   *   console.assert(x.compareTo(y) < 0);
+   * }
+   * ```
+   *
+   * @throws RangeError if the argument is not a 48-bit unsigned integer.
+   */
+  generateCore(timestamp: number): [Scru128Id, Scru128GeneratorStatus] {
+    if (
+      !Number.isInteger(timestamp) ||
+      timestamp < 0 ||
+      timestamp > MAX_TIMESTAMP
+    ) {
+      throw new RangeError("`timestamp` must be a 48-bit unsigned integer");
+    }
+
+    let status: Scru128GeneratorStatus = "NEW_TIMESTAMP";
+    if (timestamp > this.timestamp) {
+      this.timestamp = timestamp;
       this.counterLo = this.rng.nextUint32() & MAX_COUNTER_LO;
-    } else if (ts + 10_000 > this.timestamp) {
+    } else if (timestamp + 10_000 > this.timestamp) {
       this.counterLo++;
+      status = "COUNTER_LO_INC";
       if (this.counterLo > MAX_COUNTER_LO) {
         this.counterLo = 0;
         this.counterHi++;
+        status = "COUNTER_HI_INC";
         if (this.counterHi > MAX_COUNTER_HI) {
           this.counterHi = 0;
           // increment timestamp at counter overflow
           this.timestamp++;
           this.counterLo = this.rng.nextUint32() & MAX_COUNTER_LO;
+          status = "TIMESTAMP_INC";
         }
       }
     } else {
-      // reset state if clock moves back more than ten seconds
+      // reset state if clock moves back by ten seconds or more
       this.tsCounterHi = 0;
-      this.timestamp = ts;
+      this.timestamp = timestamp;
       this.counterLo = this.rng.nextUint32() & MAX_COUNTER_LO;
+      status = "CLOCK_ROLLBACK";
     }
 
     if (this.timestamp - this.tsCounterHi >= 1_000) {
@@ -394,14 +437,39 @@ export class Scru128Generator {
       this.counterHi = this.rng.nextUint32() & MAX_COUNTER_HI;
     }
 
-    return Scru128Id.fromFields(
-      this.timestamp,
-      this.counterHi,
-      this.counterLo,
-      this.rng.nextUint32()
-    );
+    return [
+      Scru128Id.fromFields(
+        this.timestamp,
+        this.counterHi,
+        this.counterLo,
+        this.rng.nextUint32()
+      ),
+      status,
+    ];
   }
 }
+
+/**
+ * Status code reported by [[Scru128Generator.generateCore]] method.
+ *
+ * - `"NEW_TIMESTAMP"` indicates that the `timestamp` passed was used because it
+ *   was greater than the previous one.
+ * - `"COUNTER_LO_INC"` indicates that `counter_lo` was incremented because the
+ *   `timestamp` passed was no greater than the previous one.
+ * - `"COUNTER_HI_INC"` indicates that `counter_hi` was incremented because
+ *   `counter_lo` reached its maximum value.
+ * - `"TIMESTAMP_INC"` indicates that the previous `timestamp` was incremented
+ *   because `counter_hi` reached its maximum value.
+ * - `"CLOCK_ROLLBACK"` indicates that the monotonic order of generated IDs was
+ *   broken because the `timestamp` passed was less than the previous one by ten
+ *   seconds or more.
+ */
+export type Scru128GeneratorStatus =
+  | "NEW_TIMESTAMP"
+  | "COUNTER_LO_INC"
+  | "COUNTER_HI_INC"
+  | "TIMESTAMP_INC"
+  | "CLOCK_ROLLBACK";
 
 /** A global flag to force use of cryptographically strong RNG. */
 declare const SCRU128_DENY_WEAK_RNG: boolean;
