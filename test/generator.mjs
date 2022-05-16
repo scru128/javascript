@@ -11,15 +11,18 @@ describe("Scru128Generator", function () {
   it("generates increasing IDs even with decreasing or constant timestamp", function () {
     const ts = 0x0123_4567_89ab;
     const g = new Scru128Generator();
-    let [prev, status] = g.generateCore(ts);
-    assert(status === "NEW_TIMESTAMP");
+    assert(g.getLastStatus() === "NOT_EXECUTED");
+
+    let prev = g.generateCore(ts);
+    assert(g.getLastStatus() === "NEW_TIMESTAMP");
     assert(prev.timestamp === ts);
+
     for (let i = 0; i < 100_000; i++) {
-      const [curr, status] = g.generateCore(ts - Math.min(9_998, i));
+      const curr = g.generateCore(ts - Math.min(9_998, i));
       assert(
-        status === "COUNTER_LO_INC" ||
-          status === "COUNTER_HI_INC" ||
-          status === "TIMESTAMP_INC"
+        g.getLastStatus() === "COUNTER_LO_INC" ||
+          g.getLastStatus() === "COUNTER_HI_INC" ||
+          g.getLastStatus() === "TIMESTAMP_INC"
       );
       assert(prev.compareTo(curr) < 0);
       prev = curr;
@@ -30,11 +33,14 @@ describe("Scru128Generator", function () {
   it("breaks increasing order of IDs if timestamp moves backward a lot", function () {
     const ts = 0x0123_4567_89ab;
     const g = new Scru128Generator();
-    const [prev, prevStatus] = g.generateCore(ts);
-    assert(prevStatus === "NEW_TIMESTAMP");
+    assert(g.getLastStatus() === "NOT_EXECUTED");
+
+    const prev = g.generateCore(ts);
+    assert(g.getLastStatus() === "NEW_TIMESTAMP");
     assert(prev.timestamp === ts);
-    const [curr, currStatus] = g.generateCore(ts - 10_000);
-    assert(currStatus === "CLOCK_ROLLBACK");
+
+    const curr = g.generateCore(ts - 10_000);
+    assert(g.getLastStatus() === "CLOCK_ROLLBACK");
     assert(prev.compareTo(curr) > 0);
     assert(curr.timestamp == ts - 10_000);
   });
