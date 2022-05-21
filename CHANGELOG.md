@@ -1,10 +1,14 @@
 # Changelog
 
-## Unreleased
+## v2.1.0 - 2022-05-22
 
 ### Added
 
 - `generateCore()` and `getLastStatus()` to `Scru128Generator`
+
+### Maintenance
+
+- Updated dev dependencies
 
 ## v2.0.0 - 2022-05-01
 
