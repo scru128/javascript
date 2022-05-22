@@ -1,5 +1,15 @@
 # Changelog
 
+## v2.1.1 - 2022-05-23
+
+### Fixed
+
+- `generateCore()` to reject zero as `timestamp` value
+
+### Maintenance
+
+- Updated dev dependencies
+
 ## v2.1.0 - 2022-05-22
 
 ### Added

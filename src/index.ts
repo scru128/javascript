@@ -384,15 +384,15 @@ export class Scru128Generator {
   /**
    * Generates a new SCRU128 ID object with the `timestamp` passed.
    *
-   * @throws RangeError if the argument is not a 48-bit unsigned integer.
+   * @throws RangeError if the argument is not a 48-bit positive integer.
    */
   generateCore(timestamp: number): Scru128Id {
     if (
       !Number.isInteger(timestamp) ||
-      timestamp < 0 ||
+      timestamp < 1 ||
       timestamp > MAX_TIMESTAMP
     ) {
-      throw new RangeError("`timestamp` must be a 48-bit unsigned integer");
+      throw new RangeError("`timestamp` must be a 48-bit positive integer");
     }
 
     this.lastStatus = "NEW_TIMESTAMP";
