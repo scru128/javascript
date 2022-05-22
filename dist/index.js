@@ -18,6 +18,8 @@
  *
  * @packageDocumentation
  */
+/** Maximum value of 48-bit `timestamp` field. */
+const MAX_TIMESTAMP = 281474976710655;
 /** Maximum value of 24-bit `counter_hi` field. */
 const MAX_COUNTER_HI = 16777215;
 /** Maximum value of 24-bit `counter_lo` field. */
@@ -78,7 +80,7 @@ export class Scru128Id {
             counterHi < 0 ||
             counterLo < 0 ||
             entropy < 0 ||
-            timestamp > 281474976710655 ||
+            timestamp > MAX_TIMESTAMP ||
             counterHi > MAX_COUNTER_HI ||
             counterLo > MAX_COUNTER_LO ||
             entropy > 4294967295) {
@@ -317,39 +319,92 @@ export class Scru128Generator {
         this.counterLo = 0;
         /** Timestamp at the last renewal of `counter_hi` field. */
         this.tsCounterHi = 0;
+        /** Status code reported at the last generation. */
+        this.lastStatus = "NOT_EXECUTED";
         this.rng = randomNumberGenerator || new DefaultRandom();
     }
     /** Generates a new SCRU128 ID object. */
     generate() {
-        const ts = Date.now();
-        if (ts > this.timestamp) {
-            this.timestamp = ts;
+        return this.generateCore(Date.now());
+    }
+    /**
+     * Generates a new SCRU128 ID object with the `timestamp` passed.
+     *
+     * @throws RangeError if the argument is not a 48-bit unsigned integer.
+     */
+    generateCore(timestamp) {
+        if (!Number.isInteger(timestamp) ||
+            timestamp < 0 ||
+            timestamp > MAX_TIMESTAMP) {
+            throw new RangeError("`timestamp` must be a 48-bit unsigned integer");
+        }
+        this.lastStatus = "NEW_TIMESTAMP";
+        if (timestamp > this.timestamp) {
+            this.timestamp = timestamp;
             this.counterLo = this.rng.nextUint32() & MAX_COUNTER_LO;
         }
-        else if (ts + 10000 > this.timestamp) {
+        else if (timestamp + 10000 > this.timestamp) {
             this.counterLo++;
+            this.lastStatus = "COUNTER_LO_INC";
             if (this.counterLo > MAX_COUNTER_LO) {
                 this.counterLo = 0;
                 this.counterHi++;
+                this.lastStatus = "COUNTER_HI_INC";
                 if (this.counterHi > MAX_COUNTER_HI) {
                     this.counterHi = 0;
                     // increment timestamp at counter overflow
                     this.timestamp++;
                     this.counterLo = this.rng.nextUint32() & MAX_COUNTER_LO;
+                    this.lastStatus = "TIMESTAMP_INC";
                 }
             }
         }
         else {
-            // reset state if clock moves back more than ten seconds
+            // reset state if clock moves back by ten seconds or more
             this.tsCounterHi = 0;
-            this.timestamp = ts;
+            this.timestamp = timestamp;
             this.counterLo = this.rng.nextUint32() & MAX_COUNTER_LO;
+            this.lastStatus = "CLOCK_ROLLBACK";
         }
         if (this.timestamp - this.tsCounterHi >= 1000) {
             this.tsCounterHi = this.timestamp;
             this.counterHi = this.rng.nextUint32() & MAX_COUNTER_HI;
         }
         return Scru128Id.fromFields(this.timestamp, this.counterHi, this.counterLo, this.rng.nextUint32());
+    }
+    /**
+     * Returns a status code that indicates the internal state involved in the
+     * last generation of ID.
+     *
+     * - `"NOT_EXECUTED"` indicates that the generator has yet to generate an ID.
+     * - `"NEW_TIMESTAMP"` indicates that the latest timestamp was used because it
+     *   was greater than the previous one.
+     * - `"COUNTER_LO_INC"` indicates that counter_lo was incremented because the
+     *   latest timestamp was no greater than the previous one.
+     * - `"COUNTER_HI_INC"` indicates that counter_hi was incremented because
+     *   counter_lo reached its maximum value.
+     * - `"TIMESTAMP_INC"` indicates that the previous timestamp was incremented
+     *   because counter_hi reached its maximum value.
+     * - `"CLOCK_ROLLBACK"` indicates that the monotonic order of generated IDs
+     *   was broken because the latest timestamp was less than the previous one by
+     *   ten seconds or more.
+     *
+     * @example
+     * ```javascript
+     * import { Scru128Generator } from "scru128";
+     *
+     * const g = new Scru128Generator();
+     * const x = g.generate();
+     * const y = g.generate();
+     * if (g.getLastStatus() === "CLOCK_ROLLBACK") {
+     *   throw new Error("clock moved backward");
+     * } else {
+     *   console.assert(x.compareTo(y) < 0);
+     * }
+     * ```
+     */
+    getLastStatus() {
+        return this.lastStatus;
     }
 }
 /** Stores `crypto.getRandomValues()` available in the environment. */

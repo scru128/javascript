@@ -140,6 +140,8 @@ export declare class Scru128Generator {
     private counterLo;
     /** Timestamp at the last renewal of `counter_hi` field. */
     private tsCounterHi;
+    /** Status code reported at the last generation. */
+    private lastStatus;
     /** Random number generator used by the generator. */
     private rng;
     /**
@@ -153,6 +155,44 @@ export declare class Scru128Generator {
     });
     /** Generates a new SCRU128 ID object. */
     generate(): Scru128Id;
+    /**
+     * Generates a new SCRU128 ID object with the `timestamp` passed.
+     *
+     * @throws RangeError if the argument is not a 48-bit unsigned integer.
+     */
+    generateCore(timestamp: number): Scru128Id;
+    /**
+     * Returns a status code that indicates the internal state involved in the
+     * last generation of ID.
+     *
+     * - `"NOT_EXECUTED"` indicates that the generator has yet to generate an ID.
+     * - `"NEW_TIMESTAMP"` indicates that the latest timestamp was used because it
+     *   was greater than the previous one.
+     * - `"COUNTER_LO_INC"` indicates that counter_lo was incremented because the
+     *   latest timestamp was no greater than the previous one.
+     * - `"COUNTER_HI_INC"` indicates that counter_hi was incremented because
+     *   counter_lo reached its maximum value.
+     * - `"TIMESTAMP_INC"` indicates that the previous timestamp was incremented
+     *   because counter_hi reached its maximum value.
+     * - `"CLOCK_ROLLBACK"` indicates that the monotonic order of generated IDs
+     *   was broken because the latest timestamp was less than the previous one by
+     *   ten seconds or more.
+     *
+     * @example
+     * ```javascript
+     * import { Scru128Generator } from "scru128";
+     *
+     * const g = new Scru128Generator();
+     * const x = g.generate();
+     * const y = g.generate();
+     * if (g.getLastStatus() === "CLOCK_ROLLBACK") {
+     *   throw new Error("clock moved backward");
+     * } else {
+     *   console.assert(x.compareTo(y) < 0);
+     * }
+     * ```
+     */
+    getLastStatus(): "NOT_EXECUTED" | "NEW_TIMESTAMP" | "COUNTER_LO_INC" | "COUNTER_HI_INC" | "TIMESTAMP_INC" | "CLOCK_ROLLBACK";
 }
 /** Generates a new SCRU128 ID object. */
 export declare const scru128: () => Scru128Id;
