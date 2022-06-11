@@ -1,10 +1,14 @@
 # Changelog
 
-## v2.1.2 - Unreleased
+## v2.1.2 - 2022-06-11
 
 ### Fixed
 
 - `generateCore()` to update `counter_hi` when `timestamp` passed < 1000
+
+### Maintenance
+
+- Updated dev dependencies
 
 ## v2.1.1 - 2022-05-23
 
