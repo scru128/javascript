@@ -366,7 +366,7 @@ export class Scru128Generator {
             this.counterLo = this.rng.nextUint32() & MAX_COUNTER_LO;
             this.lastStatus = "CLOCK_ROLLBACK";
         }
-        if (this.timestamp - this.tsCounterHi >= 1000) {
+        if (this.timestamp - this.tsCounterHi >= 1000 || this.tsCounterHi < 1) {
             this.tsCounterHi = this.timestamp;
             this.counterHi = this.rng.nextUint32() & MAX_COUNTER_HI;
         }
