@@ -1,5 +1,11 @@
 # Changelog
 
+## v2.1.3 - 2022-11-28
+
+### Maintenance
+
+- Updated dev dependencies
+
 ## v2.1.2 - 2022-06-11
 
 ### Fixed
