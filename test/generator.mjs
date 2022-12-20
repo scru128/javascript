@@ -44,4 +44,16 @@ describe("Scru128Generator", function () {
     assert(prev.compareTo(curr) > 0);
     assert(curr.timestamp == ts - 10_000);
   });
+
+  it("is iterable with for-of loop", function () {
+    let i = 0;
+    for (const e of new Scru128Generator()) {
+      assert(e instanceof Scru128Id);
+      i += 1;
+      if (i > 100) {
+        break;
+      }
+    }
+    assert(i === 101);
+  });
 });
