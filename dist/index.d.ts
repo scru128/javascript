@@ -193,6 +193,30 @@ export declare class Scru128Generator {
      * ```
      */
     getLastStatus(): "NOT_EXECUTED" | "NEW_TIMESTAMP" | "COUNTER_LO_INC" | "COUNTER_HI_INC" | "TIMESTAMP_INC" | "CLOCK_ROLLBACK";
+    /**
+     * Returns an infinite iterator object that produces a new ID for each call of
+     * `next()`.
+     *
+     * @example
+     * ```javascript
+     * import { Scru128Generator } from "scru128";
+     *
+     * const [a, b, c] = new Scru128Generator();
+     * console.log(String(a)); // e.g. "038MQR9E14CJC12DH9AMW7I5O"
+     * console.log(String(b)); // e.g. "038MQR9E14CJC12DH9DTPWFR3"
+     * console.log(String(c)); // e.g. "038MQR9E14CJC12DH9E6RJMQI"
+     * ```
+     */
+    [Symbol.iterator](): Iterator<Scru128Id, undefined>;
+    /**
+     * Returns a new SCRU128 ID object for each call, infinitely.
+     *
+     * This method wraps the result of {@link generate | generate()} in an
+     * [`IteratorResult`] object to use `this` as an infinite iterator.
+     *
+     * [`IteratorResult`]: https://developer.mozilla.org/docs/Web/JavaScript/Reference/Iteration_protocols
+     */
+    next(): IteratorResult<Scru128Id, undefined>;
 }
 /** Generates a new SCRU128 ID object. */
 export declare const scru128: () => Scru128Id;
