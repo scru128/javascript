@@ -1,5 +1,11 @@
 # Changelog
 
+## v2.2.1 - unreleased
+
+### Added
+
+- CHANGELOG.md to NPM package
+
 ## v2.2.0 - 2022-12-25
 
 ### Added
