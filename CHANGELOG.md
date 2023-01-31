@@ -9,6 +9,7 @@
 ### Maintenance
 
 - Adopted `node16` module setting to build CommonJS entry point
+- Updated dev dependencies
 
 ## v2.2.0 - 2022-12-25
 
