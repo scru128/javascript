@@ -25,8 +25,9 @@
     "crypto": false
   },
   "scripts": {
-    "build": "tsc && tsc -p ./tsconfig.cjs.json && webpack ./test/*.mjs -o ./test/bundle --mode production",
+    "build": "tsc && webpack ./test/*.mjs -o ./test/bundle --mode production",
     "doc": "typedoc ./src/index.ts --gitRevision \"v$npm_package_version\"",
+    "postbuild": "rm -f ./dist/cjs/*.d.cts",
     "prebuild": "rm -rf ./dist ./test/bundle",
     "predoc": "rm -rf ./docs",
     "prepare": "npm run build && npm run doc && npm run test",
