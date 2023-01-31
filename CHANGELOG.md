@@ -1,5 +1,16 @@
 # Changelog
 
+## v2.2.1 - 2023-01-31
+
+### Added
+
+- CHANGELOG.md to NPM package
+
+### Maintenance
+
+- Adopted `node16` module setting to build CommonJS entry point
+- Updated dev dependencies
+
 ## v2.2.0 - 2022-12-25
 
 ### Added
