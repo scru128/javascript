@@ -60,8 +60,15 @@ const DECODE_MAP = [
  * ```
  */
 export class Scru128Id {
+  /**
+   * 16-byte byte array containing the 128-bit unsigned integer representation
+   * in the big-endian (network) byte order.
+   */
+  private readonly bytes: Readonly<Uint8Array>;
+
   /** Creates an object from a 16-byte byte array. */
-  private constructor(private readonly bytes: Uint8Array) {
+  private constructor(bytes: Readonly<Uint8Array>) {
+    this.bytes = bytes;
     if (bytes.length !== 16) {
       throw new TypeError("invalid length of byte array: " + bytes.length);
     }
@@ -154,9 +161,22 @@ export class Scru128Id {
     const src = new Uint8Array(25);
     for (let i = 0; i < 25; i++) {
       src[i] = DECODE_MAP[value.charCodeAt(i)] ?? 0x7f;
-      if (src[i] === 0x7f) {
-        throw new SyntaxError("invalid digit: " + value.charAt(i));
-      }
+    }
+
+    return Scru128Id.fromDigitValues(src);
+  }
+
+  /**
+   * Creates an object from an array of Base36 digit values representing a
+   * 25-digit string representation.
+   *
+   * @throws SyntaxError if the argument does not contain a valid string
+   * representation.
+   * @category Conversion
+   */
+  private static fromDigitValues(src: ArrayLike<number>): Scru128Id {
+    if (src.length !== 25) {
+      throw new SyntaxError("invalid length: " + src.length);
     }
 
     const dst = new Uint8Array(16);
@@ -165,7 +185,11 @@ export class Scru128Id {
       // implement Base36 using 8-digit words
       let carry = 0;
       for (let j = i < 0 ? 0 : i; j < i + 8; j++) {
-        carry = carry * 36 + src[j];
+        const e = src[j];
+        if (e < 0 || e > 35 || !Number.isInteger(e)) {
+          throw new SyntaxError("invalid digit");
+        }
+        carry = carry * 36 + e;
       }
 
       // iterate over output array from right to left while carry != 0 but at
