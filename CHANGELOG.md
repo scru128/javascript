@@ -1,10 +1,10 @@
 # Changelog
 
-## v2.3.0 - 2023-02-18
+## v2.3.1 - 2023-02-18
 
 ### Added
 
-- `Scru128Id#bytes`, `Scru128Id.fromInner()`, and `Scru128Id.fromBytes()`
+- `Scru128Id#bytes`, `Scru128Id.ofInner()`, and `Scru128Id.fromBytes()`
 
 ### Maintenance
 

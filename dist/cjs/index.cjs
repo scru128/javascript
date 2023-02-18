@@ -74,7 +74,7 @@ class Scru128Id {
      *
      * @throws TypeError if the length of the argument is not 16.
      */
-    static fromInner(bytes) {
+    static ofInner(bytes) {
         return new Scru128Id(bytes);
     }
     /**

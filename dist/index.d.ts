@@ -50,7 +50,7 @@ export declare class Scru128Id {
      *
      * @throws TypeError if the length of the argument is not 16.
      */
-    static fromInner(bytes: Uint8Array): Scru128Id;
+    static ofInner(bytes: Uint8Array): Scru128Id;
     /**
      * Creates an object from field values.
      *

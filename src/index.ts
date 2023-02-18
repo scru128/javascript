@@ -84,7 +84,7 @@ export class Scru128Id {
    *
    * @throws TypeError if the length of the argument is not 16.
    */
-  static fromInner(bytes: Uint8Array) {
+  static ofInner(bytes: Uint8Array) {
     return new Scru128Id(bytes);
   }
 

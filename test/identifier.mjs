@@ -103,9 +103,9 @@ describe("Scru128Id", function () {
         ).equals(e)
       );
 
-      const fromInner = Scru128Id.fromInner(e.bytes);
-      assert(fromInner.equals(e));
-      assert(fromInner.bytes.buffer == e.bytes.buffer);
+      const ofInner = Scru128Id.ofInner(e.bytes);
+      assert(ofInner.equals(e));
+      assert(ofInner.bytes.buffer == e.bytes.buffer);
 
       const fromBytes = Scru128Id.fromBytes(e.bytes);
       assert(fromBytes.equals(e));
