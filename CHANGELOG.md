@@ -4,7 +4,7 @@
 
 ### Added
 
-- `Scru128Id.fromBytes()`
+- `Scru128Id#bytes`, `Scru128Id.fromInner()`, and `Scru128Id.fromBytes()`
 
 ## v2.2.1 - 2023-01-31
 
