@@ -1,5 +1,15 @@
 # Changelog
 
+## v2.3.0 - 2023-02-18
+
+### Added
+
+- `Scru128Id#bytes`, `Scru128Id.fromInner()`, and `Scru128Id.fromBytes()`
+
+### Maintenance
+
+- Updated dev dependencies
+
 ## v2.2.1 - 2023-01-31
 
 ### Added

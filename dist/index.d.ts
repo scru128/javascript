@@ -33,9 +33,24 @@
  * ```
  */
 export declare class Scru128Id {
-    private readonly bytes;
+    /**
+     * 16-byte byte array containing the 128-bit unsigned integer representation
+     * in the big-endian (network) byte order.
+     */
+    readonly bytes: Readonly<Uint8Array>;
     /** Creates an object from a 16-byte byte array. */
     private constructor();
+    /**
+     * Creates an object from the internal representation, a 16-byte byte array
+     * containing the 128-bit unsigned integer representation in the big-endian
+     * (network) byte order.
+     *
+     * This method does NOT shallow-copy the argument, and thus the created object
+     * holds the reference to the underlying buffer.
+     *
+     * @throws TypeError if the length of the argument is not 16.
+     */
+    static fromInner(bytes: Uint8Array): Scru128Id;
     /**
      * Creates an object from field values.
      *
@@ -63,14 +78,40 @@ export declare class Scru128Id {
      */
     static fromString(value: string): Scru128Id;
     /**
+     * Creates an object from an array of Base36 digit values representing a
+     * 25-digit string representation.
+     *
+     * @throws SyntaxError if the argument does not contain a valid string
+     * representation.
+     * @category Conversion
+     */
+    private static fromDigitValues;
+    /**
      * Returns the 25-digit canonical string representation.
      *
      * @category Conversion
      */
     toString(): string;
     /**
+     * Creates an object from a byte array representing either a 128-bit unsigned
+     * integer or a 25-digit Base36 string.
+     *
+     * This method shallow-copies the content of the argument, so the created
+     * object holds another instance of the byte array.
+     *
+     * @param value - an array of 16 bytes that contains a 128-bit unsigned
+     * integer in the big-endian (network) byte order or an array of 25 ASCII code
+     * points that reads a 25-digit Base36 string.
+     * @throws SyntaxError if conversion fails.
+     * @category Conversion
+     */
+    static fromBytes(value: ArrayLike<number>): Scru128Id;
+    /**
      * Creates an object from a byte array that represents a 128-bit unsigned
      * integer.
+     *
+     * This method shallow-copies the content of the argument, so the created
+     * object holds another instance of the byte array.
      *
      * @param value - 16-byte buffer that represents a 128-bit unsigned integer in
      * the big-endian (network) byte order.
