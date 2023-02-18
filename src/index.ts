@@ -243,6 +243,32 @@ export class Scru128Id {
   }
 
   /**
+   * Creates an object from a byte array representing either a 128-bit unsigned
+   * integer or a 25-digit Base36 string.
+   *
+   * @param value - an array of 16 bytes that contains a 128-bit unsigned
+   * integer in the big-endian (network) byte order or an array of 25 ASCII code
+   * points that reads a 25-digit Base36 string.
+   * @throws SyntaxError if conversion fails.
+   * @category Conversion
+   */
+  static fromBytes(value: ArrayLike<number>): Scru128Id {
+    for (let i = 0; i < value.length; i++) {
+      const e = value[i];
+      if (e < 0 || e > 0xff || !Number.isInteger(e)) {
+        throw new SyntaxError("invalid byte value");
+      }
+    }
+    if (value.length === 16) {
+      return new Scru128Id(Uint8Array.from(value));
+    } else {
+      return Scru128Id.fromDigitValues(
+        Uint8Array.from(value, (c) => DECODE_MAP[c] ?? 0x7f)
+      );
+    }
+  }
+
+  /**
    * Creates an object from a byte array that represents a 128-bit unsigned
    * integer.
    *

@@ -1,5 +1,11 @@
 # Changelog
 
+## v2.3.0 - unreleased
+
+### Added
+
+- `Scru128Id.fromBytes()`
+
 ## v2.2.1 - 2023-01-31
 
 ### Added

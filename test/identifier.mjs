@@ -103,6 +103,16 @@ describe("Scru128Id", function () {
         ).equals(e)
       );
 
+      const fromBytes = Scru128Id.fromBytes(e.bytes);
+      assert(fromBytes.equals(e));
+      assert(fromBytes.bytes.buffer != e.bytes.buffer);
+
+      const fromCharCodes = Scru128Id.fromBytes(
+        Uint8Array.from(e.toString(), (c) => c.charCodeAt(0))
+      );
+      assert(fromCharCodes.equals(e));
+      assert(fromCharCodes.bytes.buffer != e.bytes.buffer);
+
       const arrayBuffer = e.toArrayBuffer();
       const fromArrayBuffer = Scru128Id.fromArrayBuffer(arrayBuffer);
       assert(fromArrayBuffer.equals(e));
