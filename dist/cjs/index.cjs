@@ -65,6 +65,19 @@ class Scru128Id {
         }
     }
     /**
+     * Creates an object from the internal representation, a 16-byte byte array
+     * containing the 128-bit unsigned integer representation in the big-endian
+     * (network) byte order.
+     *
+     * This method does NOT shallow-copy the argument, and thus the created object
+     * holds the reference to the underlying buffer.
+     *
+     * @throws TypeError if the length of the argument is not 16.
+     */
+    static fromInner(bytes) {
+        return new Scru128Id(bytes);
+    }
+    /**
      * Creates an object from field values.
      *
      * @param timestamp - 48-bit `timestamp` field value.
@@ -138,9 +151,20 @@ class Scru128Id {
         const src = new Uint8Array(25);
         for (let i = 0; i < 25; i++) {
             src[i] = (_a = DECODE_MAP[value.charCodeAt(i)]) !== null && _a !== void 0 ? _a : 0x7f;
-            if (src[i] === 0x7f) {
-                throw new SyntaxError("invalid digit: " + value.charAt(i));
-            }
+        }
+        return Scru128Id.fromDigitValues(src);
+    }
+    /**
+     * Creates an object from an array of Base36 digit values representing a
+     * 25-digit string representation.
+     *
+     * @throws SyntaxError if the argument does not contain a valid string
+     * representation.
+     * @category Conversion
+     */
+    static fromDigitValues(src) {
+        if (src.length !== 25) {
+            throw new SyntaxError("invalid length: " + src.length);
         }
         const dst = new Uint8Array(16);
         let minIndex = 99; // any number greater than size of output array
@@ -148,7 +172,11 @@ class Scru128Id {
             // implement Base36 using 8-digit words
             let carry = 0;
             for (let j = i < 0 ? 0 : i; j < i + 8; j++) {
-                carry = carry * 36 + src[j];
+                const e = src[j];
+                if (e < 0 || e > 35 || !Number.isInteger(e)) {
+                    throw new SyntaxError("invalid digit");
+                }
+                carry = carry * 36 + e;
             }
             // iterate over output array from right to left while carry != 0 but at
             // least up to place already filled
@@ -196,8 +224,38 @@ class Scru128Id {
         return text;
     }
     /**
+     * Creates an object from a byte array representing either a 128-bit unsigned
+     * integer or a 25-digit Base36 string.
+     *
+     * This method shallow-copies the content of the argument, so the created
+     * object holds another instance of the byte array.
+     *
+     * @param value - an array of 16 bytes that contains a 128-bit unsigned
+     * integer in the big-endian (network) byte order or an array of 25 ASCII code
+     * points that reads a 25-digit Base36 string.
+     * @throws SyntaxError if conversion fails.
+     * @category Conversion
+     */
+    static fromBytes(value) {
+        for (let i = 0; i < value.length; i++) {
+            const e = value[i];
+            if (e < 0 || e > 0xff || !Number.isInteger(e)) {
+                throw new SyntaxError("invalid byte value");
+            }
+        }
+        if (value.length === 16) {
+            return new Scru128Id(Uint8Array.from(value));
+        }
+        else {
+            return Scru128Id.fromDigitValues(Uint8Array.from(value, (c) => { var _a; return (_a = DECODE_MAP[c]) !== null && _a !== void 0 ? _a : 0x7f; }));
+        }
+    }
+    /**
      * Creates an object from a byte array that represents a 128-bit unsigned
      * integer.
+     *
+     * This method shallow-copies the content of the argument, so the created
+     * object holds another instance of the byte array.
      *
      * @param value - 16-byte buffer that represents a 128-bit unsigned integer in
      * the big-endian (network) byte order.
