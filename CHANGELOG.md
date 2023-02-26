@@ -6,6 +6,10 @@
 
 - `generateMonotonic()` and `generateCoreMonotonic()` to `Scru128Generator`
 
+### Deprecated
+
+- `Scru128Generator#getLastStatus()`
+
 ## v2.3.1 - 2023-02-18
 
 ### Added
