@@ -4,7 +4,7 @@
 
 ### Added
 
-- `generateMonotonic()` and `generateCoreMonotonic()` to `Scru128Generator`
+- `generateNoRewind()` and `generateCoreNoRewind()` to `Scru128Generator`
 
 ### Deprecated
 
