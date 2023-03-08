@@ -6,6 +6,11 @@
 
 - `generateNoRewind()` and `generateCoreNoRewind()` to `Scru128Generator`
 
+### Changed
+
+- Precedence of PRNG selection in Node.js: Web Crypto first if available
+  - node:crypto > Web Crypto > Math.random -> Web > node > Math
+
 ### Deprecated
 
 - `Scru128Generator#getLastStatus()`
