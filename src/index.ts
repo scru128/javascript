@@ -413,6 +413,24 @@ export class Scru128Id {
  * console.log(String(x));
  * console.log(BigInt(x.toHex()));
  * ```
+ *
+ * @remarks
+ * The generator offers four different methods to generate a SCRU128 ID:
+ *
+ * | Flavor                       | Timestamp | On big clock rewind |
+ * | ---------------------------- | --------- | ------------------- |
+ * | {@link generate}             | Now       | Rewinds state       |
+ * | {@link generateNoRewind}     | Now       | Returns `undefined` |
+ * | {@link generateCore}         | Argument  | Rewinds state       |
+ * | {@link generateCoreNoRewind} | Argument  | Returns `undefined` |
+ *
+ * Each method returns monotonically increasing IDs unless a `timestamp`
+ * provided is significantly (by ten seconds or more) smaller than the one
+ * embedded in the immediately preceding ID. If such a significant clock
+ * rollback is detected, the standard `generate` rewinds the generator state and
+ * returns a new ID based on the current `timestamp`, whereas `NoRewind`
+ * variants keep the state untouched and return `undefined`. `Core` functions
+ * offer low-level primitives.
  */
 export class Scru128Generator {
   private timestamp = 0;
@@ -449,11 +467,7 @@ export class Scru128Generator {
   /**
    * Generates a new SCRU128 ID object from the current `timestamp`.
    *
-   * This method returns monotonically increasing IDs unless the up-to-date
-   * `timestamp` is significantly (by ten seconds or more) smaller than the one
-   * embedded in the immediately preceding ID. If such a significant clock
-   * rollback is detected, this method rewinds the generator state and returns a
-   * new ID based on the up-to-date `timestamp`.
+   * See the {@link Scru128Generator} class documentation for the description.
    */
   generate(): Scru128Id {
     return this.generateCore(Date.now());
@@ -464,11 +478,7 @@ export class Scru128Generator {
    * guaranteeing the monotonic order of generated IDs despite a significant
    * timestamp rollback.
    *
-   * This method returns monotonically increasing IDs unless the up-to-date
-   * `timestamp` is significantly (by ten seconds or more) smaller than the one
-   * embedded in the immediately preceding ID. If such a significant clock
-   * rollback is detected, this method returns `undefined` and keeps the
-   * generator state untouched.
+   * See the {@link Scru128Generator} class documentation for the description.
    */
   generateNoRewind(): Scru128Id | undefined {
     return this.generateCoreNoRewind(Date.now());
@@ -477,11 +487,7 @@ export class Scru128Generator {
   /**
    * Generates a new SCRU128 ID object from the `timestamp` passed.
    *
-   * This method returns monotonically increasing IDs unless a given `timestamp`
-   * is significantly (by ten seconds or more) smaller than the one embedded in
-   * the immediately preceding ID. If such a significant clock rollback is
-   * detected, this method rewinds the generator state and returns a new ID
-   * based on the given argument.
+   * See the {@link Scru128Generator} class documentation for the description.
    *
    * @throws RangeError if the argument is not a 48-bit positive integer.
    */
@@ -502,11 +508,7 @@ export class Scru128Generator {
    * the monotonic order of generated IDs despite a significant timestamp
    * rollback.
    *
-   * This method returns monotonically increasing IDs unless a given `timestamp`
-   * is significantly (by ten seconds or more) smaller than the one embedded in
-   * the immediately preceding ID. If such a significant clock rollback is
-   * detected, this method returns `undefined` and keeps the generator state
-   * untouched.
+   * See the {@link Scru128Generator} class documentation for the description.
    *
    * @throws RangeError if the argument is not a 48-bit positive integer.
    */
@@ -576,8 +578,7 @@ export class Scru128Generator {
    *   was broken because the latest timestamp was less than the previous one by
    *   ten seconds or more.
    *
-   * @deprecated Use {@link generateNoRewind | generateNoRewind()} to
-   * guarantee monotonicity.
+   * @deprecated Use {@link generateNoRewind} to guarantee monotonicity.
    */
   getLastStatus() {
     return this.lastStatus;
@@ -604,8 +605,8 @@ export class Scru128Generator {
   /**
    * Returns a new SCRU128 ID object for each call, infinitely.
    *
-   * This method wraps the result of {@link generate | generate()} in an
-   * [`IteratorResult`] object to use `this` as an infinite iterator.
+   * This method wraps the result of {@link generate} in an [`IteratorResult`]
+   * object to use `this` as an infinite iterator.
    *
    * [`IteratorResult`]: https://developer.mozilla.org/docs/Web/JavaScript/Reference/Iteration_protocols
    */
