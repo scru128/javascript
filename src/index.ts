@@ -662,14 +662,14 @@ class DefaultRandom {
   }
 }
 
-let defaultGenerator: Scru128Generator | undefined;
+let globalGenerator: Scru128Generator | undefined;
 
-/** Generates a new SCRU128 ID object. */
+/** Generates a new SCRU128 ID object using the global generator. */
 export const scru128 = (): Scru128Id =>
-  (defaultGenerator || (defaultGenerator = new Scru128Generator())).generate();
+  (globalGenerator || (globalGenerator = new Scru128Generator())).generate();
 
 /**
- * Generates a new SCRU128 ID encoded in a string.
+ * Generates a new SCRU128 ID encoded in a string using the global generator.
  *
  * Use this function to quickly get a new SCRU128 ID as a string.
  *
