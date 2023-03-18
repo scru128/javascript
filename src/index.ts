@@ -19,19 +19,19 @@
  * @packageDocumentation
  */
 
-/** Maximum value of 48-bit `timestamp` field. */
+/** The maximum value of 48-bit `timestamp` field. */
 const MAX_TIMESTAMP = 0xffff_ffff_ffff;
 
-/** Maximum value of 24-bit `counter_hi` field. */
+/** The maximum value of 24-bit `counter_hi` field. */
 const MAX_COUNTER_HI = 0xff_ffff;
 
-/** Maximum value of 24-bit `counter_lo` field. */
+/** The maximum value of 24-bit `counter_lo` field. */
 const MAX_COUNTER_LO = 0xff_ffff;
 
 /** Digit characters used in the Base36 notation. */
 const DIGITS = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
-/** O(1) map from ASCII code points to Base36 digit values. */
+/** An O(1) map from ASCII code points to Base36 digit values. */
 const DECODE_MAP = [
   0x7f, 0x7f, 0x7f, 0x7f, 0x7f, 0x7f, 0x7f, 0x7f, 0x7f, 0x7f, 0x7f, 0x7f, 0x7f,
   0x7f, 0x7f, 0x7f, 0x7f, 0x7f, 0x7f, 0x7f, 0x7f, 0x7f, 0x7f, 0x7f, 0x7f, 0x7f,
@@ -61,7 +61,7 @@ const DECODE_MAP = [
  */
 export class Scru128Id {
   /**
-   * 16-byte byte array containing the 128-bit unsigned integer representation
+   * A 16-byte byte array containing the 128-bit unsigned integer representation
    * in the big-endian (network) byte order.
    */
   readonly bytes: Readonly<Uint8Array>;
@@ -91,10 +91,10 @@ export class Scru128Id {
   /**
    * Creates an object from field values.
    *
-   * @param timestamp - 48-bit `timestamp` field value.
-   * @param counterHi - 24-bit `counter_hi` field value.
-   * @param counterLo - 24-bit `counter_lo` field value.
-   * @param entropy - 32-bit `entropy` field value.
+   * @param timestamp - A 48-bit `timestamp` field value.
+   * @param counterHi - A 24-bit `counter_hi` field value.
+   * @param counterLo - A 24-bit `counter_lo` field value.
+   * @param entropy - A 32-bit `entropy` field value.
    * @throws RangeError if any argument is out of the value range of the field.
    * @category Conversion
    */
@@ -292,8 +292,8 @@ export class Scru128Id {
    * This method shallow-copies the content of the argument, so the created
    * object holds another instance of the byte array.
    *
-   * @param value - 16-byte buffer that represents a 128-bit unsigned integer in
-   * the big-endian (network) byte order.
+   * @param value - A 16-byte buffer that represents a 128-bit unsigned integer
+   * in the big-endian (network) byte order.
    * @throws TypeError if the byte length of the argument is not 16.
    * @category Conversion
    */
@@ -437,10 +437,10 @@ export class Scru128Generator {
   private counterHi = 0;
   private counterLo = 0;
 
-  /** Timestamp at the last renewal of `counter_hi` field. */
+  /** The timestamp at the last renewal of `counter_hi` field. */
   private tsCounterHi = 0;
 
-  /** Status code reported at the last generation. */
+  /** The status code reported at the last generation. */
   private lastStatus:
     | "NOT_EXECUTED"
     | "NEW_TIMESTAMP"
@@ -449,7 +449,7 @@ export class Scru128Generator {
     | "TIMESTAMP_INC"
     | "CLOCK_ROLLBACK" = "NOT_EXECUTED";
 
-  /** Random number generator used by the generator. */
+  /** The random number generator used by the generator. */
   private rng: { nextUint32: () => number };
 
   /**
@@ -673,7 +673,7 @@ export const scru128 = (): Scru128Id =>
  *
  * Use this function to quickly get a new SCRU128 ID as a string.
  *
- * @returns 25-digit canonical string representation.
+ * @returns The 25-digit canonical string representation.
  * @example
  * ```javascript
  * import { scru128String } from "scru128";
