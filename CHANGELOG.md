@@ -5,6 +5,7 @@
 ### Added
 
 - `generateNoRewind()` and `generateCoreNoRewind()` to `Scru128Generator`
+- `rollbackAllowance` parameter to `generateCore()` of `Scru128Generator`
 
 ### Changed
 

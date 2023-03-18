@@ -45,6 +45,9 @@ const DECODE_MAP = [
   0x1e, 0x1f, 0x20, 0x21, 0x22, 0x23, 0x7f, 0x7f, 0x7f, 0x7f, 0x7f,
 ];
 
+/** The default timestamp rollback allowance. */
+const DEFAULT_ROLLBACK_ALLOWANCE = 10_000; // 10 seconds
+
 /**
  * Represents a SCRU128 ID and provides converters and comparison operators.
  *
@@ -425,8 +428,8 @@ export class Scru128Id {
  * | {@link generateCoreNoRewind} | Argument  | Returns `undefined` |
  *
  * Each method returns monotonically increasing IDs unless a `timestamp`
- * provided is significantly (by ten seconds or more) smaller than the one
- * embedded in the immediately preceding ID. If such a significant clock
+ * provided is significantly (by ten seconds or more by default) smaller than
+ * the one embedded in the immediately preceding ID. If such a significant clock
  * rollback is detected, the standard `generate` rewinds the generator state and
  * returns a new ID based on the current `timestamp`, whereas `NoRewind`
  * variants keep the state untouched and return `undefined`. `Core` functions
@@ -470,7 +473,7 @@ export class Scru128Generator {
    * See the {@link Scru128Generator} class documentation for the description.
    */
   generate(): Scru128Id {
-    return this.generateCore(Date.now());
+    return this.generateCore(Date.now(), DEFAULT_ROLLBACK_ALLOWANCE);
   }
 
   /**
@@ -481,7 +484,7 @@ export class Scru128Generator {
    * See the {@link Scru128Generator} class documentation for the description.
    */
   generateNoRewind(): Scru128Id | undefined {
-    return this.generateCoreNoRewind(Date.now());
+    return this.generateCoreNoRewind(Date.now(), DEFAULT_ROLLBACK_ALLOWANCE);
   }
 
   /**
@@ -489,15 +492,22 @@ export class Scru128Generator {
    *
    * See the {@link Scru128Generator} class documentation for the description.
    *
-   * @throws RangeError if the argument is not a 48-bit positive integer.
+   * @param rollbackAllowance - The amount of `timestamp` rollback that is
+   * considered significant. A suggested value is `10_000` (milliseconds). This
+   * parameter is optional to maintain backward compatibility; it is recommended
+   * to provide a concrete argument.
+   * @throws RangeError if `timestamp` is not a 48-bit positive integer.
    */
-  generateCore(timestamp: number): Scru128Id {
-    let value = this.generateCoreNoRewind(timestamp);
+  generateCore(
+    timestamp: number,
+    rollbackAllowance: number = DEFAULT_ROLLBACK_ALLOWANCE
+  ): Scru128Id {
+    let value = this.generateCoreNoRewind(timestamp, rollbackAllowance);
     if (value === undefined) {
       // reset state and resume
       this.timestamp = 0;
       this.tsCounterHi = 0;
-      value = this.generateCoreNoRewind(timestamp) as Scru128Id;
+      value = this.generateCoreNoRewind(timestamp, rollbackAllowance)!;
       this.lastStatus = "CLOCK_ROLLBACK";
     }
     return value;
@@ -510,24 +520,29 @@ export class Scru128Generator {
    *
    * See the {@link Scru128Generator} class documentation for the description.
    *
-   * @throws RangeError if the argument is not a 48-bit positive integer.
+   * @param rollbackAllowance - The amount of `timestamp` rollback that is
+   * considered significant. A suggested value is `10_000` (milliseconds).
+   * @throws RangeError if `timestamp` is not a 48-bit positive integer.
    */
-  generateCoreNoRewind(timestamp: number): Scru128Id | undefined {
-    const ROLLBACK_ALLOWANCE = 10_000; // 10 seconds
-
+  generateCoreNoRewind(
+    timestamp: number,
+    rollbackAllowance: number
+  ): Scru128Id | undefined {
     if (
       !Number.isInteger(timestamp) ||
       timestamp < 1 ||
       timestamp > MAX_TIMESTAMP
     ) {
       throw new RangeError("`timestamp` must be a 48-bit positive integer");
+    } else if (rollbackAllowance < 0 || rollbackAllowance > MAX_TIMESTAMP) {
+      throw new RangeError("`rollbackAllowance` out of reasonable range");
     }
 
     if (timestamp > this.timestamp) {
       this.timestamp = timestamp;
       this.counterLo = this.rng.nextUint32() & MAX_COUNTER_LO;
       this.lastStatus = "NEW_TIMESTAMP";
-    } else if (timestamp + ROLLBACK_ALLOWANCE > this.timestamp) {
+    } else if (timestamp + rollbackAllowance > this.timestamp) {
       // go on with previous timestamp if new one is not much smaller
       this.counterLo++;
       this.lastStatus = "COUNTER_LO_INC";
