@@ -593,7 +593,19 @@ export class Scru128Generator {
    *   was broken because the latest timestamp was less than the previous one by
    *   ten seconds or more.
    *
-   * @deprecated Use {@link generateNoRewind} to guarantee monotonicity.
+   * @example
+   * ```javascript
+   * import { Scru128Generator } from "scru128";
+   *
+   * const g = new Scru128Generator();
+   * const x = g.generate();
+   * const y = g.generate();
+   * if (g.getLastStatus() === "CLOCK_ROLLBACK") {
+   *   throw new Error("clock moved backward");
+   * } else {
+   *   console.assert(x.compareTo(y) < 0);
+   * }
+   * ```
    */
   getLastStatus() {
     return this.lastStatus;

@@ -12,10 +12,6 @@
 - Precedence of PRNG selection in Node.js: Web Crypto first if available
   - node:crypto > Web Crypto > Math.random -> Web > node > Math
 
-### Deprecated
-
-- `Scru128Generator#getLastStatus()`
-
 ## v2.3.1 - 2023-02-18
 
 ### Added
