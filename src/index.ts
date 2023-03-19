@@ -430,10 +430,10 @@ export class Scru128Id {
  * Each method returns monotonically increasing IDs unless a `timestamp`
  * provided is significantly (by ten seconds or more by default) smaller than
  * the one embedded in the immediately preceding ID. If such a significant clock
- * rollback is detected, the standard `generate` rewinds the generator state and
- * returns a new ID based on the current `timestamp`, whereas `NoRewind`
- * variants keep the state untouched and return `undefined`. `Core` functions
- * offer low-level primitives.
+ * rollback is detected, the `generate` method rewinds the generator state and
+ * returns a new ID based on the current `timestamp`, whereas the experimental
+ * `NoRewind` variants keep the state untouched and return `undefined`. `Core`
+ * functions offer low-level primitives.
  */
 export class Scru128Generator {
   private timestamp = 0;
@@ -473,7 +473,7 @@ export class Scru128Generator {
    * See the {@link Scru128Generator} class documentation for the description.
    */
   generate(): Scru128Id {
-    return this.generateCore(Date.now(), DEFAULT_ROLLBACK_ALLOWANCE);
+    return this.generateCore(Date.now());
   }
 
   /**
@@ -482,6 +482,8 @@ export class Scru128Generator {
    * timestamp rollback.
    *
    * See the {@link Scru128Generator} class documentation for the description.
+   *
+   * @experimental
    */
   generateNoRewind(): Scru128Id | undefined {
     return this.generateCoreNoRewind(Date.now(), DEFAULT_ROLLBACK_ALLOWANCE);
@@ -492,16 +494,10 @@ export class Scru128Generator {
    *
    * See the {@link Scru128Generator} class documentation for the description.
    *
-   * @param rollbackAllowance - The amount of `timestamp` rollback that is
-   * considered significant. A suggested value is `10_000` (milliseconds). This
-   * parameter is optional to maintain backward compatibility; it is recommended
-   * to provide a concrete argument.
    * @throws RangeError if `timestamp` is not a 48-bit positive integer.
    */
-  generateCore(
-    timestamp: number,
-    rollbackAllowance: number = DEFAULT_ROLLBACK_ALLOWANCE
-  ): Scru128Id {
+  generateCore(timestamp: number): Scru128Id {
+    const rollbackAllowance = DEFAULT_ROLLBACK_ALLOWANCE;
     let value = this.generateCoreNoRewind(timestamp, rollbackAllowance);
     if (value === undefined) {
       // reset state and resume
@@ -523,6 +519,7 @@ export class Scru128Generator {
    * @param rollbackAllowance - The amount of `timestamp` rollback that is
    * considered significant. A suggested value is `10_000` (milliseconds).
    * @throws RangeError if `timestamp` is not a 48-bit positive integer.
+   * @experimental
    */
   generateCoreNoRewind(
     timestamp: number,

@@ -14,12 +14,12 @@ describe("Scru128Generator", function () {
       const g = new Scru128Generator();
       assert(g.getLastStatus() === "NOT_EXECUTED");
 
-      let prev = g.generateCore(ts, 10_000);
+      let prev = g.generateCore(ts);
       assert(g.getLastStatus() === "NEW_TIMESTAMP");
       assert(prev.timestamp === ts);
 
       for (let i = 0; i < 100_000; i++) {
-        const curr = g.generateCore(ts - Math.min(9_998, i), 10_000);
+        const curr = g.generateCore(ts - Math.min(9_998, i));
         assert(
           g.getLastStatus() === "COUNTER_LO_INC" ||
             g.getLastStatus() === "COUNTER_HI_INC" ||
@@ -36,17 +36,17 @@ describe("Scru128Generator", function () {
       const g = new Scru128Generator();
       assert(g.getLastStatus() === "NOT_EXECUTED");
 
-      let prev = g.generateCore(ts, 10_000);
+      let prev = g.generateCore(ts);
       assert(g.getLastStatus() === "NEW_TIMESTAMP");
       assert(prev.timestamp === ts);
 
-      let curr = g.generateCore(ts - 10_000, 10_000);
+      let curr = g.generateCore(ts - 10_000);
       assert(g.getLastStatus() === "CLOCK_ROLLBACK");
       assert(prev.compareTo(curr) > 0);
       assert(curr.timestamp == ts - 10_000);
 
       prev = curr;
-      curr = g.generateCore(ts - 10_001, 10_000);
+      curr = g.generateCore(ts - 10_001);
       assert(
         g.getLastStatus() === "COUNTER_LO_INC" ||
           g.getLastStatus() === "COUNTER_HI_INC" ||
