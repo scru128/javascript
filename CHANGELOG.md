@@ -1,6 +1,6 @@
 # Changelog
 
-## v2.3.2 - unreleased
+## v2.3.2 - 2023-03-19
 
 ### Added
 
@@ -14,6 +14,7 @@
 
 ### Maintenance
 
+- Improved documentation about generator method flavors
 - Updated dev dependencies
 
 ## v2.3.1 - 2023-02-18

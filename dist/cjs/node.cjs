@@ -29,6 +29,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
 __exportStar(require("./index.cjs"), exports);
 const nodeCrypto = __importStar(require("crypto"));
 const index_cjs_1 = require("./index.cjs");
-if (nodeCrypto && nodeCrypto.randomFillSync) {
-    (0, index_cjs_1._setRandom)(nodeCrypto.randomFillSync);
+if (typeof crypto === "undefined" || !crypto.getRandomValues) {
+    if (nodeCrypto && nodeCrypto.randomFillSync) {
+        (0, index_cjs_1._setRandom)(nodeCrypto.randomFillSync);
+    }
 }
