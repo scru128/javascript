@@ -19,19 +19,19 @@
  * @packageDocumentation
  */
 
-/** Maximum value of 48-bit `timestamp` field. */
+/** The maximum value of 48-bit `timestamp` field. */
 const MAX_TIMESTAMP = 0xffff_ffff_ffff;
 
-/** Maximum value of 24-bit `counter_hi` field. */
+/** The maximum value of 24-bit `counter_hi` field. */
 const MAX_COUNTER_HI = 0xff_ffff;
 
-/** Maximum value of 24-bit `counter_lo` field. */
+/** The maximum value of 24-bit `counter_lo` field. */
 const MAX_COUNTER_LO = 0xff_ffff;
 
 /** Digit characters used in the Base36 notation. */
 const DIGITS = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
-/** O(1) map from ASCII code points to Base36 digit values. */
+/** An O(1) map from ASCII code points to Base36 digit values. */
 const DECODE_MAP = [
   0x7f, 0x7f, 0x7f, 0x7f, 0x7f, 0x7f, 0x7f, 0x7f, 0x7f, 0x7f, 0x7f, 0x7f, 0x7f,
   0x7f, 0x7f, 0x7f, 0x7f, 0x7f, 0x7f, 0x7f, 0x7f, 0x7f, 0x7f, 0x7f, 0x7f, 0x7f,
@@ -44,6 +44,9 @@ const DECODE_MAP = [
   0x11, 0x12, 0x13, 0x14, 0x15, 0x16, 0x17, 0x18, 0x19, 0x1a, 0x1b, 0x1c, 0x1d,
   0x1e, 0x1f, 0x20, 0x21, 0x22, 0x23, 0x7f, 0x7f, 0x7f, 0x7f, 0x7f,
 ];
+
+/** The default timestamp rollback allowance. */
+const DEFAULT_ROLLBACK_ALLOWANCE = 10_000; // 10 seconds
 
 /**
  * Represents a SCRU128 ID and provides converters and comparison operators.
@@ -61,7 +64,7 @@ const DECODE_MAP = [
  */
 export class Scru128Id {
   /**
-   * 16-byte byte array containing the 128-bit unsigned integer representation
+   * A 16-byte byte array containing the 128-bit unsigned integer representation
    * in the big-endian (network) byte order.
    */
   readonly bytes: Readonly<Uint8Array>;
@@ -91,10 +94,10 @@ export class Scru128Id {
   /**
    * Creates an object from field values.
    *
-   * @param timestamp - 48-bit `timestamp` field value.
-   * @param counterHi - 24-bit `counter_hi` field value.
-   * @param counterLo - 24-bit `counter_lo` field value.
-   * @param entropy - 32-bit `entropy` field value.
+   * @param timestamp - A 48-bit `timestamp` field value.
+   * @param counterHi - A 24-bit `counter_hi` field value.
+   * @param counterLo - A 24-bit `counter_lo` field value.
+   * @param entropy - A 32-bit `entropy` field value.
    * @throws RangeError if any argument is out of the value range of the field.
    * @category Conversion
    */
@@ -250,7 +253,7 @@ export class Scru128Id {
     }
 
     let text = "";
-    for (let d of dst) {
+    for (const d of dst) {
       text += DIGITS.charAt(d);
     }
     return text;
@@ -292,8 +295,8 @@ export class Scru128Id {
    * This method shallow-copies the content of the argument, so the created
    * object holds another instance of the byte array.
    *
-   * @param value - 16-byte buffer that represents a 128-bit unsigned integer in
-   * the big-endian (network) byte order.
+   * @param value - A 16-byte buffer that represents a 128-bit unsigned integer
+   * in the big-endian (network) byte order.
    * @throws TypeError if the byte length of the argument is not 16.
    * @category Conversion
    */
@@ -349,7 +352,7 @@ export class Scru128Id {
   toHex(): string {
     const digits = "0123456789abcdef";
     let text = "0x";
-    for (let e of this.bytes) {
+    for (const e of this.bytes) {
       text += digits.charAt(e >>> 4);
       text += digits.charAt(e & 0xf);
     }
@@ -413,16 +416,34 @@ export class Scru128Id {
  * console.log(String(x));
  * console.log(BigInt(x.toHex()));
  * ```
+ *
+ * @remarks
+ * The generator offers four different methods to generate a SCRU128 ID:
+ *
+ * | Flavor                       | Timestamp | On big clock rewind |
+ * | ---------------------------- | --------- | ------------------- |
+ * | {@link generate}             | Now       | Rewinds state       |
+ * | {@link generateNoRewind}     | Now       | Returns `undefined` |
+ * | {@link generateCore}         | Argument  | Rewinds state       |
+ * | {@link generateCoreNoRewind} | Argument  | Returns `undefined` |
+ *
+ * Each method returns monotonically increasing IDs unless a `timestamp`
+ * provided is significantly (by ten seconds or more by default) smaller than
+ * the one embedded in the immediately preceding ID. If such a significant clock
+ * rollback is detected, the `generate` method rewinds the generator state and
+ * returns a new ID based on the current `timestamp`, whereas the experimental
+ * `NoRewind` variants keep the state untouched and return `undefined`. `Core`
+ * functions offer low-level primitives.
  */
 export class Scru128Generator {
   private timestamp = 0;
   private counterHi = 0;
   private counterLo = 0;
 
-  /** Timestamp at the last renewal of `counter_hi` field. */
+  /** The timestamp at the last renewal of `counter_hi` field. */
   private tsCounterHi = 0;
 
-  /** Status code reported at the last generation. */
+  /** The status code reported at the last generation. */
   private lastStatus:
     | "NOT_EXECUTED"
     | "NEW_TIMESTAMP"
@@ -431,7 +452,7 @@ export class Scru128Generator {
     | "TIMESTAMP_INC"
     | "CLOCK_ROLLBACK" = "NOT_EXECUTED";
 
-  /** Random number generator used by the generator. */
+  /** The random number generator used by the generator. */
   private rng: { nextUint32: () => number };
 
   /**
@@ -446,30 +467,80 @@ export class Scru128Generator {
     this.rng = randomNumberGenerator || new DefaultRandom();
   }
 
-  /** Generates a new SCRU128 ID object. */
+  /**
+   * Generates a new SCRU128 ID object from the current `timestamp`.
+   *
+   * See the {@link Scru128Generator} class documentation for the description.
+   */
   generate(): Scru128Id {
     return this.generateCore(Date.now());
   }
 
   /**
-   * Generates a new SCRU128 ID object with the `timestamp` passed.
+   * Generates a new SCRU128 ID object from the current `timestamp`,
+   * guaranteeing the monotonic order of generated IDs despite a significant
+   * timestamp rollback.
    *
-   * @throws RangeError if the argument is not a 48-bit positive integer.
+   * See the {@link Scru128Generator} class documentation for the description.
+   *
+   * @experimental
+   */
+  generateNoRewind(): Scru128Id | undefined {
+    return this.generateCoreNoRewind(Date.now(), DEFAULT_ROLLBACK_ALLOWANCE);
+  }
+
+  /**
+   * Generates a new SCRU128 ID object from the `timestamp` passed.
+   *
+   * See the {@link Scru128Generator} class documentation for the description.
+   *
+   * @throws RangeError if `timestamp` is not a 48-bit positive integer.
    */
   generateCore(timestamp: number): Scru128Id {
+    const rollbackAllowance = DEFAULT_ROLLBACK_ALLOWANCE;
+    let value = this.generateCoreNoRewind(timestamp, rollbackAllowance);
+    if (value === undefined) {
+      // reset state and resume
+      this.timestamp = 0;
+      this.tsCounterHi = 0;
+      value = this.generateCoreNoRewind(timestamp, rollbackAllowance)!;
+      this.lastStatus = "CLOCK_ROLLBACK";
+    }
+    return value;
+  }
+
+  /**
+   * Generates a new SCRU128 ID object from the `timestamp` passed, guaranteeing
+   * the monotonic order of generated IDs despite a significant timestamp
+   * rollback.
+   *
+   * See the {@link Scru128Generator} class documentation for the description.
+   *
+   * @param rollbackAllowance - The amount of `timestamp` rollback that is
+   * considered significant. A suggested value is `10_000` (milliseconds).
+   * @throws RangeError if `timestamp` is not a 48-bit positive integer.
+   * @experimental
+   */
+  generateCoreNoRewind(
+    timestamp: number,
+    rollbackAllowance: number
+  ): Scru128Id | undefined {
     if (
       !Number.isInteger(timestamp) ||
       timestamp < 1 ||
       timestamp > MAX_TIMESTAMP
     ) {
       throw new RangeError("`timestamp` must be a 48-bit positive integer");
+    } else if (rollbackAllowance < 0 || rollbackAllowance > MAX_TIMESTAMP) {
+      throw new RangeError("`rollbackAllowance` out of reasonable range");
     }
 
-    this.lastStatus = "NEW_TIMESTAMP";
     if (timestamp > this.timestamp) {
       this.timestamp = timestamp;
       this.counterLo = this.rng.nextUint32() & MAX_COUNTER_LO;
-    } else if (timestamp + 10_000 > this.timestamp) {
+      this.lastStatus = "NEW_TIMESTAMP";
+    } else if (timestamp + rollbackAllowance > this.timestamp) {
+      // go on with previous timestamp if new one is not much smaller
       this.counterLo++;
       this.lastStatus = "COUNTER_LO_INC";
       if (this.counterLo > MAX_COUNTER_LO) {
@@ -485,11 +556,8 @@ export class Scru128Generator {
         }
       }
     } else {
-      // reset state if clock moves back by ten seconds or more
-      this.tsCounterHi = 0;
-      this.timestamp = timestamp;
-      this.counterLo = this.rng.nextUint32() & MAX_COUNTER_LO;
-      this.lastStatus = "CLOCK_ROLLBACK";
+      // abort if clock moves back to unbearable extent
+      return undefined;
     }
 
     if (this.timestamp - this.tsCounterHi >= 1_000 || this.tsCounterHi < 1) {
@@ -561,8 +629,8 @@ export class Scru128Generator {
   /**
    * Returns a new SCRU128 ID object for each call, infinitely.
    *
-   * This method wraps the result of {@link generate | generate()} in an
-   * [`IteratorResult`] object to use `this` as an infinite iterator.
+   * This method wraps the result of {@link generate} in an [`IteratorResult`]
+   * object to use `this` as an infinite iterator.
    *
    * [`IteratorResult`]: https://developer.mozilla.org/docs/Web/JavaScript/Reference/Iteration_protocols
    */
@@ -618,18 +686,18 @@ class DefaultRandom {
   }
 }
 
-let defaultGenerator: Scru128Generator | undefined;
+let globalGenerator: Scru128Generator | undefined;
 
-/** Generates a new SCRU128 ID object. */
+/** Generates a new SCRU128 ID object using the global generator. */
 export const scru128 = (): Scru128Id =>
-  (defaultGenerator || (defaultGenerator = new Scru128Generator())).generate();
+  (globalGenerator || (globalGenerator = new Scru128Generator())).generate();
 
 /**
- * Generates a new SCRU128 ID encoded in a string.
+ * Generates a new SCRU128 ID encoded in a string using the global generator.
  *
  * Use this function to quickly get a new SCRU128 ID as a string.
  *
- * @returns 25-digit canonical string representation.
+ * @returns The 25-digit canonical string representation.
  * @example
  * ```javascript
  * import { scru128String } from "scru128";

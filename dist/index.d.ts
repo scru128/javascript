@@ -34,7 +34,7 @@
  */
 export declare class Scru128Id {
     /**
-     * 16-byte byte array containing the 128-bit unsigned integer representation
+     * A 16-byte byte array containing the 128-bit unsigned integer representation
      * in the big-endian (network) byte order.
      */
     readonly bytes: Readonly<Uint8Array>;
@@ -54,10 +54,10 @@ export declare class Scru128Id {
     /**
      * Creates an object from field values.
      *
-     * @param timestamp - 48-bit `timestamp` field value.
-     * @param counterHi - 24-bit `counter_hi` field value.
-     * @param counterLo - 24-bit `counter_lo` field value.
-     * @param entropy - 32-bit `entropy` field value.
+     * @param timestamp - A 48-bit `timestamp` field value.
+     * @param counterHi - A 24-bit `counter_hi` field value.
+     * @param counterLo - A 24-bit `counter_lo` field value.
+     * @param entropy - A 32-bit `entropy` field value.
      * @throws RangeError if any argument is out of the value range of the field.
      * @category Conversion
      */
@@ -113,8 +113,8 @@ export declare class Scru128Id {
      * This method shallow-copies the content of the argument, so the created
      * object holds another instance of the byte array.
      *
-     * @param value - 16-byte buffer that represents a 128-bit unsigned integer in
-     * the big-endian (network) byte order.
+     * @param value - A 16-byte buffer that represents a 128-bit unsigned integer
+     * in the big-endian (network) byte order.
      * @throws TypeError if the byte length of the argument is not 16.
      * @category Conversion
      */
@@ -174,16 +174,34 @@ export declare class Scru128Id {
  * console.log(String(x));
  * console.log(BigInt(x.toHex()));
  * ```
+ *
+ * @remarks
+ * The generator offers four different methods to generate a SCRU128 ID:
+ *
+ * | Flavor                       | Timestamp | On big clock rewind |
+ * | ---------------------------- | --------- | ------------------- |
+ * | {@link generate}             | Now       | Rewinds state       |
+ * | {@link generateNoRewind}     | Now       | Returns `undefined` |
+ * | {@link generateCore}         | Argument  | Rewinds state       |
+ * | {@link generateCoreNoRewind} | Argument  | Returns `undefined` |
+ *
+ * Each method returns monotonically increasing IDs unless a `timestamp`
+ * provided is significantly (by ten seconds or more by default) smaller than
+ * the one embedded in the immediately preceding ID. If such a significant clock
+ * rollback is detected, the `generate` method rewinds the generator state and
+ * returns a new ID based on the current `timestamp`, whereas the experimental
+ * `NoRewind` variants keep the state untouched and return `undefined`. `Core`
+ * functions offer low-level primitives.
  */
 export declare class Scru128Generator {
     private timestamp;
     private counterHi;
     private counterLo;
-    /** Timestamp at the last renewal of `counter_hi` field. */
+    /** The timestamp at the last renewal of `counter_hi` field. */
     private tsCounterHi;
-    /** Status code reported at the last generation. */
+    /** The status code reported at the last generation. */
     private lastStatus;
-    /** Random number generator used by the generator. */
+    /** The random number generator used by the generator. */
     private rng;
     /**
      * Creates a generator object with the default random number generator, or
@@ -194,14 +212,43 @@ export declare class Scru128Generator {
         /** Returns a 32-bit random unsigned integer. */
         nextUint32: () => number;
     });
-    /** Generates a new SCRU128 ID object. */
+    /**
+     * Generates a new SCRU128 ID object from the current `timestamp`.
+     *
+     * See the {@link Scru128Generator} class documentation for the description.
+     */
     generate(): Scru128Id;
     /**
-     * Generates a new SCRU128 ID object with the `timestamp` passed.
+     * Generates a new SCRU128 ID object from the current `timestamp`,
+     * guaranteeing the monotonic order of generated IDs despite a significant
+     * timestamp rollback.
      *
-     * @throws RangeError if the argument is not a 48-bit positive integer.
+     * See the {@link Scru128Generator} class documentation for the description.
+     *
+     * @experimental
+     */
+    generateNoRewind(): Scru128Id | undefined;
+    /**
+     * Generates a new SCRU128 ID object from the `timestamp` passed.
+     *
+     * See the {@link Scru128Generator} class documentation for the description.
+     *
+     * @throws RangeError if `timestamp` is not a 48-bit positive integer.
      */
     generateCore(timestamp: number): Scru128Id;
+    /**
+     * Generates a new SCRU128 ID object from the `timestamp` passed, guaranteeing
+     * the monotonic order of generated IDs despite a significant timestamp
+     * rollback.
+     *
+     * See the {@link Scru128Generator} class documentation for the description.
+     *
+     * @param rollbackAllowance - The amount of `timestamp` rollback that is
+     * considered significant. A suggested value is `10_000` (milliseconds).
+     * @throws RangeError if `timestamp` is not a 48-bit positive integer.
+     * @experimental
+     */
+    generateCoreNoRewind(timestamp: number, rollbackAllowance: number): Scru128Id | undefined;
     /**
      * Returns a status code that indicates the internal state involved in the
      * last generation of ID.
@@ -252,21 +299,21 @@ export declare class Scru128Generator {
     /**
      * Returns a new SCRU128 ID object for each call, infinitely.
      *
-     * This method wraps the result of {@link generate | generate()} in an
-     * [`IteratorResult`] object to use `this` as an infinite iterator.
+     * This method wraps the result of {@link generate} in an [`IteratorResult`]
+     * object to use `this` as an infinite iterator.
      *
      * [`IteratorResult`]: https://developer.mozilla.org/docs/Web/JavaScript/Reference/Iteration_protocols
      */
     next(): IteratorResult<Scru128Id, undefined>;
 }
-/** Generates a new SCRU128 ID object. */
+/** Generates a new SCRU128 ID object using the global generator. */
 export declare const scru128: () => Scru128Id;
 /**
- * Generates a new SCRU128 ID encoded in a string.
+ * Generates a new SCRU128 ID encoded in a string using the global generator.
  *
  * Use this function to quickly get a new SCRU128 ID as a string.
  *
- * @returns 25-digit canonical string representation.
+ * @returns The 25-digit canonical string representation.
  * @example
  * ```javascript
  * import { scru128String } from "scru128";

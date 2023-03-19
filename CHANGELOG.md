@@ -1,5 +1,22 @@
 # Changelog
 
+## v2.3.2 - 2023-03-19
+
+### Added
+
+- `generateNoRewind()` and `generateCoreNoRewind()` to `Scru128Generator`
+  (experimental)
+
+### Changed
+
+- Precedence of PRNG selection in Node.js: Web Crypto first if available
+  - node:crypto > Web Crypto > Math.random -> Web > node > Math
+
+### Maintenance
+
+- Improved documentation about generator method flavors
+- Updated dev dependencies
+
 ## v2.3.1 - 2023-02-18
 
 ### Added

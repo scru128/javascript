@@ -1,6 +1,6 @@
 {
   "name": "scru128",
-  "version": "2.3.1",
+  "version": "2.3.2",
   "description": "SCRU128: Sortable, Clock and Random number-based Unique identifier",
   "type": "module",
   "main": "dist/index.js",
@@ -52,9 +52,9 @@
   "homepage": "https://github.com/scru128/javascript#readme",
   "devDependencies": {
     "mocha": "^10.2.0",
-    "typedoc": "^0.23.25",
+    "typedoc": "^0.23.27",
     "typescript": "^4.9.5",
-    "webpack": "^5.75.0",
+    "webpack": "^5.76.2",
     "webpack-cli": "^5.0.1"
   }
 }
