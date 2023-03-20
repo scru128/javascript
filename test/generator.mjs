@@ -56,19 +56,19 @@ describe("Scru128Generator", function () {
     });
   });
 
-  describe("#generateCoreNoRewind()", function () {
+  describe("#generateOrAbortCore()", function () {
     it("generates increasing IDs even with decreasing or constant timestamp", function () {
       const ts = 0x0123_4567_89ab;
       const g = new Scru128Generator();
       assert(g.getLastStatus() === "NOT_EXECUTED");
 
-      let prev = g.generateCoreNoRewind(ts, 10_000);
+      let prev = g.generateOrAbortCore(ts, 10_000);
       assert(prev !== undefined);
       assert(g.getLastStatus() === "NEW_TIMESTAMP");
       assert(prev.timestamp === ts);
 
       for (let i = 0; i < 100_000; i++) {
-        const curr = g.generateCoreNoRewind(ts - Math.min(9_998, i), 10_000);
+        const curr = g.generateOrAbortCore(ts - Math.min(9_998, i), 10_000);
         assert(curr !== undefined);
         assert(
           g.getLastStatus() === "COUNTER_LO_INC" ||
@@ -86,16 +86,16 @@ describe("Scru128Generator", function () {
       const g = new Scru128Generator();
       assert(g.getLastStatus() === "NOT_EXECUTED");
 
-      const prev = g.generateCoreNoRewind(ts, 10_000);
+      const prev = g.generateOrAbortCore(ts, 10_000);
       assert(prev !== undefined);
       assert(g.getLastStatus() === "NEW_TIMESTAMP");
       assert(prev.timestamp === ts);
 
-      let curr = g.generateCoreNoRewind(ts - 10_000, 10_000);
+      let curr = g.generateOrAbortCore(ts - 10_000, 10_000);
       assert(curr === undefined);
       assert(g.getLastStatus() === "NEW_TIMESTAMP");
 
-      curr = g.generateCoreNoRewind(ts - 10_001, 10_000);
+      curr = g.generateOrAbortCore(ts - 10_001, 10_000);
       assert(curr === undefined);
       assert(g.getLastStatus() === "NEW_TIMESTAMP");
     });

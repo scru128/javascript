@@ -266,7 +266,7 @@ export class Scru128Id {
    * This method shallow-copies the content of the argument, so the created
    * object holds another instance of the byte array.
    *
-   * @param value - an array of 16 bytes that contains a 128-bit unsigned
+   * @param value - An array of 16 bytes that contains a 128-bit unsigned
    * integer in the big-endian (network) byte order or an array of 25 ASCII code
    * points that reads a 25-digit Base36 string.
    * @throws SyntaxError if conversion fails.
@@ -420,20 +420,19 @@ export class Scru128Id {
  * @remarks
  * The generator offers four different methods to generate a SCRU128 ID:
  *
- * | Flavor                       | Timestamp | On big clock rewind |
- * | ---------------------------- | --------- | ------------------- |
- * | {@link generate}             | Now       | Rewinds state       |
- * | {@link generateNoRewind}     | Now       | Returns `undefined` |
- * | {@link generateCore}         | Argument  | Rewinds state       |
- * | {@link generateCoreNoRewind} | Argument  | Returns `undefined` |
+ * | Flavor                      | Timestamp | On big clock rewind |
+ * | --------------------------- | --------- | ------------------- |
+ * | {@link generate}            | Now       | Resets generator    |
+ * | {@link generateOrAbort}     | Now       | Returns `undefined` |
+ * | {@link generateCore}        | Argument  | Resets generator    |
+ * | {@link generateOrAbortCore} | Argument  | Returns `undefined` |
  *
- * Each method returns monotonically increasing IDs unless a `timestamp`
- * provided is significantly (by ten seconds or more by default) smaller than
- * the one embedded in the immediately preceding ID. If such a significant clock
- * rollback is detected, the `generate` method rewinds the generator state and
- * returns a new ID based on the current `timestamp`, whereas the experimental
- * `NoRewind` variants keep the state untouched and return `undefined`. `Core`
- * functions offer low-level primitives.
+ * All of these methods return monotonically increasing IDs unless a `timestamp`
+ * provided is significantly (by default, ten seconds or more) smaller than the
+ * one embedded in the immediately preceding ID. If such a significant clock
+ * rollback is detected, the `generate` method resets the generator and returns
+ * a new ID based on the given `timestamp`, while the `OrAbort` variants abort
+ * and return `undefined`. The `Core` functions offer low-level primitives.
  */
 export class Scru128Generator {
   private timestamp = 0;
@@ -468,7 +467,8 @@ export class Scru128Generator {
   }
 
   /**
-   * Generates a new SCRU128 ID object from the current `timestamp`.
+   * Generates a new SCRU128 ID object from the current `timestamp`, or resets
+   * the generator upon significant timestamp rollback.
    *
    * See the {@link Scru128Generator} class documentation for the description.
    */
@@ -477,20 +477,18 @@ export class Scru128Generator {
   }
 
   /**
-   * Generates a new SCRU128 ID object from the current `timestamp`,
-   * guaranteeing the monotonic order of generated IDs despite a significant
-   * timestamp rollback.
+   * Generates a new SCRU128 ID object from the current `timestamp`, or returns
+   * `undefined` upon significant timestamp rollback.
    *
    * See the {@link Scru128Generator} class documentation for the description.
-   *
-   * @experimental
    */
-  generateNoRewind(): Scru128Id | undefined {
-    return this.generateCoreNoRewind(Date.now(), DEFAULT_ROLLBACK_ALLOWANCE);
+  generateOrAbort(): Scru128Id | undefined {
+    return this.generateOrAbortCore(Date.now(), DEFAULT_ROLLBACK_ALLOWANCE);
   }
 
   /**
-   * Generates a new SCRU128 ID object from the `timestamp` passed.
+   * Generates a new SCRU128 ID object from the `timestamp` passed, or resets
+   * the generator upon significant timestamp rollback.
    *
    * See the {@link Scru128Generator} class documentation for the description.
    *
@@ -498,30 +496,28 @@ export class Scru128Generator {
    */
   generateCore(timestamp: number): Scru128Id {
     const rollbackAllowance = DEFAULT_ROLLBACK_ALLOWANCE;
-    let value = this.generateCoreNoRewind(timestamp, rollbackAllowance);
+    let value = this.generateOrAbortCore(timestamp, rollbackAllowance);
     if (value === undefined) {
       // reset state and resume
       this.timestamp = 0;
       this.tsCounterHi = 0;
-      value = this.generateCoreNoRewind(timestamp, rollbackAllowance)!;
+      value = this.generateOrAbortCore(timestamp, rollbackAllowance)!;
       this.lastStatus = "CLOCK_ROLLBACK";
     }
     return value;
   }
 
   /**
-   * Generates a new SCRU128 ID object from the `timestamp` passed, guaranteeing
-   * the monotonic order of generated IDs despite a significant timestamp
-   * rollback.
+   * Generates a new SCRU128 ID object from the `timestamp` passed, or returns
+   * `undefined` upon significant timestamp rollback.
    *
    * See the {@link Scru128Generator} class documentation for the description.
    *
    * @param rollbackAllowance - The amount of `timestamp` rollback that is
    * considered significant. A suggested value is `10_000` (milliseconds).
    * @throws RangeError if `timestamp` is not a 48-bit positive integer.
-   * @experimental
    */
-  generateCoreNoRewind(
+  generateOrAbortCore(
     timestamp: number,
     rollbackAllowance: number
   ): Scru128Id | undefined {
