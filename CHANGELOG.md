@@ -6,6 +6,11 @@
 
 - `generateOrAbort()` and `generateOrAbortCore()` to `Scru128Generator`
   (formerly named as `generateNoRewind()` and `generateCoreNoRewind()`)
+- `Scru128Generator#generateOrResetCore()`
+
+### Deprecated
+
+- `Scru128Generator#generateCore()`
 
 ## v2.3.2 - 2023-03-19
 

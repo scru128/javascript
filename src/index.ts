@@ -424,15 +424,16 @@ export class Scru128Id {
  * | --------------------------- | --------- | ------------------- |
  * | {@link generate}            | Now       | Resets generator    |
  * | {@link generateOrAbort}     | Now       | Returns `undefined` |
- * | {@link generateCore}        | Argument  | Resets generator    |
+ * | {@link generateOrResetCore} | Argument  | Resets generator    |
  * | {@link generateOrAbortCore} | Argument  | Returns `undefined` |
  *
  * All of these methods return monotonically increasing IDs unless a `timestamp`
  * provided is significantly (by default, ten seconds or more) smaller than the
  * one embedded in the immediately preceding ID. If such a significant clock
- * rollback is detected, the `generate` method resets the generator and returns
- * a new ID based on the given `timestamp`, while the `OrAbort` variants abort
- * and return `undefined`. The `Core` functions offer low-level primitives.
+ * rollback is detected, the `generate` (OrReset) method resets the generator
+ * and returns a new ID based on the given `timestamp`, while the `OrAbort`
+ * variants abort and return `undefined`. The `Core` functions offer low-level
+ * primitives.
  */
 export class Scru128Generator {
   private timestamp = 0;
@@ -473,7 +474,7 @@ export class Scru128Generator {
    * See the {@link Scru128Generator} class documentation for the description.
    */
   generate(): Scru128Id {
-    return this.generateCore(Date.now());
+    return this.generateOrResetCore(Date.now(), DEFAULT_ROLLBACK_ALLOWANCE);
   }
 
   /**
@@ -492,10 +493,11 @@ export class Scru128Generator {
    *
    * See the {@link Scru128Generator} class documentation for the description.
    *
+   * @param rollbackAllowance - The amount of `timestamp` rollback that is
+   * considered significant. A suggested value is `10_000` (milliseconds).
    * @throws RangeError if `timestamp` is not a 48-bit positive integer.
    */
-  generateCore(timestamp: number): Scru128Id {
-    const rollbackAllowance = DEFAULT_ROLLBACK_ALLOWANCE;
+  generateOrResetCore(timestamp: number, rollbackAllowance: number): Scru128Id {
     let value = this.generateOrAbortCore(timestamp, rollbackAllowance);
     if (value === undefined) {
       // reset state and resume
@@ -505,6 +507,15 @@ export class Scru128Generator {
       this.lastStatus = "CLOCK_ROLLBACK";
     }
     return value;
+  }
+
+  /**
+   * A deprecated synonym for `generateOrResetCore(timestamp, 10_000)`.
+   *
+   * @deprecated Use `generateOrResetCore(timestamp, 10_000)` instead.
+   */
+  generateCore(timestamp: number): Scru128Id {
+    return this.generateOrResetCore(timestamp, DEFAULT_ROLLBACK_ALLOWANCE);
   }
 
   /**
