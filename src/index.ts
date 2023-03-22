@@ -482,6 +482,19 @@ export class Scru128Generator {
    * `undefined` upon significant timestamp rollback.
    *
    * See the {@link Scru128Generator} class documentation for the description.
+   *
+   * @example
+   * ```javascript
+   * import { Scru128Generator } from "scru128";
+   *
+   * const g = new Scru128Generator();
+   * const x = g.generateOrAbort();
+   * const y = g.generateOrAbort();
+   * if (y === undefined) {
+   *   throw new Error("The clock went backwards by ten seconds!");
+   * }
+   * console.assert(x.compareTo(y) < 0);
+   * ```
    */
   generateOrAbort(): Scru128Id | undefined {
     return this.generateOrAbortCore(Date.now(), DEFAULT_ROLLBACK_ALLOWANCE);
