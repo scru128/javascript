@@ -1,5 +1,22 @@
 # Changelog
 
+## v2.4.0 - 2023-03-22
+
+### Added
+
+- `generateOrAbort()` and `generateOrAbortCore()` to `Scru128Generator`
+  (formerly named as `generateNoRewind()` and `generateCoreNoRewind()`)
+- `Scru128Generator#generateOrResetCore()`
+
+### Deprecated
+
+- `Scru128Generator#generateCore()`
+- `Scru128Generator#getLastStatus()`
+
+### Maintenance
+
+- Updated TypeScript version to 5.0
+
 ## v2.3.2 - 2023-03-19
 
 ### Added
