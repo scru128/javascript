@@ -34,38 +34,38 @@ and other internal states.</p>
 <tbody><tr>
 <td><a href="Scru128Generator.html#generate">generate</a></td>
 <td>Now</td>
-<td>Rewinds state</td>
+<td>Resets generator</td>
 </tr>
 <tr>
-<td><a href="Scru128Generator.html#generateNoRewind">generateNoRewind</a></td>
+<td><a href="Scru128Generator.html#generateOrAbort">generateOrAbort</a></td>
 <td>Now</td>
 <td>Returns <code>undefined</code></td>
 </tr>
 <tr>
-<td><a href="Scru128Generator.html#generateCore">generateCore</a></td>
+<td><a href="Scru128Generator.html#generateOrResetCore">generateOrResetCore</a></td>
 <td>Argument</td>
-<td>Rewinds state</td>
+<td>Resets generator</td>
 </tr>
 <tr>
-<td><a href="Scru128Generator.html#generateCoreNoRewind">generateCoreNoRewind</a></td>
+<td><a href="Scru128Generator.html#generateOrAbortCore">generateOrAbortCore</a></td>
 <td>Argument</td>
 <td>Returns <code>undefined</code></td>
 </tr>
 </tbody></table>
-<p>Each method returns monotonically increasing IDs unless a <code>timestamp</code>
-provided is significantly (by ten seconds or more by default) smaller than
-the one embedded in the immediately preceding ID. If such a significant clock
-rollback is detected, the <code>generate</code> method rewinds the generator state and
-returns a new ID based on the current <code>timestamp</code>, whereas the experimental
-<code>NoRewind</code> variants keep the state untouched and return <code>undefined</code>. <code>Core</code>
-functions offer low-level primitives.</p>
+<p>All of these methods return monotonically increasing IDs unless a <code>timestamp</code>
+provided is significantly (by default, ten seconds or more) smaller than the
+one embedded in the immediately preceding ID. If such a significant clock
+rollback is detected, the <code>generate</code> (OrReset) method resets the generator
+and returns a new ID based on the given <code>timestamp</code>, while the <code>OrAbort</code>
+variants abort and return <code>undefined</code>. The <code>Core</code> functions offer low-level
+primitives.</p>
 </div></section>
 <section class="tsd-panel tsd-hierarchy">
 <h4>Hierarchy</h4>
 <ul class="tsd-hierarchy">
 <li><span class="target">Scru128Generator</span></li></ul></section><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/scru128/javascript/blob/v2.3.2/src/index.ts#L438">index.ts:438</a></li></ul></aside>
+<li>Defined in <a href="https://github.com/scru128/javascript/blob/v2.4.0/src/index.ts#L438">index.ts:438</a></li></ul></aside>
 <section class="tsd-panel-group tsd-index-group">
 <section class="tsd-panel tsd-index-panel">
 <details class="tsd-index-content tsd-index-accordion" open><summary class="tsd-accordion-summary tsd-index-summary">
@@ -89,8 +89,9 @@ functions offer low-level primitives.</p>
 <div class="tsd-index-list"><a href="Scru128Generator.html#_iterator_" class="tsd-index-link tsd-kind-method tsd-parent-kind-class"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><rect fill="var(--color-icon-background)" stroke="#FF4DB8" stroke-width="1.5" x="1" y="1" width="22" height="22" rx="12" id="icon-2048-path"></rect><path d="M9.162 16V7.24H10.578L11.514 10.072C11.602 10.328 11.674 10.584 11.73 10.84C11.794 11.088 11.842 11.28 11.874 11.416C11.906 11.28 11.954 11.088 12.018 10.84C12.082 10.584 12.154 10.324 12.234 10.06L13.122 7.24H14.538V16H13.482V12.82C13.482 12.468 13.49 12.068 13.506 11.62C13.53 11.172 13.558 10.716 13.59 10.252C13.622 9.78 13.654 9.332 13.686 8.908C13.726 8.476 13.762 8.1 13.794 7.78L12.366 12.16H11.334L9.894 7.78C9.934 8.092 9.97 8.456 10.002 8.872C10.042 9.28 10.078 9.716 10.11 10.18C10.142 10.636 10.166 11.092 10.182 11.548C10.206 12.004 10.218 12.428 10.218 12.82V16H9.162Z" fill="var(--color-text)" id="icon-2048-text"></path></svg><span>[iterator]</span></a>
 <a href="Scru128Generator.html#generate" class="tsd-index-link tsd-kind-method tsd-parent-kind-class"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg><span>generate</span></a>
 <a href="Scru128Generator.html#generateCore" class="tsd-index-link tsd-kind-method tsd-parent-kind-class"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg><span>generate<wbr/>Core</span></a>
-<a href="Scru128Generator.html#generateCoreNoRewind" class="tsd-index-link tsd-kind-method tsd-parent-kind-class"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg><span>generate<wbr/>Core<wbr/>No<wbr/>Rewind</span></a>
-<a href="Scru128Generator.html#generateNoRewind" class="tsd-index-link tsd-kind-method tsd-parent-kind-class"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg><span>generate<wbr/>No<wbr/>Rewind</span></a>
+<a href="Scru128Generator.html#generateOrAbort" class="tsd-index-link tsd-kind-method tsd-parent-kind-class"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg><span>generate<wbr/>Or<wbr/>Abort</span></a>
+<a href="Scru128Generator.html#generateOrAbortCore" class="tsd-index-link tsd-kind-method tsd-parent-kind-class"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg><span>generate<wbr/>Or<wbr/>Abort<wbr/>Core</span></a>
+<a href="Scru128Generator.html#generateOrResetCore" class="tsd-index-link tsd-kind-method tsd-parent-kind-class"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg><span>generate<wbr/>Or<wbr/>Reset<wbr/>Core</span></a>
 <a href="Scru128Generator.html#getLastStatus" class="tsd-index-link tsd-kind-method tsd-parent-kind-class"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg><span>get<wbr/>Last<wbr/>Status</span></a>
 <a href="Scru128Generator.html#next" class="tsd-index-link tsd-kind-method tsd-parent-kind-class"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg><span>next</span></a>
 </div></section></div></details></section></section>
@@ -123,26 +124,26 @@ number generator should be cryptographically strong and securely seeded.</p>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">number</span></h4></li></ul></li></ul></li></ul></li></ul></div>
 <h4 class="tsd-returns-title">Returns <a href="Scru128Generator.html" class="tsd-signature-type" data-tsd-kind="Class">Scru128Generator</a></h4><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/scru128/javascript/blob/v2.3.2/src/index.ts#L463">index.ts:463</a></li></ul></aside></li></ul></section></section>
+<li>Defined in <a href="https://github.com/scru128/javascript/blob/v2.4.0/src/index.ts#L463">index.ts:463</a></li></ul></aside></li></ul></section></section>
 <section class="tsd-panel-group tsd-member-group">
 <h2>Properties</h2>
 <section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class tsd-is-private"><a id="counterHi" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagPrivate">Private</code> <span>counter<wbr/>Hi</span><a href="#counterHi" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
 <div class="tsd-signature">counter<wbr/>Hi<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol"> = 0</span></div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/scru128/javascript/blob/v2.3.2/src/index.ts#L440">index.ts:440</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/scru128/javascript/blob/v2.4.0/src/index.ts#L440">index.ts:440</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class tsd-is-private"><a id="counterLo" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagPrivate">Private</code> <span>counter<wbr/>Lo</span><a href="#counterLo" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
 <div class="tsd-signature">counter<wbr/>Lo<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol"> = 0</span></div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/scru128/javascript/blob/v2.3.2/src/index.ts#L441">index.ts:441</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/scru128/javascript/blob/v2.4.0/src/index.ts#L441">index.ts:441</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class tsd-is-private"><a id="lastStatus" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagPrivate">Private</code> <span>last<wbr/>Status</span><a href="#lastStatus" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
 <div class="tsd-signature">last<wbr/>Status<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">&quot;NOT_EXECUTED&quot;</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">&quot;NEW_TIMESTAMP&quot;</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">&quot;COUNTER_LO_INC&quot;</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">&quot;COUNTER_HI_INC&quot;</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">&quot;TIMESTAMP_INC&quot;</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">&quot;CLOCK_ROLLBACK&quot;</span><span class="tsd-signature-symbol"> = &quot;NOT_EXECUTED&quot;</span></div>
 <div class="tsd-comment tsd-typography"><p>The status code reported at the last generation.</p>
 </div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/scru128/javascript/blob/v2.3.2/src/index.ts#L447">index.ts:447</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/scru128/javascript/blob/v2.4.0/src/index.ts#L447">index.ts:447</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class tsd-is-private"><a id="rng" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagPrivate">Private</code> <span>rng</span><a href="#rng" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
 <div class="tsd-signature">rng<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-symbol">{ </span><br/><span>    </span>nextUint32<span class="tsd-signature-symbol">: </span><span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol"> =&gt; </span><span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">; </span><br/><span class="tsd-signature-symbol">}</span></div>
@@ -160,19 +161,19 @@ number generator should be cryptographically strong and securely seeded.</p>
 <li class="tsd-description">
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">number</span></h4></li></ul></li></ul></li></ul></div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/scru128/javascript/blob/v2.3.2/src/index.ts#L456">index.ts:456</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/scru128/javascript/blob/v2.4.0/src/index.ts#L456">index.ts:456</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class tsd-is-private"><a id="timestamp" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagPrivate">Private</code> <span>timestamp</span><a href="#timestamp" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
 <div class="tsd-signature">timestamp<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol"> = 0</span></div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/scru128/javascript/blob/v2.3.2/src/index.ts#L439">index.ts:439</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/scru128/javascript/blob/v2.4.0/src/index.ts#L439">index.ts:439</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class tsd-is-private"><a id="tsCounterHi" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagPrivate">Private</code> <span>ts<wbr/>Counter<wbr/>Hi</span><a href="#tsCounterHi" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
 <div class="tsd-signature">ts<wbr/>Counter<wbr/>Hi<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol"> = 0</span></div>
 <div class="tsd-comment tsd-typography"><p>The timestamp at the last renewal of <code>counter_hi</code> field.</p>
 </div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/scru128/javascript/blob/v2.3.2/src/index.ts#L444">index.ts:444</a></li></ul></aside></section></section>
+<li>Defined in <a href="https://github.com/scru128/javascript/blob/v2.4.0/src/index.ts#L444">index.ts:444</a></li></ul></aside></section></section>
 <section class="tsd-panel-group tsd-member-group">
 <h2>Methods</h2>
 <section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class"><a id="_iterator_" class="tsd-anchor"></a>
@@ -188,27 +189,27 @@ number generator should be cryptographically strong and securely seeded.</p>
 </div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Iterator</span><span class="tsd-signature-symbol">&lt;</span><a href="Scru128Id.html" class="tsd-signature-type" data-tsd-kind="Class">Scru128Id</a><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol">&gt;</span></h4><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/scru128/javascript/blob/v2.3.2/src/index.ts#L625">index.ts:625</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/scru128/javascript/blob/v2.4.0/src/index.ts#L633">index.ts:633</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class"><a id="generate" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>generate</span><a href="#generate" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
 <li class="tsd-signature tsd-anchor-link" id="generate.generate-1">generate<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="Scru128Id.html" class="tsd-signature-type" data-tsd-kind="Class">Scru128Id</a><a href="#generate.generate-1" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></li>
 <li class="tsd-description">
-<div class="tsd-comment tsd-typography"><p>Generates a new SCRU128 ID object from the current <code>timestamp</code>.</p>
+<div class="tsd-comment tsd-typography"><p>Generates a new SCRU128 ID object from the current <code>timestamp</code>, or resets
+the generator upon significant timestamp rollback.</p>
 <p>See the <a href="Scru128Generator.html">Scru128Generator</a> class documentation for the description.</p>
 </div>
 <h4 class="tsd-returns-title">Returns <a href="Scru128Id.html" class="tsd-signature-type" data-tsd-kind="Class">Scru128Id</a></h4><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/scru128/javascript/blob/v2.3.2/src/index.ts#L475">index.ts:475</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/scru128/javascript/blob/v2.4.0/src/index.ts#L476">index.ts:476</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class"><a id="generateCore" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>generate<wbr/>Core</span><a href="#generateCore" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
 <li class="tsd-signature tsd-anchor-link" id="generateCore.generateCore-1">generate<wbr/>Core<span class="tsd-signature-symbol">(</span>timestamp<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="Scru128Id.html" class="tsd-signature-type" data-tsd-kind="Class">Scru128Id</a><a href="#generateCore.generateCore-1" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></li>
 <li class="tsd-description">
-<div class="tsd-comment tsd-typography"><p>Generates a new SCRU128 ID object from the <code>timestamp</code> passed.</p>
-<p>See the <a href="Scru128Generator.html">Scru128Generator</a> class documentation for the description.</p>
+<div class="tsd-comment tsd-typography"><p>A deprecated synonym for <code>generateOrResetCore(timestamp, 10_000)</code>.</p>
 
-<h3>Throws</h3><p>RangeError if <code>timestamp</code> is not a 48-bit positive integer.</p>
+<h3>Deprecated</h3><p>Use <code>generateOrResetCore(timestamp, 10_000)</code> instead.</p>
 </div>
 <div class="tsd-parameters">
 <h4 class="tsd-parameters-title">Parameters</h4>
@@ -217,15 +218,29 @@ number generator should be cryptographically strong and securely seeded.</p>
 <h5>timestamp: <span class="tsd-signature-type">number</span></h5></li></ul></div>
 <h4 class="tsd-returns-title">Returns <a href="Scru128Id.html" class="tsd-signature-type" data-tsd-kind="Class">Scru128Id</a></h4><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/scru128/javascript/blob/v2.3.2/src/index.ts#L499">index.ts:499</a></li></ul></aside></li></ul></section>
-<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class"><a id="generateCoreNoRewind" class="tsd-anchor"></a>
-<h3 class="tsd-anchor-link"><span>generate<wbr/>Core<wbr/>No<wbr/>Rewind</span><a href="#generateCoreNoRewind" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
+<li>Defined in <a href="https://github.com/scru128/javascript/blob/v2.4.0/src/index.ts#L530">index.ts:530</a></li></ul></aside></li></ul></section>
+<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class"><a id="generateOrAbort" class="tsd-anchor"></a>
+<h3 class="tsd-anchor-link"><span>generate<wbr/>Or<wbr/>Abort</span><a href="#generateOrAbort" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
-<li class="tsd-signature tsd-anchor-link" id="generateCoreNoRewind.generateCoreNoRewind-1">generate<wbr/>Core<wbr/>No<wbr/>Rewind<span class="tsd-signature-symbol">(</span>timestamp<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span>, rollbackAllowance<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol"> | </span><a href="Scru128Id.html" class="tsd-signature-type" data-tsd-kind="Class">Scru128Id</a><a href="#generateCoreNoRewind.generateCoreNoRewind-1" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></li>
-<li class="tsd-description"><code class="tsd-tag ts-flagExperimental">Experimental</code> 
-<div class="tsd-comment tsd-typography"><p>Generates a new SCRU128 ID object from the <code>timestamp</code> passed, guaranteeing
-the monotonic order of generated IDs despite a significant timestamp
-rollback.</p>
+<li class="tsd-signature tsd-anchor-link" id="generateOrAbort.generateOrAbort-1">generate<wbr/>Or<wbr/>Abort<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol"> | </span><a href="Scru128Id.html" class="tsd-signature-type" data-tsd-kind="Class">Scru128Id</a><a href="#generateOrAbort.generateOrAbort-1" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></li>
+<li class="tsd-description">
+<div class="tsd-comment tsd-typography"><p>Generates a new SCRU128 ID object from the current <code>timestamp</code>, or returns
+<code>undefined</code> upon significant timestamp rollback.</p>
+<p>See the <a href="Scru128Generator.html">Scru128Generator</a> class documentation for the description.</p>
+
+<h3>Example</h3><pre><code class="language-javascript"><span class="hl-0">import</span><span class="hl-1"> { </span><span class="hl-2">Scru128Generator</span><span class="hl-1"> } </span><span class="hl-0">from</span><span class="hl-1"> </span><span class="hl-3">&quot;scru128&quot;</span><span class="hl-1">;</span><br/><br/><span class="hl-5">const</span><span class="hl-1"> </span><span class="hl-6">g</span><span class="hl-1"> = </span><span class="hl-5">new</span><span class="hl-1"> </span><span class="hl-7">Scru128Generator</span><span class="hl-1">();</span><br/><span class="hl-5">const</span><span class="hl-1"> </span><span class="hl-6">x</span><span class="hl-1"> = </span><span class="hl-2">g</span><span class="hl-1">.</span><span class="hl-7">generateOrAbort</span><span class="hl-1">();</span><br/><span class="hl-5">const</span><span class="hl-1"> </span><span class="hl-6">y</span><span class="hl-1"> = </span><span class="hl-2">g</span><span class="hl-1">.</span><span class="hl-7">generateOrAbort</span><span class="hl-1">();</span><br/><span class="hl-0">if</span><span class="hl-1"> (</span><span class="hl-2">y</span><span class="hl-1"> === </span><span class="hl-5">undefined</span><span class="hl-1">) {</span><br/><span class="hl-1">  </span><span class="hl-0">throw</span><span class="hl-1"> </span><span class="hl-5">new</span><span class="hl-1"> </span><span class="hl-7">Error</span><span class="hl-1">(</span><span class="hl-3">&quot;The clock went backwards by ten seconds!&quot;</span><span class="hl-1">);</span><br/><span class="hl-1">}</span><br/><span class="hl-2">console</span><span class="hl-1">.</span><span class="hl-7">assert</span><span class="hl-1">(</span><span class="hl-2">x</span><span class="hl-1">.</span><span class="hl-7">compareTo</span><span class="hl-1">(</span><span class="hl-2">y</span><span class="hl-1">) &lt; </span><span class="hl-8">0</span><span class="hl-1">);</span>
+</code></pre>
+</div>
+<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol"> | </span><a href="Scru128Id.html" class="tsd-signature-type" data-tsd-kind="Class">Scru128Id</a></h4><aside class="tsd-sources">
+<ul>
+<li>Defined in <a href="https://github.com/scru128/javascript/blob/v2.4.0/src/index.ts#L499">index.ts:499</a></li></ul></aside></li></ul></section>
+<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class"><a id="generateOrAbortCore" class="tsd-anchor"></a>
+<h3 class="tsd-anchor-link"><span>generate<wbr/>Or<wbr/>Abort<wbr/>Core</span><a href="#generateOrAbortCore" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
+<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
+<li class="tsd-signature tsd-anchor-link" id="generateOrAbortCore.generateOrAbortCore-1">generate<wbr/>Or<wbr/>Abort<wbr/>Core<span class="tsd-signature-symbol">(</span>timestamp<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span>, rollbackAllowance<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol"> | </span><a href="Scru128Id.html" class="tsd-signature-type" data-tsd-kind="Class">Scru128Id</a><a href="#generateOrAbortCore.generateOrAbortCore-1" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></li>
+<li class="tsd-description">
+<div class="tsd-comment tsd-typography"><p>Generates a new SCRU128 ID object from the <code>timestamp</code> passed, or returns
+<code>undefined</code> upon significant timestamp rollback.</p>
 <p>See the <a href="Scru128Generator.html">Scru128Generator</a> class documentation for the description.</p>
 
 <h3>Throws</h3><p>RangeError if <code>timestamp</code> is not a 48-bit positive integer.</p>
@@ -242,20 +257,31 @@ considered significant. A suggested value is <code>10_000</code> (milliseconds).
 </div></li></ul></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol"> | </span><a href="Scru128Id.html" class="tsd-signature-type" data-tsd-kind="Class">Scru128Id</a></h4><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/scru128/javascript/blob/v2.3.2/src/index.ts#L524">index.ts:524</a></li></ul></aside></li></ul></section>
-<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class"><a id="generateNoRewind" class="tsd-anchor"></a>
-<h3 class="tsd-anchor-link"><span>generate<wbr/>No<wbr/>Rewind</span><a href="#generateNoRewind" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
+<li>Defined in <a href="https://github.com/scru128/javascript/blob/v2.4.0/src/index.ts#L544">index.ts:544</a></li></ul></aside></li></ul></section>
+<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class"><a id="generateOrResetCore" class="tsd-anchor"></a>
+<h3 class="tsd-anchor-link"><span>generate<wbr/>Or<wbr/>Reset<wbr/>Core</span><a href="#generateOrResetCore" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
-<li class="tsd-signature tsd-anchor-link" id="generateNoRewind.generateNoRewind-1">generate<wbr/>No<wbr/>Rewind<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol"> | </span><a href="Scru128Id.html" class="tsd-signature-type" data-tsd-kind="Class">Scru128Id</a><a href="#generateNoRewind.generateNoRewind-1" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></li>
-<li class="tsd-description"><code class="tsd-tag ts-flagExperimental">Experimental</code> 
-<div class="tsd-comment tsd-typography"><p>Generates a new SCRU128 ID object from the current <code>timestamp</code>,
-guaranteeing the monotonic order of generated IDs despite a significant
-timestamp rollback.</p>
+<li class="tsd-signature tsd-anchor-link" id="generateOrResetCore.generateOrResetCore-1">generate<wbr/>Or<wbr/>Reset<wbr/>Core<span class="tsd-signature-symbol">(</span>timestamp<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span>, rollbackAllowance<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="Scru128Id.html" class="tsd-signature-type" data-tsd-kind="Class">Scru128Id</a><a href="#generateOrResetCore.generateOrResetCore-1" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></li>
+<li class="tsd-description">
+<div class="tsd-comment tsd-typography"><p>Generates a new SCRU128 ID object from the <code>timestamp</code> passed, or resets
+the generator upon significant timestamp rollback.</p>
 <p>See the <a href="Scru128Generator.html">Scru128Generator</a> class documentation for the description.</p>
+
+<h3>Throws</h3><p>RangeError if <code>timestamp</code> is not a 48-bit positive integer.</p>
 </div>
-<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol"> | </span><a href="Scru128Id.html" class="tsd-signature-type" data-tsd-kind="Class">Scru128Id</a></h4><aside class="tsd-sources">
+<div class="tsd-parameters">
+<h4 class="tsd-parameters-title">Parameters</h4>
+<ul class="tsd-parameter-list">
+<li>
+<h5>timestamp: <span class="tsd-signature-type">number</span></h5></li>
+<li>
+<h5>rollbackAllowance: <span class="tsd-signature-type">number</span></h5>
+<div class="tsd-comment tsd-typography"><p>The amount of <code>timestamp</code> rollback that is
+considered significant. A suggested value is <code>10_000</code> (milliseconds).</p>
+</div></li></ul></div>
+<h4 class="tsd-returns-title">Returns <a href="Scru128Id.html" class="tsd-signature-type" data-tsd-kind="Class">Scru128Id</a></h4><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/scru128/javascript/blob/v2.3.2/src/index.ts#L488">index.ts:488</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/scru128/javascript/blob/v2.4.0/src/index.ts#L513">index.ts:513</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class"><a id="getLastStatus" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>get<wbr/>Last<wbr/>Status</span><a href="#getLastStatus" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
@@ -278,12 +304,11 @@ was broken because the latest timestamp was less than the previous one by
 ten seconds or more.</li>
 </ul>
 
-<h3>Example</h3><pre><code class="language-javascript"><span class="hl-0">import</span><span class="hl-1"> { </span><span class="hl-2">Scru128Generator</span><span class="hl-1"> } </span><span class="hl-0">from</span><span class="hl-1"> </span><span class="hl-3">&quot;scru128&quot;</span><span class="hl-1">;</span><br/><br/><span class="hl-5">const</span><span class="hl-1"> </span><span class="hl-6">g</span><span class="hl-1"> = </span><span class="hl-5">new</span><span class="hl-1"> </span><span class="hl-7">Scru128Generator</span><span class="hl-1">();</span><br/><span class="hl-5">const</span><span class="hl-1"> </span><span class="hl-6">x</span><span class="hl-1"> = </span><span class="hl-2">g</span><span class="hl-1">.</span><span class="hl-7">generate</span><span class="hl-1">();</span><br/><span class="hl-5">const</span><span class="hl-1"> </span><span class="hl-6">y</span><span class="hl-1"> = </span><span class="hl-2">g</span><span class="hl-1">.</span><span class="hl-7">generate</span><span class="hl-1">();</span><br/><span class="hl-0">if</span><span class="hl-1"> (</span><span class="hl-2">g</span><span class="hl-1">.</span><span class="hl-7">getLastStatus</span><span class="hl-1">() === </span><span class="hl-3">&quot;CLOCK_ROLLBACK&quot;</span><span class="hl-1">) {</span><br/><span class="hl-1">  </span><span class="hl-0">throw</span><span class="hl-1"> </span><span class="hl-5">new</span><span class="hl-1"> </span><span class="hl-7">Error</span><span class="hl-1">(</span><span class="hl-3">&quot;clock moved backward&quot;</span><span class="hl-1">);</span><br/><span class="hl-1">} </span><span class="hl-0">else</span><span class="hl-1"> {</span><br/><span class="hl-1">  </span><span class="hl-2">console</span><span class="hl-1">.</span><span class="hl-7">assert</span><span class="hl-1">(</span><span class="hl-2">x</span><span class="hl-1">.</span><span class="hl-7">compareTo</span><span class="hl-1">(</span><span class="hl-2">y</span><span class="hl-1">) &lt; </span><span class="hl-8">0</span><span class="hl-1">);</span><br/><span class="hl-1">}</span>
-</code></pre>
+<h3>Deprecated</h3><p>Use <a href="Scru128Generator.html#generateOrAbort">generateOrAbort</a> to guarantee monotonicity.</p>
 </div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">&quot;NOT_EXECUTED&quot;</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">&quot;NEW_TIMESTAMP&quot;</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">&quot;COUNTER_LO_INC&quot;</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">&quot;COUNTER_HI_INC&quot;</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">&quot;TIMESTAMP_INC&quot;</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">&quot;CLOCK_ROLLBACK&quot;</span></h4><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/scru128/javascript/blob/v2.3.2/src/index.ts#L607">index.ts:607</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/scru128/javascript/blob/v2.4.0/src/index.ts#L615">index.ts:615</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class"><a id="next" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>next</span><a href="#next" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
@@ -295,7 +320,7 @@ object to use <code>this</code> as an infinite iterator.</p>
 </div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">IteratorResult</span><span class="tsd-signature-symbol">&lt;</span><a href="Scru128Id.html" class="tsd-signature-type" data-tsd-kind="Class">Scru128Id</a><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol">&gt;</span></h4><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/scru128/javascript/blob/v2.3.2/src/index.ts#L637">index.ts:637</a></li></ul></aside></li></ul></section></section></div>
+<li>Defined in <a href="https://github.com/scru128/javascript/blob/v2.4.0/src/index.ts#L645">index.ts:645</a></li></ul></aside></li></ul></section></section></div>
 <div class="col-4 col-menu menu-sticky-wrap menu-highlight">
 <div class="tsd-navigation settings">
 <details class="tsd-index-accordion"><summary class="tsd-accordion-summary">
@@ -331,8 +356,9 @@ object to use <code>this</code> as an infinite iterator.</p>
 <li class="tsd-kind-method tsd-parent-kind-class"><a href="Scru128Generator.html#_iterator_" class="tsd-index-link"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg>[iterator]</a></li>
 <li class="tsd-kind-method tsd-parent-kind-class"><a href="Scru128Generator.html#generate" class="tsd-index-link"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg>generate</a></li>
 <li class="tsd-kind-method tsd-parent-kind-class"><a href="Scru128Generator.html#generateCore" class="tsd-index-link"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg>generate<wbr/>Core</a></li>
-<li class="tsd-kind-method tsd-parent-kind-class"><a href="Scru128Generator.html#generateCoreNoRewind" class="tsd-index-link"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg>generate<wbr/>Core<wbr/>No<wbr/>Rewind</a></li>
-<li class="tsd-kind-method tsd-parent-kind-class"><a href="Scru128Generator.html#generateNoRewind" class="tsd-index-link"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg>generate<wbr/>No<wbr/>Rewind</a></li>
+<li class="tsd-kind-method tsd-parent-kind-class"><a href="Scru128Generator.html#generateOrAbort" class="tsd-index-link"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg>generate<wbr/>Or<wbr/>Abort</a></li>
+<li class="tsd-kind-method tsd-parent-kind-class"><a href="Scru128Generator.html#generateOrAbortCore" class="tsd-index-link"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg>generate<wbr/>Or<wbr/>Abort<wbr/>Core</a></li>
+<li class="tsd-kind-method tsd-parent-kind-class"><a href="Scru128Generator.html#generateOrResetCore" class="tsd-index-link"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg>generate<wbr/>Or<wbr/>Reset<wbr/>Core</a></li>
 <li class="tsd-kind-method tsd-parent-kind-class"><a href="Scru128Generator.html#getLastStatus" class="tsd-index-link"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg>get<wbr/>Last<wbr/>Status</a></li>
 <li class="tsd-kind-method tsd-parent-kind-class"><a href="Scru128Generator.html#next" class="tsd-index-link"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-2048-path"></use><use href="#icon-2048-text"></use></svg>next</a></li></ul></li></ul></nav></div></div>
 <div class="container tsd-generator">

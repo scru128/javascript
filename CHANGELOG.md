@@ -1,6 +1,6 @@
 # Changelog
 
-## v2.4.0 - unreleased
+## v2.4.0 - 2023-03-22
 
 ### Added
 
@@ -12,6 +12,10 @@
 
 - `Scru128Generator#generateCore()`
 - `Scru128Generator#getLastStatus()`
+
+### Maintenance
+
+- Updated TypeScript version to 5.0
 
 ## v2.3.2 - 2023-03-19
 
