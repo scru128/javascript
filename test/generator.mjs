@@ -31,7 +31,7 @@ describe("Scru128Generator", function () {
       assert(prev.timestamp >= ts);
     });
 
-    it("breaks increasing order of IDs if timestamp goes backwards by ten seconds", function () {
+    it("breaks increasing order of IDs if timestamp goes backwards a lot", function () {
       const ts = 0x0123_4567_89ab;
       const g = new Scru128Generator();
       assert(g.getLastStatus() === "NOT_EXECUTED");
@@ -81,7 +81,7 @@ describe("Scru128Generator", function () {
       assert(prev.timestamp >= ts);
     });
 
-    it("returns undefined if timestamp goes backwards by ten seconds", function () {
+    it("returns undefined if timestamp goes backwards a lot", function () {
       const ts = 0x0123_4567_89ab;
       const g = new Scru128Generator();
       assert(g.getLastStatus() === "NOT_EXECUTED");
