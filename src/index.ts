@@ -73,7 +73,9 @@ export class Scru128Id {
   private constructor(bytes: Readonly<Uint8Array>) {
     this.bytes = bytes;
     if (bytes.length !== 16) {
-      throw new TypeError("invalid length of byte array: " + bytes.length);
+      throw new TypeError(
+        "invalid length of byte array: " + bytes.length + " bytes (expected 16)"
+      );
     }
   }
 
@@ -172,12 +174,18 @@ export class Scru128Id {
    */
   static fromString(value: string): Scru128Id {
     if (value.length !== 25) {
-      throw new SyntaxError("invalid length: " + value.length);
+      throw new SyntaxError(
+        "invalid length: " + value.length + " (expected 25)"
+      );
     }
 
     const src = new Uint8Array(25);
     for (let i = 0; i < 25; i++) {
       src[i] = DECODE_MAP[value.charCodeAt(i)] ?? 0x7f;
+      if (src[i] == 0x7f) {
+        const c = String.fromCodePoint(value.codePointAt(i)!);
+        throw new SyntaxError("invalid digit '" + c + "' at " + i);
+      }
     }
 
     return Scru128Id.fromDigitValues(src);
@@ -193,7 +201,7 @@ export class Scru128Id {
    */
   private static fromDigitValues(src: ArrayLike<number>): Scru128Id {
     if (src.length !== 25) {
-      throw new SyntaxError("invalid length: " + src.length);
+      throw new SyntaxError("invalid length: " + src.length + " (expected 25)");
     }
 
     const dst = new Uint8Array(16);
@@ -204,7 +212,7 @@ export class Scru128Id {
       for (let j = i < 0 ? 0 : i; j < i + 8; j++) {
         const e = src[j];
         if (e < 0 || e > 35 || !Number.isInteger(e)) {
-          throw new SyntaxError("invalid digit");
+          throw new SyntaxError("invalid digit at " + j);
         }
         carry = carry * 36 + e;
       }
@@ -276,14 +284,18 @@ export class Scru128Id {
     for (let i = 0; i < value.length; i++) {
       const e = value[i];
       if (e < 0 || e > 0xff || !Number.isInteger(e)) {
-        throw new SyntaxError("invalid byte value");
+        throw new SyntaxError("invalid byte value " + e + " at " + i);
       }
     }
     if (value.length === 16) {
       return new Scru128Id(Uint8Array.from(value));
-    } else {
+    } else if (value.length === 25) {
       return Scru128Id.fromDigitValues(
         Uint8Array.from(value, (c) => DECODE_MAP[c] ?? 0x7f)
+      );
+    } else {
+      throw new SyntaxError(
+        "invalid length of byte array: " + value.length + " bytes"
       );
     }
   }
@@ -302,7 +314,11 @@ export class Scru128Id {
    */
   static fromArrayBuffer(value: ArrayBuffer): Scru128Id {
     if (value.byteLength !== 16) {
-      throw new TypeError("invalid length of byte array: " + value.byteLength);
+      throw new TypeError(
+        "invalid length of byte array: " +
+          value.byteLength +
+          " bytes (expected 16)"
+      );
     }
 
     return new Scru128Id(new Uint8Array(value.slice(0)));

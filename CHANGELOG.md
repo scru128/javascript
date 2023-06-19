@@ -1,5 +1,11 @@
 # Changelog
 
+## v2.4.2 - unreleased
+
+### Changed
+
+- Error messages thrown by `Scru128Id` to improve error reporting
+
 ## v2.4.1 - 2023-04-07
 
 ### Maintenance
