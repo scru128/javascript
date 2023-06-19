@@ -10,6 +10,10 @@
 
 - Error messages thrown by `Scru128Id` to improve error reporting
 
+### Deprecated
+
+- `Scru128Id.fromArrayBuffer()` and `Scru128Id#toArrayBuffer()`
+
 ## v2.4.1 - 2023-04-07
 
 ### Maintenance

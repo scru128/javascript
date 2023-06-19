@@ -311,6 +311,7 @@ export class Scru128Id {
    * in the big-endian (network) byte order.
    * @throws TypeError if the byte length of the argument is not 16.
    * @category Conversion
+   * @deprecated Use `fromBytes(new Uint8Array(value))` instead.
    */
   static fromArrayBuffer(value: ArrayBuffer): Scru128Id {
     if (value.byteLength !== 16) {
@@ -329,6 +330,7 @@ export class Scru128Id {
    * representation in the big-endian (network) byte order.
    *
    * @category Conversion
+   * @deprecated Use `bytes.buffer.slice(0)` instead.
    */
   toArrayBuffer(): ArrayBuffer {
     return this.bytes.buffer.slice(0);
