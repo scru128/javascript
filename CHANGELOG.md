@@ -1,6 +1,10 @@
 # Changelog
 
-## v2.4.2 - unreleased
+## v2.5.0 - unreleased
+
+### Added
+
+- `Scru128Id.fromBigInt()` and `Scru128Id#toBigInt()`
 
 ### Changed
 

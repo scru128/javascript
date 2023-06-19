@@ -10,7 +10,7 @@
  * // generate a new identifier object
  * const x = scru128();
  * console.log(String(x)); // e.g. "036Z951MHJIKZIK2GSL81GR7L"
- * console.log(BigInt(x.toHex())); // as a 128-bit unsigned integer
+ * console.log(x.toBigInt()); // as a 128-bit unsigned integer
  *
  * // generate a textual representation directly
  * console.log(scru128String()); // e.g. "036Z951MHZX67T63MQ9XE6Q0J"
@@ -58,8 +58,8 @@ const DEFAULT_ROLLBACK_ALLOWANCE = 10_000; // 10 seconds
  * const x = Scru128Id.fromString("036Z968FU2TUGY7SVKFZNEWKK");
  * console.log(String(x));
  *
- * const y = Scru128Id.fromHex(0x017fa1de51a80fd992f9e8cc2d5eb88en.toString(16));
- * console.log(BigInt(y.toHex()));
+ * const y = Scru128Id.fromBigInt(0x017fa1de51a80fd992f9e8cc2d5eb88en);
+ * console.log(y.toBigInt());
  * ```
  */
 export class Scru128Id {
@@ -335,6 +335,37 @@ export class Scru128Id {
   }
 
   /**
+   * Creates an object from a 128-bit unsigned integer.
+   *
+   * @throws RangeError if the argument is out of the range of 128-bit unsigned
+   * integer.
+   * @category Conversion
+   */
+  static fromBigInt(value: bigint): Scru128Id {
+    if (value < 0 || value >> BigInt(128) > 0) {
+      throw new RangeError("out of 128-bit value range");
+    }
+    const bytes = new Uint8Array(16);
+    for (let i = 15; i >= 0; i--) {
+      bytes[i] = Number(value & BigInt(0xff));
+      value >>= BigInt(8);
+    }
+    return new Scru128Id(bytes);
+  }
+
+  /**
+   * Returns the 128-bit unsigned integer representation.
+   *
+   * @category Conversion
+   */
+  toBigInt(): bigint {
+    return this.bytes.reduce(
+      (acc, curr) => (acc << BigInt(8)) | BigInt(curr),
+      BigInt(0)
+    );
+  }
+
+  /**
    * Creates an object from a 128-bit unsigned integer encoded in a hexadecimal
    * string.
    *
@@ -430,7 +461,7 @@ export class Scru128Id {
  * const g = new Scru128Generator();
  * const x = g.generate();
  * console.log(String(x));
- * console.log(BigInt(x.toHex()));
+ * console.log(x.toBigInt());
  * ```
  *
  * @remarks

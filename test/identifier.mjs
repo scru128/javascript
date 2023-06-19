@@ -129,6 +129,12 @@ describe("Scru128Id", function () {
       assert(fromArrayBuffer.equals(e));
       assert(arrayBuffer != e.bytes.buffer);
       assert(arrayBuffer != fromArrayBuffer.bytes.buffer);
+
+      if (typeof BigInt === "function") {
+        assert(Scru128Id.fromBigInt(e.toBigInt()).equals(e));
+        assert(Scru128Id.fromBigInt(BigInt(e.toHex())).equals(e));
+        assert(Scru128Id.fromHex(e.toBigInt().toString(16)).equals(e));
+      }
     }
   });
 
