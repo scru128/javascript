@@ -1,6 +1,6 @@
 # Changelog
 
-## v2.5.0 - unreleased
+## v2.5.0 - 2023-06-21
 
 ### Added
 
@@ -13,6 +13,10 @@
 ### Deprecated
 
 - `Scru128Id.fromArrayBuffer()` and `Scru128Id#toArrayBuffer()`
+
+### Maintenance
+
+- Updated dev dependencies
 
 ## v2.4.1 - 2023-04-07
 

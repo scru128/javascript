@@ -10,7 +10,7 @@
  * // generate a new identifier object
  * const x = scru128();
  * console.log(String(x)); // e.g. "036Z951MHJIKZIK2GSL81GR7L"
- * console.log(BigInt(x.toHex())); // as a 128-bit unsigned integer
+ * console.log(x.toBigInt()); // as a 128-bit unsigned integer
  *
  * // generate a textual representation directly
  * console.log(scru128String()); // e.g. "036Z951MHZX67T63MQ9XE6Q0J"
@@ -28,8 +28,8 @@
  * const x = Scru128Id.fromString("036Z968FU2TUGY7SVKFZNEWKK");
  * console.log(String(x));
  *
- * const y = Scru128Id.fromHex(0x017fa1de51a80fd992f9e8cc2d5eb88en.toString(16));
- * console.log(BigInt(y.toHex()));
+ * const y = Scru128Id.fromBigInt(0x017fa1de51a80fd992f9e8cc2d5eb88en);
+ * console.log(y.toBigInt());
  * ```
  */
 export declare class Scru128Id {
@@ -117,6 +117,7 @@ export declare class Scru128Id {
      * in the big-endian (network) byte order.
      * @throws TypeError if the byte length of the argument is not 16.
      * @category Conversion
+     * @deprecated Use `fromBytes(new Uint8Array(value))` instead.
      */
     static fromArrayBuffer(value: ArrayBuffer): Scru128Id;
     /**
@@ -124,8 +125,23 @@ export declare class Scru128Id {
      * representation in the big-endian (network) byte order.
      *
      * @category Conversion
+     * @deprecated Use `bytes.buffer.slice(0)` instead.
      */
     toArrayBuffer(): ArrayBuffer;
+    /**
+     * Creates an object from a 128-bit unsigned integer.
+     *
+     * @throws RangeError if the argument is out of the range of 128-bit unsigned
+     * integer.
+     * @category Conversion
+     */
+    static fromBigInt(value: bigint): Scru128Id;
+    /**
+     * Returns the 128-bit unsigned integer representation.
+     *
+     * @category Conversion
+     */
+    toBigInt(): bigint;
     /**
      * Creates an object from a 128-bit unsigned integer encoded in a hexadecimal
      * string.
@@ -172,7 +188,7 @@ export declare class Scru128Id {
  * const g = new Scru128Generator();
  * const x = g.generate();
  * console.log(String(x));
- * console.log(BigInt(x.toHex()));
+ * console.log(x.toBigInt());
  * ```
  *
  * @remarks

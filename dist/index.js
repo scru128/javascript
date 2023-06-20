@@ -10,7 +10,7 @@
  * // generate a new identifier object
  * const x = scru128();
  * console.log(String(x)); // e.g. "036Z951MHJIKZIK2GSL81GR7L"
- * console.log(BigInt(x.toHex())); // as a 128-bit unsigned integer
+ * console.log(x.toBigInt()); // as a 128-bit unsigned integer
  *
  * // generate a textual representation directly
  * console.log(scru128String()); // e.g. "036Z951MHZX67T63MQ9XE6Q0J"
@@ -51,8 +51,8 @@ const DEFAULT_ROLLBACK_ALLOWANCE = 10000; // 10 seconds
  * const x = Scru128Id.fromString("036Z968FU2TUGY7SVKFZNEWKK");
  * console.log(String(x));
  *
- * const y = Scru128Id.fromHex(0x017fa1de51a80fd992f9e8cc2d5eb88en.toString(16));
- * console.log(BigInt(y.toHex()));
+ * const y = Scru128Id.fromBigInt(0x017fa1de51a80fd992f9e8cc2d5eb88en);
+ * console.log(y.toBigInt());
  * ```
  */
 export class Scru128Id {
@@ -60,7 +60,7 @@ export class Scru128Id {
     constructor(bytes) {
         this.bytes = bytes;
         if (bytes.length !== 16) {
-            throw new TypeError("invalid length of byte array: " + bytes.length);
+            throw new TypeError("invalid length of byte array: " + bytes.length + " bytes (expected 16)");
         }
     }
     /**
@@ -145,11 +145,15 @@ export class Scru128Id {
     static fromString(value) {
         var _a;
         if (value.length !== 25) {
-            throw new SyntaxError("invalid length: " + value.length);
+            throw new SyntaxError("invalid length: " + value.length + " (expected 25)");
         }
         const src = new Uint8Array(25);
         for (let i = 0; i < 25; i++) {
             src[i] = (_a = DECODE_MAP[value.charCodeAt(i)]) !== null && _a !== void 0 ? _a : 0x7f;
+            if (src[i] == 0x7f) {
+                const c = String.fromCodePoint(value.codePointAt(i));
+                throw new SyntaxError("invalid digit '" + c + "' at " + i);
+            }
         }
         return Scru128Id.fromDigitValues(src);
     }
@@ -163,7 +167,7 @@ export class Scru128Id {
      */
     static fromDigitValues(src) {
         if (src.length !== 25) {
-            throw new SyntaxError("invalid length: " + src.length);
+            throw new SyntaxError("invalid length: " + src.length + " (expected 25)");
         }
         const dst = new Uint8Array(16);
         let minIndex = 99; // any number greater than size of output array
@@ -173,7 +177,7 @@ export class Scru128Id {
             for (let j = i < 0 ? 0 : i; j < i + 8; j++) {
                 const e = src[j];
                 if (e < 0 || e > 35 || !Number.isInteger(e)) {
-                    throw new SyntaxError("invalid digit");
+                    throw new SyntaxError("invalid digit at " + j);
                 }
                 carry = carry * 36 + e;
             }
@@ -239,14 +243,17 @@ export class Scru128Id {
         for (let i = 0; i < value.length; i++) {
             const e = value[i];
             if (e < 0 || e > 0xff || !Number.isInteger(e)) {
-                throw new SyntaxError("invalid byte value");
+                throw new SyntaxError("invalid byte value " + e + " at " + i);
             }
         }
         if (value.length === 16) {
             return new Scru128Id(Uint8Array.from(value));
         }
-        else {
+        else if (value.length === 25) {
             return Scru128Id.fromDigitValues(Uint8Array.from(value, (c) => { var _a; return (_a = DECODE_MAP[c]) !== null && _a !== void 0 ? _a : 0x7f; }));
+        }
+        else {
+            throw new SyntaxError("invalid length of byte array: " + value.length + " bytes");
         }
     }
     /**
@@ -260,10 +267,13 @@ export class Scru128Id {
      * in the big-endian (network) byte order.
      * @throws TypeError if the byte length of the argument is not 16.
      * @category Conversion
+     * @deprecated Use `fromBytes(new Uint8Array(value))` instead.
      */
     static fromArrayBuffer(value) {
         if (value.byteLength !== 16) {
-            throw new TypeError("invalid length of byte array: " + value.byteLength);
+            throw new TypeError("invalid length of byte array: " +
+                value.byteLength +
+                " bytes (expected 16)");
         }
         return new Scru128Id(new Uint8Array(value.slice(0)));
     }
@@ -272,9 +282,36 @@ export class Scru128Id {
      * representation in the big-endian (network) byte order.
      *
      * @category Conversion
+     * @deprecated Use `bytes.buffer.slice(0)` instead.
      */
     toArrayBuffer() {
         return this.bytes.buffer.slice(0);
+    }
+    /**
+     * Creates an object from a 128-bit unsigned integer.
+     *
+     * @throws RangeError if the argument is out of the range of 128-bit unsigned
+     * integer.
+     * @category Conversion
+     */
+    static fromBigInt(value) {
+        if (value < 0 || value >> BigInt(128) > 0) {
+            throw new RangeError("out of 128-bit value range");
+        }
+        const bytes = new Uint8Array(16);
+        for (let i = 15; i >= 0; i--) {
+            bytes[i] = Number(value & BigInt(0xff));
+            value >>= BigInt(8);
+        }
+        return new Scru128Id(bytes);
+    }
+    /**
+     * Returns the 128-bit unsigned integer representation.
+     *
+     * @category Conversion
+     */
+    toBigInt() {
+        return this.bytes.reduce((acc, curr) => (acc << BigInt(8)) | BigInt(curr), BigInt(0));
     }
     /**
      * Creates an object from a 128-bit unsigned integer encoded in a hexadecimal
@@ -364,7 +401,7 @@ export class Scru128Id {
  * const g = new Scru128Generator();
  * const x = g.generate();
  * console.log(String(x));
- * console.log(BigInt(x.toHex()));
+ * console.log(x.toBigInt());
  * ```
  *
  * @remarks
