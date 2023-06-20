@@ -1,5 +1,23 @@
 # Changelog
 
+## v2.5.0 - 2023-06-21
+
+### Added
+
+- `Scru128Id.fromBigInt()` and `Scru128Id#toBigInt()`
+
+### Changed
+
+- Error messages thrown by `Scru128Id` to improve error reporting
+
+### Deprecated
+
+- `Scru128Id.fromArrayBuffer()` and `Scru128Id#toArrayBuffer()`
+
+### Maintenance
+
+- Updated dev dependencies
+
 ## v2.4.1 - 2023-04-07
 
 ### Maintenance

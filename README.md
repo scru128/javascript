@@ -22,7 +22,7 @@ import { scru128, scru128String } from "scru128";
 // generate a new identifier object
 const x = scru128();
 console.log(String(x)); // e.g. "036Z951MHJIKZIK2GSL81GR7L"
-console.log(BigInt(x.toHex())); // as a 128-bit unsigned integer
+console.log(x.toBigInt()); // as a 128-bit unsigned integer
 
 // generate a textual representation directly
 console.log(scru128String()); // e.g. "036Z951MHZX67T63MQ9XE6Q0J"

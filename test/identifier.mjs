@@ -63,6 +63,13 @@ describe("Scru128Id", function () {
       "036Z8PUQ5A7J0TI08P4J 6CYA",
       "F5LXX1ZZ5PNORYNQGLHZMSP34",
       "ZZZZZZZZZZZZZZZZZZZZZZZZZ",
+      "039O\tVVKLFMQLQE7FZLLZ7C7T",
+      "039ONVVKLFMQLQ漢字FGVD1",
+      "039ONVVKL🤣QE7FZR2HDOQU",
+      "頭ONVVKLFMQLQE7FZRHTGCFZ",
+      "039ONVVKLFMQLQE7FZTFT5尾",
+      "039漢字A52XP4BVF4SN94E09CJA",
+      "039OOA52XP4BV😘SN97642MWL",
     ];
 
     for (const e of cases) {
@@ -122,6 +129,12 @@ describe("Scru128Id", function () {
       assert(fromArrayBuffer.equals(e));
       assert(arrayBuffer != e.bytes.buffer);
       assert(arrayBuffer != fromArrayBuffer.bytes.buffer);
+
+      if (typeof BigInt === "function") {
+        assert(Scru128Id.fromBigInt(e.toBigInt()).equals(e));
+        assert(Scru128Id.fromBigInt(BigInt(e.toHex())).equals(e));
+        assert(Scru128Id.fromHex(e.toBigInt().toString(16)).equals(e));
+      }
     }
   });
 
