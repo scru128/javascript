@@ -5,6 +5,8 @@
 ### Removed
 
 - CommonJS entry point
+- `node:crypto`-based CSPRNG implementation; now falls back on `Math.random()`
+  in Node v14 or older where Web Crypto API is not yet available
 - Non-ESM browser test runner
 
 ## v2.5.0 - 2023-06-21

@@ -719,13 +719,6 @@ if (typeof crypto !== "undefined" && crypto.getRandomValues) {
   getRandomValues = (buffer) => crypto.getRandomValues(buffer);
 }
 
-/** @internal */
-export const _setRandom = (
-  rand: <T extends Uint8Array | Uint16Array | Uint32Array>(buffer: T) => T
-) => {
-  getRandomValues = rand;
-};
-
 /**
  * Wraps `crypto.getRandomValues()` and compatibles to enable buffering; this
  * uses a small buffer by default to avoid unbearable throughput decline in some

@@ -5,20 +5,12 @@
   "type": "module",
   "main": "dist/index.js",
   "types": "./dist/index.d.ts",
-  "exports": {
-    "node": "./dist/node.js",
-    "default": "./dist/index.js"
-  },
+  "exports": "./dist/index.js",
   "files": [
     "CHANGELOG.md",
     "dist"
   ],
-  "sideEffects": [
-    "./dist/node.js"
-  ],
-  "browser": {
-    "crypto": false
-  },
+  "sideEffects": false,
   "scripts": {
     "build": "tsc",
     "doc": "typedoc ./src/index.ts --gitRevision \"v$npm_package_version\"",
