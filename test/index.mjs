@@ -27,7 +27,7 @@ describe("scru128String()", function () {
   }
 
   it("generates 25-digit canonical string", function () {
-    const re = /^[0-9A-Z]{25}$/;
+    const re = /^[0-9a-z]{25}$/;
     assert(samples.every((e) => typeof e === "string" && re.test(e)));
   });
 

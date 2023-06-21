@@ -40,8 +40,8 @@ describe("Scru128Id", function () {
       const fromString = Scru128Id.fromString(e[1]);
 
       assert(fromFields.equals(fromString));
-      assert(fromFields.toString() === e[1].toUpperCase());
-      assert(fromString.toString() === e[1].toUpperCase());
+      assert(fromFields.toString() === e[1].toLowerCase());
+      assert(fromString.toString() === e[1].toLowerCase());
       for (let i = 0; i < fs.length; i++) {
         assert(fromFields[fs[i]] === e[0][i]);
         assert(fromString[fs[i]] === e[0][i]);
@@ -52,25 +52,25 @@ describe("Scru128Id", function () {
   it("throws error if an invalid string representation is supplied", function () {
     const cases = [
       "",
-      " 036Z8PUQ4TSXSIGK6O19Y164Q",
-      "036Z8PUQ54QNY1VQ3HCBRKWEB ",
-      " 036Z8PUQ54QNY1VQ3HELIVWAX ",
-      "+036Z8PUQ54QNY1VQ3HFCV3SS0",
-      "-036Z8PUQ54QNY1VQ3HHY8U1CH",
-      "+36Z8PUQ54QNY1VQ3HJQ48D9P",
-      "-36Z8PUQ5A7J0TI08OZ6ZDRDY",
-      "036Z8PUQ5A7J0T_08P2CDZ28V",
-      "036Z8PU-5A7J0TI08P3OL8OOL",
-      "036Z8PUQ5A7J0TI08P4J 6CYA",
-      "F5LXX1ZZ5PNORYNQGLHZMSP34",
-      "ZZZZZZZZZZZZZZZZZZZZZZZZZ",
-      "039O\tVVKLFMQLQE7FZLLZ7C7T",
-      "039ONVVKLFMQLQ漢字FGVD1",
-      "039ONVVKL🤣QE7FZR2HDOQU",
-      "頭ONVVKLFMQLQE7FZRHTGCFZ",
-      "039ONVVKLFMQLQE7FZTFT5尾",
-      "039漢字A52XP4BVF4SN94E09CJA",
-      "039OOA52XP4BV😘SN97642MWL",
+      " 036z8puq4tsxsigk6o19y164q",
+      "036z8puq54qny1vq3hcbrkweb ",
+      " 036z8puq54qny1vq3helivwax ",
+      "+036z8puq54qny1vq3hfcv3ss0",
+      "-036z8puq54qny1vq3hhy8u1ch",
+      "+36z8puq54qny1vq3hjq48d9p",
+      "-36z8puq5a7j0ti08oz6zdrdy",
+      "036z8puq5a7j0t_08p2cdz28v",
+      "036z8pu-5a7j0ti08p3ol8ool",
+      "036z8puq5a7j0ti08p4j 6cya",
+      "f5lxx1zz5pnorynqglhzmsp34",
+      "zzzzzzzzzzzzzzzzzzzzzzzzz",
+      "039o\tvvklfmqlqe7fzllz7c7t",
+      "039onvvklfmqlq漢字fgvd1",
+      "039onvvkl🤣qe7fzr2hdoqu",
+      "頭onvvklfmqlqe7fzrhtgcfz",
+      "039onvvklfmqlqe7fztft5尾",
+      "039漢字a52xp4bvf4sn94e09cja",
+      "039ooa52xp4bv😘sn97642mwl",
     ];
 
     for (const e of cases) {

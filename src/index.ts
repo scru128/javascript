@@ -5,15 +5,15 @@
  * ```javascript
  * import { scru128, scru128String } from "scru128";
  * // or on browsers:
- * // import { scru128, scru128String } from "https://unpkg.com/scru128@^2";
+ * // import { scru128, scru128String } from "https://unpkg.com/scru128@^3";
  *
  * // generate a new identifier object
  * const x = scru128();
- * console.log(String(x)); // e.g. "036Z951MHJIKZIK2GSL81GR7L"
+ * console.log(String(x)); // e.g., "036z951mhjikzik2gsl81gr7l"
  * console.log(x.toBigInt()); // as a 128-bit unsigned integer
  *
  * // generate a textual representation directly
- * console.log(scru128String()); // e.g. "036Z951MHZX67T63MQ9XE6Q0J"
+ * console.log(scru128String()); // e.g., "036z951mhzx67t63mq9xe6q0j"
  * ```
  *
  * @packageDocumentation
@@ -29,7 +29,7 @@ const MAX_COUNTER_HI = 0xff_ffff;
 const MAX_COUNTER_LO = 0xff_ffff;
 
 /** Digit characters used in the Base36 notation. */
-const DIGITS = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+const DIGITS = "0123456789abcdefghijklmnopqrstuvwxyz";
 
 /** An O(1) map from ASCII code points to Base36 digit values. */
 const DECODE_MAP = [
@@ -55,7 +55,7 @@ const DEFAULT_ROLLBACK_ALLOWANCE = 10_000; // 10 seconds
  * ```javascript
  * import { Scru128Id } from "scru128";
  *
- * const x = Scru128Id.fromString("036Z968FU2TUGY7SVKFZNEWKK");
+ * const x = Scru128Id.fromString("036z968fu2tugy7svkfznewkk");
  * console.log(String(x));
  *
  * const y = Scru128Id.fromBigInt(0x017fa1de51a80fd992f9e8cc2d5eb88en);
@@ -592,9 +592,9 @@ export class Scru128Generator {
    * import { Scru128Generator } from "scru128";
    *
    * const [a, b, c] = new Scru128Generator();
-   * console.log(String(a)); // e.g. "038MQR9E14CJC12DH9AMW7I5O"
-   * console.log(String(b)); // e.g. "038MQR9E14CJC12DH9DTPWFR3"
-   * console.log(String(c)); // e.g. "038MQR9E14CJC12DH9E6RJMQI"
+   * console.log(String(a)); // e.g., "038mqr9e14cjc12dh9amw7i5o"
+   * console.log(String(b)); // e.g., "038mqr9e14cjc12dh9dtpwfr3"
+   * console.log(String(c)); // e.g., "038mqr9e14cjc12dh9e6rjmqi"
    * ```
    */
   [Symbol.iterator](): Iterator<Scru128Id, undefined> {
