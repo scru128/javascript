@@ -131,6 +131,12 @@ describe("Scru128Id", function () {
       assert(arrayBuffer != e.bytes.buffer);
       assert(arrayBuffer != fromArrayBuffer.bytes.buffer);
 
+      const fromStrBuffer = Scru128Id.fromArrayBuffer(
+        Uint8Array.from(e.toString(), (c) => c.charCodeAt(0)).buffer
+      );
+      assert(fromStrBuffer.equals(e));
+      assert(fromStrBuffer.bytes.buffer != e.bytes.buffer);
+
       if (typeof BigInt === "function") {
         assert(Scru128Id.fromBigInt(e.toBigInt()).equals(e));
         assert(Scru128Id.fromBigInt(BigInt(e.toHex())).equals(e));

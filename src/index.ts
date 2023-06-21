@@ -301,28 +301,31 @@ export class Scru128Id {
   }
 
   /**
-   * Creates an object from a byte array that represents a 128-bit unsigned
-   * integer.
+   * Creates an object from a byte array representing either a 128-bit unsigned
+   * integer or a 25-digit Base36 string.
    *
    * This method shallow-copies the content of the argument, so the created
    * object holds another instance of the byte array.
    *
-   * @param value - A 16-byte buffer that represents a 128-bit unsigned integer
-   * in the big-endian (network) byte order.
-   * @throws TypeError if the byte length of the argument is not 16.
+   * @param value - A 16-byte buffer containing a 128-bit unsigned integer in
+   * the big-endian (network) byte order or a 25-byte buffer containing a
+   * 25-digit ASCII-encoded, Base36 string.
+   * @throws SyntaxError if conversion fails.
    * @category Conversion
    * @deprecated Use `fromBytes(new Uint8Array(value))` instead.
    */
   static fromArrayBuffer(value: ArrayBuffer): Scru128Id {
-    if (value.byteLength !== 16) {
-      throw new TypeError(
-        "invalid length of byte array: " +
-          value.byteLength +
-          " bytes (expected 16)"
+    if (value.byteLength === 16) {
+      return new Scru128Id(new Uint8Array(value.slice(0)));
+    } else if (value.byteLength === 25) {
+      return Scru128Id.fromDigitValues(
+        Uint8Array.from(new Uint8Array(value), (c) => DECODE_MAP[c] ?? 0x7f)
+      );
+    } else {
+      throw new SyntaxError(
+        "invalid length of byte array: " + value.byteLength + " bytes"
       );
     }
-
-    return new Scru128Id(new Uint8Array(value.slice(0)));
   }
 
   /**

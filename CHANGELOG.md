@@ -9,6 +9,12 @@
   in Node v14 or older where Web Crypto API is not yet available
 - Non-ESM browser test runner
 
+### Changed
+
+- Behavior of `Scru128Id.fromArrayBuffer()`, which now throws `SyntaxError`
+  (instead of `TypeError`) on failure and accepts 25-digit ASCII-encoded, Base36
+  strings (in addition to 128-bit unsigned integers)
+
 ## v2.5.0 - 2023-06-21
 
 ### Added
