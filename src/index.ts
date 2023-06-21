@@ -72,11 +72,6 @@ export class Scru128Id {
   /** Creates an object from a 16-byte byte array. */
   private constructor(bytes: Readonly<Uint8Array>) {
     this.bytes = bytes;
-    if (bytes.length !== 16) {
-      throw new TypeError(
-        "invalid length of byte array: " + bytes.length + " bytes (expected 16)"
-      );
-    }
   }
 
   /**
@@ -90,7 +85,13 @@ export class Scru128Id {
    * @throws TypeError if the length of the argument is not 16.
    */
   static ofInner(bytes: Uint8Array) {
-    return new Scru128Id(bytes);
+    if (bytes.length === 16) {
+      return new Scru128Id(bytes);
+    } else {
+      throw new TypeError(
+        "invalid length of byte array: " + bytes.length + " bytes (expected 16)"
+      );
+    }
   }
 
   /**
