@@ -22,6 +22,7 @@ a case-insensitive scheme. Other changes include the removal of deprecated APIs.
 ### Changed
 
 - Letter case of generated IDs from uppercase to lowercase
+- TypeScript transpilation target from ES2015 to ES2016
 
 ## v2.5.0 - 2023-06-21
 
