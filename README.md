@@ -17,15 +17,15 @@ decentralized, globally unique time-ordered identifiers. SCRU128 is inspired by
 ```javascript
 import { scru128, scru128String } from "scru128";
 // or on browsers:
-// import { scru128, scru128String } from "https://unpkg.com/scru128@^2";
+// import { scru128, scru128String } from "https://unpkg.com/scru128@^3";
 
 // generate a new identifier object
 const x = scru128();
-console.log(String(x)); // e.g. "036Z951MHJIKZIK2GSL81GR7L"
+console.log(String(x)); // e.g., "036z951mhjikzik2gsl81gr7l"
 console.log(x.toBigInt()); // as a 128-bit unsigned integer
 
 // generate a textual representation directly
-console.log(scru128String()); // e.g. "036Z951MHZX67T63MQ9XE6Q0J"
+console.log(scru128String()); // e.g., "036z951mhzx67t63mq9xe6q0j"
 ```
 
 See [SCRU128 Specification] for details.

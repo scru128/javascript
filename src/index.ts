@@ -5,15 +5,15 @@
  * ```javascript
  * import { scru128, scru128String } from "scru128";
  * // or on browsers:
- * // import { scru128, scru128String } from "https://unpkg.com/scru128@^2";
+ * // import { scru128, scru128String } from "https://unpkg.com/scru128@^3";
  *
  * // generate a new identifier object
  * const x = scru128();
- * console.log(String(x)); // e.g. "036Z951MHJIKZIK2GSL81GR7L"
+ * console.log(String(x)); // e.g., "036z951mhjikzik2gsl81gr7l"
  * console.log(x.toBigInt()); // as a 128-bit unsigned integer
  *
  * // generate a textual representation directly
- * console.log(scru128String()); // e.g. "036Z951MHZX67T63MQ9XE6Q0J"
+ * console.log(scru128String()); // e.g., "036z951mhzx67t63mq9xe6q0j"
  * ```
  *
  * @packageDocumentation
@@ -29,7 +29,7 @@ const MAX_COUNTER_HI = 0xff_ffff;
 const MAX_COUNTER_LO = 0xff_ffff;
 
 /** Digit characters used in the Base36 notation. */
-const DIGITS = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+const DIGITS = "0123456789abcdefghijklmnopqrstuvwxyz";
 
 /** An O(1) map from ASCII code points to Base36 digit values. */
 const DECODE_MAP = [
@@ -55,7 +55,7 @@ const DEFAULT_ROLLBACK_ALLOWANCE = 10_000; // 10 seconds
  * ```javascript
  * import { Scru128Id } from "scru128";
  *
- * const x = Scru128Id.fromString("036Z968FU2TUGY7SVKFZNEWKK");
+ * const x = Scru128Id.fromString("036z968fu2tugy7svkfznewkk");
  * console.log(String(x));
  *
  * const y = Scru128Id.fromBigInt(0x017fa1de51a80fd992f9e8cc2d5eb88en);
@@ -72,11 +72,6 @@ export class Scru128Id {
   /** Creates an object from a 16-byte byte array. */
   private constructor(bytes: Readonly<Uint8Array>) {
     this.bytes = bytes;
-    if (bytes.length !== 16) {
-      throw new TypeError(
-        "invalid length of byte array: " + bytes.length + " bytes (expected 16)"
-      );
-    }
   }
 
   /**
@@ -90,7 +85,13 @@ export class Scru128Id {
    * @throws TypeError if the length of the argument is not 16.
    */
   static ofInner(bytes: Uint8Array) {
-    return new Scru128Id(bytes);
+    if (bytes.length === 16) {
+      return new Scru128Id(bytes);
+    } else {
+      throw new TypeError(
+        "invalid length of byte array: " + bytes.length + " bytes (expected 16)"
+      );
+    }
   }
 
   /**
@@ -301,42 +302,6 @@ export class Scru128Id {
   }
 
   /**
-   * Creates an object from a byte array that represents a 128-bit unsigned
-   * integer.
-   *
-   * This method shallow-copies the content of the argument, so the created
-   * object holds another instance of the byte array.
-   *
-   * @param value - A 16-byte buffer that represents a 128-bit unsigned integer
-   * in the big-endian (network) byte order.
-   * @throws TypeError if the byte length of the argument is not 16.
-   * @category Conversion
-   * @deprecated Use `fromBytes(new Uint8Array(value))` instead.
-   */
-  static fromArrayBuffer(value: ArrayBuffer): Scru128Id {
-    if (value.byteLength !== 16) {
-      throw new TypeError(
-        "invalid length of byte array: " +
-          value.byteLength +
-          " bytes (expected 16)"
-      );
-    }
-
-    return new Scru128Id(new Uint8Array(value.slice(0)));
-  }
-
-  /**
-   * Returns a 16-byte byte array containing the 128-bit unsigned integer
-   * representation in the big-endian (network) byte order.
-   *
-   * @category Conversion
-   * @deprecated Use `bytes.buffer.slice(0)` instead.
-   */
-  toArrayBuffer(): ArrayBuffer {
-    return this.bytes.buffer.slice(0);
-  }
-
-  /**
    * Creates an object from a 128-bit unsigned integer.
    *
    * @throws RangeError if the argument is out of the range of 128-bit unsigned
@@ -492,15 +457,6 @@ export class Scru128Generator {
   /** The timestamp at the last renewal of `counter_hi` field. */
   private tsCounterHi = 0;
 
-  /** The status code reported at the last generation. */
-  private lastStatus:
-    | "NOT_EXECUTED"
-    | "NEW_TIMESTAMP"
-    | "COUNTER_LO_INC"
-    | "COUNTER_HI_INC"
-    | "TIMESTAMP_INC"
-    | "CLOCK_ROLLBACK" = "NOT_EXECUTED";
-
   /** The random number generator used by the generator. */
   private rng: { nextUint32: () => number };
 
@@ -566,18 +522,8 @@ export class Scru128Generator {
       this.timestamp = 0;
       this.tsCounterHi = 0;
       value = this.generateOrAbortCore(timestamp, rollbackAllowance)!;
-      this.lastStatus = "CLOCK_ROLLBACK";
     }
     return value;
-  }
-
-  /**
-   * A deprecated synonym for `generateOrResetCore(timestamp, 10_000)`.
-   *
-   * @deprecated Use `generateOrResetCore(timestamp, 10_000)` instead.
-   */
-  generateCore(timestamp: number): Scru128Id {
-    return this.generateOrResetCore(timestamp, DEFAULT_ROLLBACK_ALLOWANCE);
   }
 
   /**
@@ -607,21 +553,17 @@ export class Scru128Generator {
     if (timestamp > this.timestamp) {
       this.timestamp = timestamp;
       this.counterLo = this.rng.nextUint32() & MAX_COUNTER_LO;
-      this.lastStatus = "NEW_TIMESTAMP";
     } else if (timestamp + rollbackAllowance > this.timestamp) {
       // go on with previous timestamp if new one is not much smaller
       this.counterLo++;
-      this.lastStatus = "COUNTER_LO_INC";
       if (this.counterLo > MAX_COUNTER_LO) {
         this.counterLo = 0;
         this.counterHi++;
-        this.lastStatus = "COUNTER_HI_INC";
         if (this.counterHi > MAX_COUNTER_HI) {
           this.counterHi = 0;
           // increment timestamp at counter overflow
           this.timestamp++;
           this.counterLo = this.rng.nextUint32() & MAX_COUNTER_LO;
-          this.lastStatus = "TIMESTAMP_INC";
         }
       }
     } else {
@@ -643,29 +585,6 @@ export class Scru128Generator {
   }
 
   /**
-   * Returns a status code that indicates the internal state involved in the
-   * last generation of ID.
-   *
-   * - `"NOT_EXECUTED"` indicates that the generator has yet to generate an ID.
-   * - `"NEW_TIMESTAMP"` indicates that the latest timestamp was used because it
-   *   was greater than the previous one.
-   * - `"COUNTER_LO_INC"` indicates that counter_lo was incremented because the
-   *   latest timestamp was no greater than the previous one.
-   * - `"COUNTER_HI_INC"` indicates that counter_hi was incremented because
-   *   counter_lo reached its maximum value.
-   * - `"TIMESTAMP_INC"` indicates that the previous timestamp was incremented
-   *   because counter_hi reached its maximum value.
-   * - `"CLOCK_ROLLBACK"` indicates that the monotonic order of generated IDs
-   *   was broken because the latest timestamp was less than the previous one by
-   *   ten seconds or more.
-   *
-   * @deprecated Use {@link generateOrAbort} to guarantee monotonicity.
-   */
-  getLastStatus() {
-    return this.lastStatus;
-  }
-
-  /**
    * Returns an infinite iterator object that produces a new ID for each call of
    * `next()`.
    *
@@ -674,9 +593,9 @@ export class Scru128Generator {
    * import { Scru128Generator } from "scru128";
    *
    * const [a, b, c] = new Scru128Generator();
-   * console.log(String(a)); // e.g. "038MQR9E14CJC12DH9AMW7I5O"
-   * console.log(String(b)); // e.g. "038MQR9E14CJC12DH9DTPWFR3"
-   * console.log(String(c)); // e.g. "038MQR9E14CJC12DH9E6RJMQI"
+   * console.log(String(a)); // e.g., "038mqr9e14cjc12dh9amw7i5o"
+   * console.log(String(b)); // e.g., "038mqr9e14cjc12dh9dtpwfr3"
+   * console.log(String(c)); // e.g., "038mqr9e14cjc12dh9e6rjmqi"
    * ```
    */
   [Symbol.iterator](): Iterator<Scru128Id, undefined> {
@@ -718,13 +637,6 @@ let getRandomValues: (buffer: Uint32Array) => Uint32Array = (buffer) => {
 if (typeof crypto !== "undefined" && crypto.getRandomValues) {
   getRandomValues = (buffer) => crypto.getRandomValues(buffer);
 }
-
-/** @internal */
-export const _setRandom = (
-  rand: <T extends Uint8Array | Uint16Array | Uint32Array>(buffer: T) => T
-) => {
-  getRandomValues = rand;
-};
 
 /**
  * Wraps `crypto.getRandomValues()` and compatibles to enable buffering; this
