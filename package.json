@@ -6,11 +6,7 @@
   "main": "dist/index.js",
   "types": "./dist/index.d.ts",
   "exports": {
-    "node": {
-      "require": "./dist/cjs/node.cjs",
-      "default": "./dist/node.js"
-    },
-    "require": "./dist/cjs/index.cjs",
+    "node": "./dist/node.js",
     "default": "./dist/index.js"
   },
   "files": [
@@ -18,8 +14,7 @@
     "dist"
   ],
   "sideEffects": [
-    "./dist/node.js",
-    "./dist/cjs/node.cjs"
+    "./dist/node.js"
   ],
   "browser": {
     "crypto": false
@@ -27,7 +22,6 @@
   "scripts": {
     "build": "tsc",
     "doc": "typedoc ./src/index.ts --gitRevision \"v$npm_package_version\"",
-    "postbuild": "rm -f ./dist/cjs/*.d.cts",
     "prebuild": "rm -rf ./dist",
     "predoc": "rm -rf ./docs",
     "prepare": "npm run build && npm run doc && npm run test",
