@@ -1,4 +1,5 @@
-import { Scru128Generator, Scru128Id } from "scru128";
+import { Scru128Generator, Scru128Id } from "../dist/index.js";
+
 const assert = (expression, message = "") => {
   if (!expression) {
     throw new Error("Assertion failed" + (message ? ": " + message : ""));

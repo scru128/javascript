@@ -1,5 +1,11 @@
 # Changelog
 
+## v3.0.0 - unreleased
+
+### Removed
+
+- Non-ESM browser test runner
+
 ## v2.5.0 - 2023-06-21
 
 ### Added
