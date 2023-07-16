@@ -89,7 +89,9 @@ export class Scru128Id {
       return new Scru128Id(bytes);
     } else {
       throw new TypeError(
-        "invalid length of byte array: " + bytes.length + " bytes (expected 16)"
+        "invalid length of byte array: " +
+          bytes.length +
+          " bytes (expected 16)",
       );
     }
   }
@@ -108,7 +110,7 @@ export class Scru128Id {
     timestamp: number,
     counterHi: number,
     counterLo: number,
-    entropy: number
+    entropy: number,
   ): Scru128Id {
     if (
       !Number.isInteger(timestamp) ||
@@ -176,7 +178,7 @@ export class Scru128Id {
   static fromString(value: string): Scru128Id {
     if (value.length !== 25) {
       throw new SyntaxError(
-        "invalid length: " + value.length + " (expected 25)"
+        "invalid length: " + value.length + " (expected 25)",
       );
     }
 
@@ -292,11 +294,11 @@ export class Scru128Id {
       return new Scru128Id(Uint8Array.from(value));
     } else if (value.length === 25) {
       return Scru128Id.fromDigitValues(
-        Uint8Array.from(value, (c) => DECODE_MAP[c] ?? 0x7f)
+        Uint8Array.from(value, (c) => DECODE_MAP[c] ?? 0x7f),
       );
     } else {
       throw new SyntaxError(
-        "invalid length of byte array: " + value.length + " bytes"
+        "invalid length of byte array: " + value.length + " bytes",
       );
     }
   }
@@ -328,7 +330,7 @@ export class Scru128Id {
   toBigInt(): bigint {
     return this.bytes.reduce(
       (acc, curr) => (acc << BigInt(8)) | BigInt(curr),
-      BigInt(0)
+      BigInt(0),
     );
   }
 
@@ -458,7 +460,7 @@ export class Scru128Generator {
   private tsCounterHi = 0;
 
   /** The random number generator used by the generator. */
-  private rng: { nextUint32: () => number };
+  private rng: { nextUint32(): number };
 
   /**
    * Creates a generator object with the default random number generator, or
@@ -467,7 +469,7 @@ export class Scru128Generator {
    */
   constructor(randomNumberGenerator?: {
     /** Returns a 32-bit random unsigned integer. */
-    nextUint32: () => number;
+    nextUint32(): number;
   }) {
     this.rng = randomNumberGenerator || new DefaultRandom();
   }
@@ -538,7 +540,7 @@ export class Scru128Generator {
    */
   generateOrAbortCore(
     timestamp: number,
-    rollbackAllowance: number
+    rollbackAllowance: number,
   ): Scru128Id | undefined {
     if (
       !Number.isInteger(timestamp) ||
@@ -580,7 +582,7 @@ export class Scru128Generator {
       this.timestamp,
       this.counterHi,
       this.counterLo,
-      this.rng.nextUint32()
+      this.rng.nextUint32(),
     );
   }
 

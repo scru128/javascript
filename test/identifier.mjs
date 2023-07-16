@@ -107,8 +107,8 @@ describe("Scru128Id", function () {
           e.timestamp,
           e.counterHi,
           e.counterLo,
-          e.entropy
-        ).equals(e)
+          e.entropy,
+        ).equals(e),
       );
 
       const ofInner = Scru128Id.ofInner(e.bytes);
@@ -120,7 +120,7 @@ describe("Scru128Id", function () {
       assert(fromBytes.bytes.buffer != e.bytes.buffer);
 
       const fromCharCodes = Scru128Id.fromBytes(
-        Uint8Array.from(e.toString(), (c) => c.charCodeAt(0))
+        Uint8Array.from(e.toString(), (c) => c.charCodeAt(0)),
       );
       assert(fromCharCodes.equals(e));
       assert(fromCharCodes.bytes.buffer != e.bytes.buffer);

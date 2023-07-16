@@ -202,7 +202,7 @@ export declare class Scru128Generator {
      */
     constructor(randomNumberGenerator?: {
         /** Returns a 32-bit random unsigned integer. */
-        nextUint32: () => number;
+        nextUint32(): number;
     });
     /**
      * Generates a new SCRU128 ID object from the current `timestamp`, or resets
