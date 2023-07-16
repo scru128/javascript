@@ -60,7 +60,7 @@ describe("scru128String()", function () {
             prev.counterHi < curr.counterHi) ||
           (prev.timestamp === curr.timestamp &&
             prev.counterHi === curr.counterHi &&
-            prev.counterLo < curr.counterLo)
+            prev.counterLo < curr.counterLo),
       );
       prev = curr;
     }
@@ -76,7 +76,7 @@ describe("scru128String()", function () {
     await Promise.all(producers);
 
     const s = new Set(
-      q.map((e) => `${e.timestamp}-${e.counterHi}-${e.counterLo}`)
+      q.map((e) => `${e.timestamp}-${e.counterHi}-${e.counterLo}`),
     );
     assert(s.size === 4 * 10_000);
   });
