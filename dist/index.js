@@ -75,7 +75,9 @@ export class Scru128Id {
             return new Scru128Id(bytes);
         }
         else {
-            throw new TypeError("invalid length of byte array: " + bytes.length + " bytes (expected 16)");
+            throw new TypeError("invalid length of byte array: " +
+                bytes.length +
+                " bytes (expected 16)");
         }
     }
     /**
