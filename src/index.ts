@@ -460,7 +460,7 @@ export class Scru128Generator {
   private tsCounterHi = 0;
 
   /** The random number generator used by the generator. */
-  private rng: { nextUint32: () => number };
+  private rng: { nextUint32(): number };
 
   /**
    * Creates a generator object with the default random number generator, or
@@ -469,7 +469,7 @@ export class Scru128Generator {
    */
   constructor(randomNumberGenerator?: {
     /** Returns a 32-bit random unsigned integer. */
-    nextUint32: () => number;
+    nextUint32(): number;
   }) {
     this.rng = randomNumberGenerator || new DefaultRandom();
   }
