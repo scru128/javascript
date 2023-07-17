@@ -68,15 +68,14 @@ describe("Scru128Generator", function () {
       const ts = 0x0123_4567_89ab;
       const g = new Scru128Generator();
 
-      let prev = g.generateOrAbortCore(ts, 10_000);
+      const prev = g.generateOrAbortCore(ts, 10_000);
       assert(prev !== undefined);
       assert(prev.timestamp === ts);
 
-      let curr = g.generateOrResetCore(ts - 10_000, 10_000);
+      let curr = g.generateOrAbortCore(ts - 10_000, 10_000);
       assert(curr !== undefined);
       assert(prev.compareTo(curr) < 0);
 
-      prev = curr;
       curr = g.generateOrAbortCore(ts - 10_001, 10_000);
       assert(curr === undefined);
 
