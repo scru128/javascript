@@ -444,8 +444,8 @@ export class Scru128Id {
  * | {@link generateOrAbortCore} | Argument  | Returns `undefined` |
  *
  * All of these methods return monotonically increasing IDs unless a `timestamp`
- * provided is significantly (by default, ten seconds or more) smaller than the
- * one embedded in the immediately preceding ID. If such a significant clock
+ * provided is significantly (by default, more than ten seconds) smaller than
+ * the one embedded in the immediately preceding ID. If such a significant clock
  * rollback is detected, the `generate` (OrReset) method resets the generator
  * and returns a new ID based on the given `timestamp`, while the `OrAbort`
  * variants abort and return `undefined`. The `Core` functions offer low-level
@@ -555,7 +555,7 @@ export class Scru128Generator {
     if (timestamp > this.timestamp) {
       this.timestamp = timestamp;
       this.counterLo = this.rng.nextUint32() & MAX_COUNTER_LO;
-    } else if (timestamp + rollbackAllowance > this.timestamp) {
+    } else if (timestamp + rollbackAllowance >= this.timestamp) {
       // go on with previous timestamp if new one is not much smaller
       this.counterLo++;
       if (this.counterLo > MAX_COUNTER_LO) {

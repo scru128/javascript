@@ -18,7 +18,7 @@ describe("Scru128Generator", function () {
       assert(prev.timestamp === ts);
 
       for (let i = 0; i < 100_000; i++) {
-        const curr = g.generateOrResetCore(ts - Math.min(9_998, i), 10_000);
+        const curr = g.generateOrResetCore(ts - Math.min(9_999, i), 10_000);
         assert(prev.compareTo(curr) < 0);
         prev = curr;
       }
@@ -33,11 +33,15 @@ describe("Scru128Generator", function () {
       assert(prev.timestamp === ts);
 
       let curr = g.generateOrResetCore(ts - 10_000, 10_000);
-      assert(prev.compareTo(curr) > 0);
-      assert(curr.timestamp == ts - 10_000);
+      assert(prev.compareTo(curr) < 0);
 
       prev = curr;
       curr = g.generateOrResetCore(ts - 10_001, 10_000);
+      assert(prev.compareTo(curr) > 0);
+      assert(curr.timestamp == ts - 10_001);
+
+      prev = curr;
+      curr = g.generateOrResetCore(ts - 10_002, 10_000);
       assert(prev.compareTo(curr) < 0);
     });
   });
@@ -52,7 +56,7 @@ describe("Scru128Generator", function () {
       assert(prev.timestamp === ts);
 
       for (let i = 0; i < 100_000; i++) {
-        const curr = g.generateOrAbortCore(ts - Math.min(9_998, i), 10_000);
+        const curr = g.generateOrAbortCore(ts - Math.min(9_999, i), 10_000);
         assert(curr !== undefined);
         assert(prev.compareTo(curr) < 0);
         prev = curr;
@@ -64,14 +68,19 @@ describe("Scru128Generator", function () {
       const ts = 0x0123_4567_89ab;
       const g = new Scru128Generator();
 
-      const prev = g.generateOrAbortCore(ts, 10_000);
+      let prev = g.generateOrAbortCore(ts, 10_000);
       assert(prev !== undefined);
       assert(prev.timestamp === ts);
 
-      let curr = g.generateOrAbortCore(ts - 10_000, 10_000);
+      let curr = g.generateOrResetCore(ts - 10_000, 10_000);
+      assert(curr !== undefined);
+      assert(prev.compareTo(curr) < 0);
+
+      prev = curr;
+      curr = g.generateOrAbortCore(ts - 10_001, 10_000);
       assert(curr === undefined);
 
-      curr = g.generateOrAbortCore(ts - 10_001, 10_000);
+      curr = g.generateOrAbortCore(ts - 10_002, 10_000);
       assert(curr === undefined);
     });
   });
