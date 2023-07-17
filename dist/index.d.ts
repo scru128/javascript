@@ -180,8 +180,8 @@ export declare class Scru128Id {
  * | {@link generateOrAbortCore} | Argument  | Returns `undefined` |
  *
  * All of these methods return monotonically increasing IDs unless a `timestamp`
- * provided is significantly (by default, ten seconds or more) smaller than the
- * one embedded in the immediately preceding ID. If such a significant clock
+ * provided is significantly (by default, more than ten seconds) smaller than
+ * the one embedded in the immediately preceding ID. If such a significant clock
  * rollback is detected, the `generate` (OrReset) method resets the generator
  * and returns a new ID based on the given `timestamp`, while the `OrAbort`
  * variants abort and return `undefined`. The `Core` functions offer low-level

@@ -1,6 +1,6 @@
 # Changelog
 
-## v3.0.2 - unreleased
+## v3.0.2 - 2023-07-17
 
 Most notably, v3 switches the letter case of generated IDs from uppercase (e.g.,
 "036Z951MHJIKZIK2GSL81GR7L") to lowercase (e.g., "036z951mhjikzik2gsl81gr7l"),
@@ -24,6 +24,10 @@ a case-insensitive scheme. Other changes include the removal of deprecated APIs.
 - Letter case of generated IDs from uppercase to lowercase
 - TypeScript transpilation target from ES2015 to ES2016
 - Edge case behavior of generator functions' rollback allowance handling
+
+### Maintenance
+
+- Updated dev dependencies
 
 ## v2.5.0 - 2023-06-21
 
