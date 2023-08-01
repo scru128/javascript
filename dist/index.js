@@ -407,7 +407,7 @@ export class Scru128Generator {
         this.counterLo = 0;
         /** The timestamp at the last renewal of `counter_hi` field. */
         this.tsCounterHi = 0;
-        this.rng = randomNumberGenerator || new DefaultRandom();
+        this.rng = randomNumberGenerator || getDefaultRandom();
     }
     /**
      * Generates a new SCRU128 ID object from the current `timestamp`, or resets
@@ -536,36 +536,37 @@ export class Scru128Generator {
         return { value: this.generate(), done: false };
     }
 }
-/** Stores `crypto.getRandomValues()` available in the environment. */
-let getRandomValues = (buffer) => {
-    // fall back on Math.random() unless the flag is set to true
-    if (typeof SCRU128_DENY_WEAK_RNG !== "undefined" && SCRU128_DENY_WEAK_RNG) {
-        throw new Error("no cryptographically strong RNG available");
+/** Returns the default random number generator available in the environment. */
+const getDefaultRandom = () => {
+    // detect Web Crypto API
+    if (typeof crypto !== "undefined" &&
+        typeof crypto.getRandomValues !== "undefined") {
+        return new BufferedCryptoRandom();
     }
-    for (let i = 0; i < buffer.length; i++) {
-        buffer[i] =
-            Math.trunc(Math.random() * 65536) * 65536 +
-                Math.trunc(Math.random() * 65536);
+    else {
+        // fall back on Math.random() unless the flag is set to true
+        if (typeof SCRU128_DENY_WEAK_RNG !== "undefined" && SCRU128_DENY_WEAK_RNG) {
+            throw new Error("no cryptographically strong RNG available");
+        }
+        return {
+            nextUint32: () => Math.trunc(Math.random() * 65536) * 65536 +
+                Math.trunc(Math.random() * 65536),
+        };
     }
-    return buffer;
 };
-// detect Web Crypto API
-if (typeof crypto !== "undefined" && crypto.getRandomValues) {
-    getRandomValues = (buffer) => crypto.getRandomValues(buffer);
-}
 /**
- * Wraps `crypto.getRandomValues()` and compatibles to enable buffering; this
- * uses a small buffer by default to avoid unbearable throughput decline in some
- * environments as well as the waste of time and space for unused values.
+ * Wraps `crypto.getRandomValues()` to enable buffering; this uses a small
+ * buffer by default to avoid both unbearable throughput decline in some
+ * environments and the waste of time and space for unused values.
  */
-class DefaultRandom {
+class BufferedCryptoRandom {
     constructor() {
         this.buffer = new Uint32Array(8);
-        this.cursor = Infinity;
+        this.cursor = 0xffff;
     }
     nextUint32() {
         if (this.cursor >= this.buffer.length) {
-            getRandomValues(this.buffer);
+            crypto.getRandomValues(this.buffer);
             this.cursor = 0;
         }
         return this.buffer[this.cursor++];
