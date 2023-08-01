@@ -1,5 +1,13 @@
 # Changelog
 
+## v3.0.3 - unreleased
+
+### Maintenance
+
+- Refactored default random number generator to defer detection Web Crypto API
+  until creation of `Scru128Generator`
+- Fixed wrong test case
+
 ## v3.0.2 - 2023-07-17
 
 Most notably, v3 switches the letter case of generated IDs from uppercase (e.g.,
