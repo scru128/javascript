@@ -1,5 +1,12 @@
 # Changelog
 
+## v3.0.4 - 2023-09-18
+
+### Maintenance
+
+- Improved documentation about generator's clock rollback behavior
+- Updated dev dependencies
+
 ## v3.0.3 - 2023-08-01
 
 ### Maintenance
