@@ -1,5 +1,12 @@
 # Changelog
 
+## v3.0.5 - 2024-06-19
+
+### Maintenance
+
+- Changed naming convention of test files
+- Updated dev dependencies
+
 ## v3.0.4 - 2023-09-18
 
 ### Maintenance
