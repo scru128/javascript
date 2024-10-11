@@ -3,16 +3,28 @@
   "version": "3.0.5",
   "description": "SCRU128: Sortable, Clock and Random number-based Unique identifier",
   "type": "module",
-  "main": "dist/index.js",
-  "types": "./dist/index.d.ts",
-  "exports": "./dist/index.js",
+  "exports": {
+		".": {
+			"require": {
+				"types": "./dist/index.d.cts",
+				"default": "./dist/index.cjs"
+			},
+			"import": {
+				"types": "./dist/index.d.ms",
+				"default": "./dist/index.js"
+			}
+		}
+	},
+	"main": "./dist/index.cjs",
+	"module": "./dist/index.js",
+	"types": "./dist/index.d.ts",
   "files": [
     "CHANGELOG.md",
     "dist"
   ],
   "sideEffects": false,
   "scripts": {
-    "build": "tsc",
+    "build": "tsc --noEmit && tsup",
     "doc": "typedoc ./src/index.ts --gitRevision \"v$npm_package_version\"",
     "prebuild": "rm -rf ./dist",
     "predoc": "rm -rf ./docs",
@@ -38,6 +50,7 @@
   "homepage": "https://github.com/scru128/javascript#readme",
   "devDependencies": {
     "mocha": "^10.4.0",
+    "tsup": "^8.3.0",
     "typedoc": "^0.25.13",
     "typescript": "^5.4.5"
   }
