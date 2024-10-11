@@ -26,8 +26,8 @@
   "scripts": {
     "build": "tsc --noEmit && tsup",
     "doc": "typedoc ./src/index.ts --gitRevision \"v$npm_package_version\"",
-    "prebuild": "del -f ./dist",
-    "predoc": "del -f ./docs",
+    "prebuild": "del -f dist",
+    "predoc": "del -f docs",
     "prepare": "npm run build && npm run doc && npm run test",
     "test": "mocha"
   },
