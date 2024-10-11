@@ -4,20 +4,20 @@
   "description": "SCRU128: Sortable, Clock and Random number-based Unique identifier",
   "type": "module",
   "exports": {
-		".": {
-			"require": {
-				"types": "./dist/index.d.cts",
-				"default": "./dist/index.cjs"
-			},
-			"import": {
-				"types": "./dist/index.d.ms",
-				"default": "./dist/index.js"
-			}
-		}
-	},
-	"main": "./dist/index.cjs",
-	"module": "./dist/index.js",
-	"types": "./dist/index.d.ts",
+    ".": {
+      "require": {
+        "types": "./dist/index.d.cts",
+        "default": "./dist/index.cjs"
+      },
+      "import": {
+        "types": "./dist/index.d.ms",
+        "default": "./dist/index.js"
+      }
+    }
+  },
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
   "files": [
     "CHANGELOG.md",
     "dist"
@@ -26,8 +26,8 @@
   "scripts": {
     "build": "tsc --noEmit && tsup",
     "doc": "typedoc ./src/index.ts --gitRevision \"v$npm_package_version\"",
-    "prebuild": "rm -rf ./dist",
-    "predoc": "rm -rf ./docs",
+    "prebuild": "del -f ./dist",
+    "predoc": "del -f ./docs",
     "prepare": "npm run build && npm run doc && npm run test",
     "test": "mocha"
   },
@@ -49,6 +49,7 @@
   },
   "homepage": "https://github.com/scru128/javascript#readme",
   "devDependencies": {
+    "del-cli": "^6.0.0",
     "mocha": "^10.4.0",
     "tsup": "^8.3.0",
     "typedoc": "^0.25.13",
