@@ -35,6 +35,12 @@ See [SCRU128 Specification] for details.
 [KSUID]: https://github.com/segmentio/ksuid
 [SCRU128 Specification]: https://github.com/scru128/spec
 
+## CommonJS support
+
+The CommonJS entry point is deprecated and provided for backward compatibility
+purposes only. The entry point is no longer tested and will be removed in the
+future.
+
 ## License
 
 Licensed under the Apache License, Version 2.0.
