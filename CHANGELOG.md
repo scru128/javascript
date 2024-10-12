@@ -1,10 +1,14 @@
 # Changelog
 
-## Unreleased
+## v3.0.6 - 2024-10-12
 
 ## Added
 
 - CommonJS entry point to support older environments
+
+### Maintenance
+
+- Updated dev dependencies
 
 ## v3.0.5 - 2024-06-19
 
