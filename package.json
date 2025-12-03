@@ -40,8 +40,8 @@
   },
   "homepage": "https://github.com/scru128/javascript#readme",
   "devDependencies": {
-    "mocha": "^10.7.3",
-    "typedoc": "^0.26.9",
-    "typescript": "^5.6.3"
+    "mocha": "^11.7.5",
+    "typedoc": "^0.28.15",
+    "typescript": "^5.9.3"
   }
 }
