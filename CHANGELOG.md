@@ -1,8 +1,7 @@
 # Changelog
 
-## v3.1.0 - unreleased
+## Unreleased
 
-- Removed CommonJS entry point
 - Migrated to TypeScript 6.0
 
 ## v3.0.6 - 2024-10-12
