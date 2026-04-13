@@ -37,9 +37,8 @@ See [SCRU128 Specification] for details.
 
 ## CommonJS support
 
-The CommonJS entry point is deprecated and provided for backward compatibility
-purposes only. The entry point is no longer tested and will be removed in the
-future.
+As of v3.1.0, this package is ESM-only. Older runtimes that do not support
+`require(esm)` should pin to v3.0.6.
 
 ## License
 
