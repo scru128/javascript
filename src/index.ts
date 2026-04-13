@@ -84,7 +84,7 @@ export class Scru128Id {
    *
    * @throws TypeError if the length of the argument is not 16.
    */
-  static ofInner(bytes: Uint8Array) {
+  static ofInner(bytes: Uint8Array): Scru128Id {
     if (bytes.length === 16) {
       return new Scru128Id(bytes);
     } else {
@@ -665,7 +665,7 @@ let globalGenerator: Scru128Generator | undefined;
 
 /** Generates a new SCRU128 ID object using the global generator. */
 export const scru128 = (): Scru128Id =>
-  (globalGenerator || (globalGenerator = new Scru128Generator())).generate();
+  (globalGenerator ??= new Scru128Generator()).generate();
 
 /**
  * Generates a new SCRU128 ID encoded in a string using the global generator.
