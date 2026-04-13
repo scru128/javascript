@@ -147,13 +147,12 @@ export class Scru128Id {
      * @category Conversion
      */
     static fromString(value) {
-        var _a;
         if (value.length !== 25) {
             throw new SyntaxError("invalid length: " + value.length + " (expected 25)");
         }
         const src = new Uint8Array(25);
         for (let i = 0; i < 25; i++) {
-            src[i] = (_a = DECODE_MAP[value.charCodeAt(i)]) !== null && _a !== void 0 ? _a : 0x7f;
+            src[i] = DECODE_MAP[value.charCodeAt(i)] ?? 0x7f;
             if (src[i] == 0x7f) {
                 const c = String.fromCodePoint(value.codePointAt(i));
                 throw new SyntaxError("invalid digit '" + c + "' at " + i);
@@ -254,7 +253,7 @@ export class Scru128Id {
             return new Scru128Id(Uint8Array.from(value));
         }
         else if (value.length === 25) {
-            return Scru128Id.fromDigitValues(Uint8Array.from(value, (c) => { var _a; return (_a = DECODE_MAP[c]) !== null && _a !== void 0 ? _a : 0x7f; }));
+            return Scru128Id.fromDigitValues(Uint8Array.from(value, (c) => DECODE_MAP[c] ?? 0x7f));
         }
         else {
             throw new SyntaxError("invalid length of byte array: " + value.length + " bytes");
