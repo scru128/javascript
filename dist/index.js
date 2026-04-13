@@ -576,7 +576,7 @@ class BufferedCryptoRandom {
 }
 let globalGenerator;
 /** Generates a new SCRU128 ID object using the global generator. */
-export const scru128 = () => (globalGenerator ?? (globalGenerator = new Scru128Generator())).generate();
+export const scru128 = () => (globalGenerator || (globalGenerator = new Scru128Generator())).generate();
 /**
  * Generates a new SCRU128 ID encoded in a string using the global generator.
  *
