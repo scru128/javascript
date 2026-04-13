@@ -3,7 +3,6 @@
 ## v3.1.0 - unreleased
 
 - Removed CommonJS entry point
-- Migrated the target to ES2020 from ES2016
 - Migrated to TypeScript 6.0
 
 ## v3.0.6 - 2024-10-12
